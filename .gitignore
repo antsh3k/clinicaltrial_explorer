@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+tmp/
+
+# ct-landscape build artifacts
+data/raw/*
+!data/raw/.keep
+*.duckdb
+*.duckdb.wal
+runs/answers/*
+runs/conversations/*
+!runs/**/.keep
+.DS_Store
