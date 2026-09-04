@@ -159,9 +159,12 @@ def test_no_enumeration_caps_in_programs(con):
 
 
 def test_contested_aliases_are_logged_not_applied(con):
-    contested = q(con, "SELECT alias_key FROM contested_aliases")
-    for (k,) in contested:
-        assert q(con, "SELECT count(*) FROM asset_aliases WHERE alias_key=?", k)[0][0] == 0
+    for k, res in q(con, "SELECT alias_key, resolution FROM contested_aliases"):
+        n = q(con, "SELECT count(*) FROM asset_aliases WHERE alias_key=?", k)[0][0]
+        if res == "vetoed":
+            assert n == 0
+        else:
+            assert res.startswith("dominance:") and n == 1
 
 
 def test_company_normalization_and_declared_parents(con):

@@ -42,9 +42,33 @@ def test_contested_alias_is_vetoed_not_merged():
     a = r.intervention_assets[("NCT1", 0)][0][0]
     b = r.intervention_assets[("NCT2", 0)][0][0]
     assert a != b
-    assert [c[0] for c in r.contested] == ["xyzzy"]
+    assert [c[0] for c in r.contested] == ["xyzzy"] and r.contested[0][3] == "vetoed"
     assert set(r.contested[0][1]) == {"alphaxin", "betaxin"}
     assert "xyzzy" not in r.aliases  # global uniqueness: a contested alias belongs to nobody
+
+
+def test_dominance_rule_assigns_brand_to_the_real_asset_and_logs_it():
+    # 12 trials name pembrolizumab and list Keytruda; one trial names a typo (also listing Keytruda); one names KEYTRUDA
+    ivs = [_iv(f"NCT{i}", 0, "Pembrolizumab") for i in range(12)] + [
+        _iv("NCTX", 0, "Pembroluzimab"),
+        _iv("NCTY", 0, "KEYTRUDA"),
+    ]
+    other = {(f"NCT{i}", 0): ["Keytruda"] for i in range(12)}
+    other[("NCTX", 0)] = ["Keytruda"]
+    r = build_assets(ivs, other)
+    assert r.aliases["keytruda"][0] == "pembrolizumab"  # brand assigned to the dominant claimant
+    assert r.intervention_assets[("NCTY", 0)][0][0] == "pembrolizumab"  # the KEYTRUDA-named cluster merged in
+    assert r.intervention_assets[("NCTX", 0)][0][0] == "pembroluzimab"  # the typo cluster stays separate
+    assert [(c[0], c[3]) for c in r.contested] == [("keytruda", "dominance:pembrolizumab")]
+    assert r.census["n_alias_dominance_resolutions"] == 1 and r.census.get("n_contested_aliases", 0) == 0
+
+
+def test_dominance_rule_needs_five_trials_and_ten_x():
+    ivs = [_iv(f"NCT{i}", 0, "Alphaxin") for i in range(4)] + [_iv("NCTX", 0, "Betaxin")]
+    other = {(f"NCT{i}", 0): ["Zbrand"] for i in range(4)}
+    other[("NCTX", 0)] = ["Zbrand"]
+    r = build_assets(ivs, other)
+    assert "zbrand" not in r.aliases and r.contested[0][3] == "vetoed"  # 4 < 5 trials → still vetoed
 
 
 def test_multi_claimant_alias_resolves_when_claimants_already_merged():

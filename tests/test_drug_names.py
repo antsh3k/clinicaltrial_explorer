@@ -46,6 +46,14 @@ from ct_landscape.normalize.drug_names import clean, dedup_key, gate, is_code_na
         "platinum doublet chemotherapy",
         "therapy",
         "Lymphodepleting chemotherapy",
+        "PD-1",
+        "pd-l1 monoclonal antibody",
+        "EGFR-TKI",
+        "intravenous solution",
+        "Solution",
+        "CAR-T cells",
+        "Neoadjuvant PD-1 antibody plus chemotherapy",
+        "Intravenous",
         "N/A",
         "12",
         "ab",
@@ -112,6 +120,11 @@ def test_gates_are_whole_label_only(raw, expected_key):
         ("Gemcitabine alone", "gemcitabine"),
         ("low-dose dexamethasone", "dexamethasone"),
         ("Benmelstobart combined with chemotherapy", "benmelstobart"),
+        ("intravenous MK-3475", "mk3475"),
+        ("Intravenous infusion of ketamine", "ketamine"),
+        ("Intravenous injection of heparin", "heparin"),
+        ("1 cycle of pembrolizumab", "pembrolizumab"),
+        ("3 cycles of Pembrolizumab", "pembrolizumab"),
     ],
 )
 def test_cleaning_and_fixed_point_keys(raw, key):
@@ -234,6 +247,14 @@ def test_code_shape(s, expected):
     assert is_code_name(s) is expected
 
 
+def test_display_surface_keeps_case_and_peels_qualifiers():
+    from ct_landscape.normalize.drug_names import display_surface
+
+    assert display_surface("intravenous MK-3475") == "MK-3475"
+    assert display_surface("Neoadjuvant Nivolumab 240 mg") == "Nivolumab"
+    assert display_surface("Pembrolizumab") == "Pembrolizumab"
+
+
 def test_clean_is_lowercase_and_trimmed():
     assert clean("  Drug:  Pembrolizumab  ") == "pembrolizumab"
 
@@ -242,5 +263,5 @@ def test_gate_names_every_reason():
     assert gate("placebo") == "placebo_sham_prefix"
     assert gate("standard of care") == "exact_noise"
     assert gate("dose escalation cohort") == "metadata_cue"
-    assert gate("anti-pd-1") == "regex_noise"
+    assert gate("anti-cd38 antibody") == "regex_noise"
     assert gate("pembrolizumab") is None

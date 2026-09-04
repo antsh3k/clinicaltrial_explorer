@@ -144,3 +144,93 @@ class_labels:
   - physiotherapy
   - counseling
   - education
+  # bare target / pathway / cell-product names used as intervention labels: a class, never an asset
+  - pd-1
+  - pd1
+  - pd-l1
+  - pdl1
+  - pd-1/pd-l1
+  - anti-pd-1
+  - anti-pd-l1
+  - ctla-4
+  - ctla4
+  - her-2
+  - her2
+  - egfr
+  - egfr-tki
+  - egfr tki
+  - vegf
+  - vegfr
+  - alk
+  - tnf
+  - anti-tnf
+  - il-6
+  - il-17
+  - il-23
+  - jak
+  - btk
+  - parp
+  - cdk4/6
+  - mtor
+  - pi3k
+  - kras
+  - kras g12c
+  - braf
+  - mek
+  - bcl-2
+  - bcma
+  - cd19
+  - cd20
+  - cd38
+  - cd3
+  - car-t
+  - car t
+  - cart
+  - car-t cells
+  - tils
+  - til
+  - nk cells
+  - dendritic cells
+  - stem cells
+  - mesenchymal stem cells
+  - msc
+  - mscs
+  - treg
+  - tregs
+  - axl
+  - mer
+  - ici
+  - icis
+  - io
+  # bare dose-form / vehicle words
+  - solution
+  - suspension
+  - injection
+  - infusion
+  - tablet
+  - tablets
+  - capsule
+  - capsules
+  - pill
+  - pills
+  - cream
+  - gel
+  - ointment
+  - lotion
+  - spray
+  - patch
+  - powder
+  - drops
+  - eye drops
+  - inhaler
+  - nebulizer
+  - intravenous solution
+  - oral solution
+  - iv fluid
+  - iv fluids
+  - normal saline solution
+  - dextrose
+  - glucose
+  - 5% dextrose
+  - lactated ringer's
+  - ringer's lactate

@@ -49,7 +49,8 @@ CREATE TABLE IF NOT EXISTS assets            (asset_id TEXT PRIMARY KEY, canonic
 CREATE TABLE IF NOT EXISTS asset_components  (combo_asset_id TEXT, component_asset_id TEXT);
 CREATE TABLE IF NOT EXISTS asset_aliases     (alias_key TEXT PRIMARY KEY, asset_id TEXT, alias_raw TEXT,
                                               source TEXT CHECK (source IN ('name','other_name')));
-CREATE TABLE IF NOT EXISTS contested_aliases (alias_key TEXT, asset_ids TEXT[], n_trials INT);
+CREATE TABLE IF NOT EXISTS contested_aliases (alias_key TEXT, asset_ids TEXT[], n_trials INT,
+                                              resolution TEXT);  -- 'vetoed' | 'dominance:<asset_id>'
 CREATE TABLE IF NOT EXISTS trial_assets      (nct_id TEXT, intervention_no INT, asset_id TEXT,
                                               via TEXT CHECK (via IN ('name','combo_component')),
                                               role TEXT CHECK (role IN ('subject','comparator','unknown')),

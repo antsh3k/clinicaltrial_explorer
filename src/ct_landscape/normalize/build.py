@@ -108,7 +108,12 @@ def normalize_assets(con: duckdb.DuckDBPyConnection, log) -> dict[str, Any]:
         "contested_aliases",
         sorted(res.contested),
         pa.schema(
-            [("alias_key", pa.string()), ("asset_ids", pa.list_(pa.string())), ("n_trials", pa.int32())]
+            [
+                ("alias_key", pa.string()),
+                ("asset_ids", pa.list_(pa.string())),
+                ("n_trials", pa.int32()),
+                ("resolution", pa.string()),
+            ]
         ),
     )
     _insert(

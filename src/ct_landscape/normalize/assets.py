@@ -15,9 +15,11 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
-from ct_landscape.normalize.drug_names import Keyed, clean, is_code_name, route
+from ct_landscape.normalize.drug_names import Keyed, display_surface, is_code_name, route
 
 ASSET_TYPES = ("DRUG", "BIOLOGICAL", "COMBINATION_PRODUCT", "GENETIC")
+DOMINANCE_MIN_TRIALS = 5  # a claimant must assert the alias in at least this many trials …
+DOMINANCE_RATIO = 10  # … and at least this many times more often than every other claimant
 
 
 class UnionFind:
@@ -66,7 +68,7 @@ class AssetResult:
     aliases: dict[str, tuple[str, str, str]] = field(
         default_factory=dict
     )  # alias_key → (asset_id, alias_raw, source)
-    contested: list[tuple[str, list[str], int]] = field(
+    contested: list[tuple[str, list[str], int, str]] = field(
         default_factory=list
     )  # (alias_key, asset_ids, n_trials)
     census: Counter = field(default_factory=Counter)
@@ -77,7 +79,7 @@ class AssetResult:
 
 def _trim_surface(raw: str) -> str:
     """Display surface: the case-preserving clean (prefixes, doses, parentheticals, placebo clauses removed)."""
-    return clean(raw, lower=False) or raw.strip()
+    return display_surface(raw) or raw.strip()
 
 
 def build_assets(
@@ -130,6 +132,9 @@ def build_assets(
     claims: dict[str, set[str]] = defaultdict(set)
     alias_surfaces: dict[str, Counter] = defaultdict(Counter)
     alias_trials: dict[str, set[str]] = defaultdict(set)
+    support: dict[tuple[str, str], set[str]] = defaultdict(
+        set
+    )  # (alias_key, claimant key) → asserting trials
     for (nct, no), names in other_names.items():
         k = routed.get((nct, no))
         if k is None or k.key is None:
@@ -152,28 +157,42 @@ def build_assets(
                 claims[a.key].add(owner)
                 alias_surfaces[a.key][_trim_surface(name)] += 1
                 alias_trials[a.key].add(nct)
+                support[(a.key, owner)].add(nct)
 
-    # ---- 3. merge pass: uncontested claims union; re-evaluate multi-claimant aliases by ROOT until stable
+    # ---- 3. merge pass. An alias claimed by ONE root → merge/assign. Claimed by ≥2 roots → the DOMINANCE rule:
+    # assign only when one claimant is asserted by ≥ DOMINANCE_MIN_TRIALS trials AND ≥ DOMINANCE_RATIO × every other
+    # claimant (typos, regimen acronyms and qualified phrases each claim a brand in a trial or two; the real
+    # asset claims it in hundreds). Everything else stays CONTESTED: logged, never applied. Every decision is
+    # written to contested_aliases with its resolution so it can be audited.
     def roots_of(keys: set[str]) -> set[str]:
         return {uf.find(k) for k in keys}
 
-    for alias, owners in claims.items():
-        if len(owners) == 1:
-            (owner,) = owners
-            if alias in uf.parent:  # the alias is itself another asset's name → merge the two clusters
-                uf.union(alias, owner)
+    def support_by_root(alias: str) -> dict[str, int]:
+        agg: dict[str, set[str]] = defaultdict(set)
+        for owner in claims[alias]:
+            agg[uf.find(owner)] |= support[(alias, owner)]
+        return {r: len(t) for r, t in agg.items()}
+
+    def dominant_root(alias: str) -> str | None:
+        sup = sorted(support_by_root(alias).items(), key=lambda kv: (-kv[1], kv[0]))
+        if len(sup) == 1:
+            return sup[0][0]
+        top, second = sup[0], sup[1]
+        if top[1] >= DOMINANCE_MIN_TRIALS and top[1] >= DOMINANCE_RATIO * second[1]:
+            return top[0]
+        return None
+
     changed = True
     while changed:
         changed = False
-        for alias, owners in claims.items():
-            if len(owners) < 2:
-                continue
-            r = roots_of(owners)
-            if len(r) == 1 and alias in uf.parent and uf.find(alias) not in r:
-                uf.union(alias, next(iter(r)))
+        for alias in claims:
+            r = roots_of(claims[alias])
+            target = next(iter(r)) if len(r) == 1 else dominant_root(alias)
+            if target and alias in uf.parent and uf.find(alias) != target:
+                uf.union(alias, target)  # the alias is itself another asset's name → merge the two clusters
                 changed = True
 
-    # ---- 4. assign aliases; log contested
+    # ---- 4. assign aliases; log contested and dominance decisions
     alias_owner: dict[str, str] = {}  # alias_key → root
     for alias, owners in claims.items():
         r = roots_of(owners)
@@ -181,8 +200,14 @@ def build_assets(
             r.add(uf.find(alias))
         if len(r) == 1:
             alias_owner[alias] = next(iter(r))
+            continue
+        dom = dominant_root(alias)
+        if dom is not None:
+            alias_owner[alias] = dom
+            res.contested.append((alias, sorted(r), len(alias_trials[alias]), f"dominance:{dom}"))
+            res.census["n_alias_dominance_resolutions"] += 1
         else:
-            res.contested.append((alias, sorted(r), len(alias_trials[alias])))
+            res.contested.append((alias, sorted(r), len(alias_trials[alias]), "vetoed"))
             res.census["n_contested_aliases"] += 1
 
     # ---- 5. materialize clusters → assets
@@ -226,6 +251,18 @@ def build_assets(
         for k in keys:
             top = surfaces[k].most_common(1)
             res.aliases.setdefault(k, (asset_id, top[0][0] if top else k, "name"))
+    # contested log: translate union-find roots → asset ids (the audit table must name assets, not roots)
+    res.contested = [
+        (
+            alias,
+            sorted({root_to_asset.get(uf.find(k), k) for k in ids}),
+            n,
+            f"dominance:{root_to_asset.get(uf.find(reso[10:]), reso[10:])}"
+            if reso.startswith("dominance:")
+            else reso,
+        )
+        for alias, ids, n, reso in res.contested
+    ]
     for alias, root in alias_owner.items():
         aid = root_to_asset[root]
         if alias in res.aliases and res.aliases[alias][0] != aid:

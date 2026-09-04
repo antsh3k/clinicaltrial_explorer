@@ -33,6 +33,8 @@ def _lex():
     return {
         "qual_lead": re.compile(r"^(?:" + qual_alt + r")(?:\s+|$)"),
         "qual_trail": re.compile(r"(?:^|\s+)(?:" + qual_alt + r")$"),
+        "qual_lead_ci": re.compile(r"^(?:" + qual_alt + r")(?:\s+|$)", re.IGNORECASE),
+        "qual_trail_ci": re.compile(r"(?:^|\s+)(?:" + qual_alt + r")$", re.IGNORECASE),
         "exact": set(noise["exact"]) | set(nonmol["class_labels"]),
         "starts": re.compile(r"^(?:" + _alt(noise["starts_with"]) + r")(?:\b|$)"),
         "contains": [c for c in noise["contains"]],
@@ -64,7 +66,7 @@ _DOSE = re.compile(
     r"(?:\b\d+(?:[.,]\d+)?\s*(?:-|to|–|or|/)\s*)?"  # range start "25-50 mg", "25 or 50 mg"
     r"\b\d+(?:[.,]\d+)?\s*(?:x\s*\d+\s*)?"
     r"(?:mg|mcg|µg|ug|g|kg|ml|mL|l|iu|units?|u|mmol|µmol|umol|meq|mci|mbq|gbq|gy|ppm|%|ng|pg|mg/kg|mg/m2|mg/m²|cells?/kg|"
-    r"cells|copies|vg/kg|vg|pfu|tcid50|ccid50|cfu|spores|dose|doses|tablets?|capsules?|puffs?|drops?|sprays?|vials?|patches?)"
+    r"cells|copies|vg/kg|vg|pfu|tcid50|ccid50|cfu|spores|dose|doses|tablets?|capsules?|puffs?|drops?|sprays?|vials?|patches?|cycles?|courses?|infusions?|injections?)"
     r"(?:\s*/\s*(?:kg|m2|m²|ml|mL|l|day|d|dose|h|hr|hour|week|wk|kg/day|kg/dose|min))?\b",
     re.IGNORECASE,
 )
@@ -228,11 +230,43 @@ def strip_device(s: str) -> str:
     return _lex()["device"].sub("", s)
 
 
+_NUMERIC_PREFIX = re.compile(r"^(?:\d+(?:st|nd|rd|th)?|[ivx]+)\s+", re.IGNORECASE)
+
+
+def display_surface(raw: str) -> str:
+    """Case-preserving display form: cleaned, then edge qualifiers peeled (case-insensitively)."""
+    s = clean(raw, lower=False)
+    lx = _lex()
+    while True:
+        n = lx["qual_lead_ci"].sub("", s).strip()
+        n = _NUMERIC_PREFIX.sub("", n).strip()
+        if not n:
+            return s
+        m = lx["qual_trail_ci"].sub("", n).strip()
+        if not m:
+            return n
+        if m == s:
+            return s
+        s = m
+
+
+def only_qualifiers(s: str) -> bool:
+    """True when the whole label is qualifier words ("intravenous", "oral solution")."""
+    lx = _lex()
+    prev = None
+    while s and s != prev:
+        prev = s
+        s = lx["qual_lead"].sub("", s).strip()
+        s = _NUMERIC_PREFIX.sub("", s).strip()
+    return not s
+
+
 def strip_qualifiers(s: str) -> str:
     """Peel curated qualifier words from both EDGES until stable; never empties the name (caller gates that)."""
     lx = _lex()
     while True:
         n = lx["qual_lead"].sub("", s).strip()
+        n = _NUMERIC_PREFIX.sub("", n).strip()
         if not n:
             return s
         m = lx["qual_trail"].sub("", n).strip()
@@ -247,13 +281,13 @@ def _key_single(cleaned: str) -> str:
     n = cleaned
     if is_biologic_shape(n):
         while True:  # keep Greek qualifier + biosimilar suffix; strip device/dose-form/qualifier edges
-            m = strip_qualifiers(strip_dose_forms(strip_device(n)))
+            m = strip_dose_forms(strip_device(strip_qualifiers(n)))
             if m == n:
                 break
             n = m
     else:
         while True:
-            m = strip_qualifiers(strip_dose_forms(strip_salt(strip_device(n))))
+            m = strip_dose_forms(strip_salt(strip_device(strip_qualifiers(n))))
             if m == n:
                 break
             n = m
@@ -315,7 +349,7 @@ def route(raw: str, known_tokens: frozenset[str] | None = None) -> Keyed:
         keep: list[tuple[str, str]] = []
         dropped: list[tuple[str, str]] = []
         for p in parts:
-            pg = gate(p)
+            pg = gate(p) or gate(strip_qualifiers(p))  # "neoadjuvant PD-1 antibody" is a class label too
             if pg:
                 dropped.append((p, pg))
                 continue
@@ -381,8 +415,8 @@ def route(raw: str, known_tokens: frozenset[str] | None = None) -> Keyed:
     if len(key) < 3:
         return Keyed(raw=raw, cleaned=cleaned, key=None, gate_reason="too_short_after_key", route="gated")
     post = strip_qualifiers(cleaned)
-    g = gate(post)
-    if g:  # the name was ONLY qualifiers around a class word: "neoadjuvant chemotherapy"
+    g = gate(post) or ("qualifiers_only" if only_qualifiers(cleaned) else None)
+    if g:  # the name was ONLY qualifiers, or qualifiers around a class word: "neoadjuvant chemotherapy"
         return Keyed(raw=raw, cleaned=cleaned, key=None, gate_reason=g, route="gated")
     return Keyed(
         raw=raw, cleaned=cleaned, key=key, route="biologic" if is_biologic_shape(cleaned) else "fixed_point"

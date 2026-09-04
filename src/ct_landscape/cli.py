@@ -94,7 +94,14 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         write_meta(con, {"llm_batch_census": census})
         if not args.dry_run:
             load_shipped_enrichment(con)
-    apply_views(con, fail_on_empty=False)
+    counts = apply_views(con, fail_on_empty=False)
+    print(
+        "views: " + ", ".join(f"{v}={n:,}" for v, n in sorted(counts.items()) if v.startswith("v_moa")),
+        file=sys.stderr,
+    )
+    from ct_landscape.funnel import compute_funnel, print_funnel
+
+    print_funnel(compute_funnel(con))
     con.close()
     return 0
 
