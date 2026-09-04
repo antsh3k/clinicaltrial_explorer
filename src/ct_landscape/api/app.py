@@ -7,6 +7,8 @@ GET  /api/trials/{nct_id}                    → v_trial_card row
 GET  /api/entities/resolve?q=&kind=          → resolve_entity
 POST /api/sql {sql}                          → read-only console, the SAME sandbox as the agent tool
 GET  /api/meta                               → snapshot date + build census (coverage footer)
+POST /api/trials/profile {nct_ids}           → per-trial index facts for an evidence set (dashboard; model never involved)
+GET  /api/entities/{kind}/{id}/landscape     → headline + breakdown charts for a condition / drug / company, each with its SQL
 No auth/CORS (single localhost process). A fresh sandboxed DuckDB connection per request; one in-flight run per conversation.
 """
 
@@ -26,6 +28,7 @@ from pydantic import BaseModel, Field
 from ct_landscape.agent import tools as T
 from ct_landscape.agent.agent import Deps, answer_question
 from ct_landscape.agent.schema_card import schema_card
+from ct_landscape.api.analytics import entity_landscape, profile_trials
 from ct_landscape.api.store import Store
 from ct_landscape.db import read_meta
 
@@ -38,6 +41,10 @@ class AskBody(BaseModel):
 
 class SqlBody(BaseModel):
     sql: str = Field(min_length=1, max_length=20000)
+
+
+class ProfileBody(BaseModel):
+    nct_ids: list[str] = Field(max_length=2000)
 
 
 def create_app(db_path: str, runs_dir: Path | None = None, model: Any | None = None) -> FastAPI:
@@ -149,6 +156,30 @@ def create_app(db_path: str, runs_dir: Path | None = None, model: Any | None = N
             if card is None:
                 raise HTTPException(404, "not in the index")
             return card
+        finally:
+            con.close()
+
+    @app.post("/api/trials/profile")
+    def profile(body: ProfileBody) -> dict[str, Any]:
+        """Evidence-set profile for the dashboard: facts per NCT straight from the views (never from the model)."""
+        con = db()
+        try:
+            return profile_trials(con, body.nct_ids)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from e
+        finally:
+            con.close()
+
+    @app.get("/api/entities/{kind}/{entity_id}/landscape")
+    def landscape(kind: str, entity_id: str) -> dict[str, Any]:
+        if kind not in ("condition", "drug", "company"):
+            raise HTTPException(400, "kind must be condition, drug or company")
+        con = db()
+        try:
+            out = entity_landscape(con, kind, entity_id)
+            if out is None:
+                raise HTTPException(404, "entity not in the index")
+            return out
         finally:
             con.close()
 
