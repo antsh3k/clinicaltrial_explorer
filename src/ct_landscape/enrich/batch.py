@@ -197,9 +197,12 @@ def run(
     poll_s: int = 30,
     log=sys.stderr,
     chembl_covered: bool = False,
+    close_before_wait: bool = False,
 ) -> dict[str, Any]:
     """Plan → (dry-run: print the plan) → submit one batch → poll → settle → append. Returns the census."""
     assets = in_scope_assets(con, limit, chembl_covered=chembl_covered)
+    if close_before_wait and not dry_run:
+        con.close()  # planning is the only DB access: release the file lock for the (possibly hour-long) batch wait
     done = load_checkpoint(checkpoint)
     todo = [a for a in assets if a["asset_id"] not in done]
     spent = sum(cost_of(r.get("usage", {})) for r in done.values())

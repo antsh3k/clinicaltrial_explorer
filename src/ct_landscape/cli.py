@@ -92,23 +92,34 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         census = run(con, refresh=args.refresh)
         write_meta(con, {"chembl_join_census": census})
     else:
+        from ct_landscape.db import connect_sandboxed
+        from ct_landscape.enrich.batch import CHECKPOINT
         from ct_landscape.enrich.batch import run as run_llm
         from ct_landscape.enrich.load import load_shipped_enrichment
 
+        con.close()  # plan on a read-only connection (released before the batch wait); reopen to load results
+        plan_con = connect_sandboxed(db_path)
         if args.agreement:
-            from ct_landscape.enrich.batch import CHECKPOINT
-
             census = run_llm(
-                con,
+                plan_con,
                 limit=args.limit or 50,
                 ceiling_usd=args.ceiling,
                 dry_run=args.dry_run,
                 checkpoint=CHECKPOINT.with_name("assets_agreement.jsonl"),
                 chembl_covered=True,
+                close_before_wait=True,
             )
+            con = connect(db_path)
             write_meta(con, {"llm_agreement_census": census})
         else:
-            census = run_llm(con, limit=args.limit, ceiling_usd=args.ceiling, dry_run=args.dry_run)
+            census = run_llm(
+                plan_con,
+                limit=args.limit,
+                ceiling_usd=args.ceiling,
+                dry_run=args.dry_run,
+                close_before_wait=True,
+            )
+            con = connect(db_path)
             write_meta(con, {"llm_batch_census": census})
             if not args.dry_run:
                 load_shipped_enrichment(con)
