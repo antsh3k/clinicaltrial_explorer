@@ -4,7 +4,7 @@ Source of truth for scope: `ct-landscape-agent-design.md` (§ references below).
 Mark items `[x]` when done. Record any deliberate deviation from the spec under **Deviations** at the bottom.
 
 ## Phase 0 — Scaffold (§11.1) ✅ target: `pytest` green, `ctl --help`
-- [x] uv project: `pyproject.toml`, Python 3.12 pinned, deps synced (duckdb, pydantic, pydantic-ai-slim[anthropic], fastapi, uvicorn, pyyaml, httpx, anthropic; dev: pytest, ruff)
+- [x] uv project: `pyproject.toml`, Python 3.14 pinned (3.12 at scaffold time, bumped 2026-09-04), deps synced (duckdb, pydantic, pydantic-ai-slim[anthropic], fastapi, uvicorn, pyyaml, httpx, anthropic; dev: pytest, ruff)
 - [x] Package skeleton `src/ct_landscape/{normalize,enrich,agent,api,web,evals}` + `ctl` console script with stub subcommands
 - [x] `CLAUDE.md`, `TASKS.md`, `PROMPTS.md`, `.env.example`, gitignore for raw dump / duckdb / runs
 - [x] Fixture-builder script `scripts/make_fixtures.py` (mini.zip 213 studies covering every §2.5 case; demo.zip ~17k = all gold-indication trials + 1,500 random)
