@@ -26,7 +26,7 @@ Everything runs locally from one checkout: a `uv`-managed Python 3.12 environmen
 ```bash
 git clone <this repository> ct-landscape && cd ct-landscape
 uv sync                       # creates .venv with Python 3.12 and every dependency; nothing is installed globally
-uv run pytest                 # optional, ~2 min: ~250 offline tests (no network, no LLM) — confirms the environment
+uv run pytest                 # optional, ~2 min: ~350 offline tests (no network, no LLM) — confirms the environment
 ```
 
 Run every command below from the repository root: `.env`, `data/`, `lexicons/` and `runs/` are resolved relative to it.
@@ -75,12 +75,12 @@ uv run ctl sql "SELECT asset_id, max_phase_active, n_active_trials FROM v_progra
 uv run ctl eval --demo --mode replay --replay-dir runs/evals/live-demo-2     # replays the recorded Sonnet 5 transcripts through the real agent, tools and gate, no model
 ```
 
-The first prints the most advanced renal-cell-carcinoma programs straight from the definition-of-record view (`--csv` for machine-readable output; omit `--db` to query the full index). The second re-scores the shipped gold set offline and must report `replay_mismatch_count = 0`; `uv run ctl eval --demo --mode live` runs the same 14 cases against the live model (~$4).
+The first prints the most advanced renal-cell-carcinoma programs straight from the definition-of-record view (`--csv` for machine-readable output; omit `--db` to query the full index). The second re-scores the shipped gold set offline by feeding the recorded model turns back through the real tools and the real grounding gate. Recorded transcripts are pinned to the index they were recorded on: against the current index 12 of 14 cases replay identically and two diverge **because the index got stricter** after the recording — G07's recorded answer names cabozantinib as a pembrolizumab partner (now excluded as a backbone pair) and G05b's names the code RMC-9805 (now folded into zoldonrasib) — so the gate rejects those two recorded answers and the run reports them as replay mismatches. That is the fail-closed gate doing its job, not a regression; `uv run ctl eval --demo --mode live` (~$4) re-records all 14 against the current index.
 
 ### Optional: refresh the mechanism tiers
 
 ```bash
-uv run ctl enrich chembl                  # re-derive the ChEMBL tier live from the EMBL-EBI REST API ($0, ~10 min, then ctl build --skip-ingest)
+uv run ctl enrich chembl                  # re-derive the ChEMBL tier live from the EMBL-EBI REST API ($0, a few minutes; the raw pull is cached in data/enrichment/chembl_raw.json)
 uv run ctl enrich llm --dry-run           # plan the LLM tier: how many assets, estimated cost; nothing is sent
 uv run ctl enrich llm --limit 300         # the pilot actually run for this write-up ($0.21); the full tail is ~$22 under a $35 ceiling
 ```
@@ -286,7 +286,7 @@ Caveat the agent must state: a Phase 4 trial is not evidence of approval; trial-
 **What is verified today (offline, in CI):**
 - The **mutation mini-suite**: one planted defect per case (fabricated well-formed NCT, 7-digit NCT, citation outside the retrieved set, entity never returned, NCT hidden in a table cell) each breaks exactly its FLOOR; the no-mutation control has zero findings.
 - **Scripted-agent runs** through the real tools and the real output validator: a clean happy path, a fabricated citation rejected then corrected on the one retry, a never-grounded answer ending in an error (never a clean answer), prose that cannot end a run.
-- **Replay**: recorded transcripts replayed through the real agent with no model → `replay_mismatch_count = 0`.
+- **Replay**: recorded transcripts replayed through the real agent with no model → `replay_mismatch_count = 0` against the index they were recorded on (run 2). Against the hardened index built later the same day, 12 of 14 replay identically and 2 are rejected by the gate for entities the stricter index no longer returns (cabozantinib as a pembrolizumab partner; the code RMC-9805 now folded into zoldonrasib) — the expected, visible effect of changing the index under a fail-closed gate; re-recording is a ~$4 live run.
 
 **Live results (Sonnet 5, demo index, 2026-09-04).** Two full live runs were needed; the first surfaced agent-behaviour defects that were fixed and are listed under failure modes below. Run 2 (`runs/evals/live-demo-2`, 14 cases, ~1.66M input tokens ≈ $4 with prompt caching):
 

@@ -76,7 +76,7 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
 - [x] Phase 3b pilot — done: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
 - [ ] Owner sign-off on the Fable-5.1 adjudication of G01–G07 (read each case `note` in `evals/gold.yaml`; veto or amend) and on the 30 pilot verdicts in `docs/llm_pilot_review.md`
-- [ ] Re-run `ctl eval --demo` (~$4) so the pooled NCT precision/recall (now gated via G05) and the G01/G06 changes are measured
+- [ ] Re-run `ctl eval --demo` (~$4) so the pooled NCT precision/recall (now gated via G05) and the G01/G06 changes are measured, and to re-record the replay fixtures against the hardened index (12/14 replay clean today; G07 and G05b diverge because the index got stricter — cabozantinib no longer a pembrolizumab partner, RMC-9805 folded into zoldonrasib)
 - [x] Chrome instance picked by the user; UI tested (two drawer glitches + a parallel-call spinner fixed)
 
 ## Deviations from the spec
