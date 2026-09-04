@@ -4,7 +4,7 @@ A ClinicalTrials.gov landscape-question agent: **one DuckDB index**, a **small t
 
 Brief: `argon-brief.md` · Design specification: `ct-landscape-agent-design.md` · Build log / resumable checklist: `TASKS.md` · How AI coding agents were used: `PROMPTS.md`.
 
-**Where each deliverable in the brief lives:** source + run instructions → [5-minute reviewer path](#5-minute-reviewer-path) · agent / query interface → the chat UI (`ctl serve`) and `ctl sql`, [What it answers](#what-it-answers-and-how) · example questions and answers → [Example landscape questions](#example-landscape-questions-zero-llm-spend--straight-from-the-views) and the [UI walkthrough](#the-chat-ui-on-the-specs-worked-example) · indexing / ontology architecture, where it performs well and poorly → [Architecture](#architecture) and [Where it performs well, where it performs poorly](#where-it-performs-well-where-it-performs-poorly) · precision/recall tradeoffs → [the dials](#precision--recall-tradeoffs-the-dials) · evaluation results and failure modes → [Evaluation](#evaluation) · use of coding agents → [How AI coding agents were used](#how-ai-coding-agents-were-used) and `PROMPTS.md`.
+**Where each deliverable in the brief lives:** source + run instructions → [5-minute reviewer path](#5-minute-reviewer-path) · agent / query interface → the chat UI (`ctl serve`) and `ctl sql`, [What it answers](#what-it-answers-and-how) · output experience for inspecting the evidence → [the evidence dashboard](#the-evidence-dashboard-inspecting-what-the-agent-saw-not-just-what-it-said) · example questions and answers → [Example landscape questions](#example-landscape-questions-zero-llm-spend--straight-from-the-views) and the [UI walkthrough](#the-chat-ui-on-the-specs-worked-example) · indexing / ontology architecture, where it performs well and poorly → [Architecture](#architecture) and [Where it performs well, where it performs poorly](#where-it-performs-well-where-it-performs-poorly) · precision/recall tradeoffs → [the dials](#precision--recall-tradeoffs-the-dials) · evaluation results and failure modes → [Evaluation](#evaluation) · use of coding agents → [How AI coding agents were used](#how-ai-coding-agents-were-used) and `PROMPTS.md`.
 
 ---
 
@@ -289,7 +289,8 @@ src/ct_landscape/
   normalize/   phases · drug_names · assets · arms · conditions · companies · populations · mechanism_key · build
   enrich/      chembl · load · models · prompts · batch
   agent/       gate · tools · schema_card · agent
-  api/         app · store          web/  index.html · app.js · styles.css
+  api/         app · store · analytics (evidence-set profiles, entity landscapes, reference check)
+  web/         index.html · app.js · styles.css (chat, evidence dashboard, SQL console)
   evals/       checks · gold.py · gold.yaml · harness · mutate · replay
 tests/                    offline only: hand-built records, data/fixtures/mini.zip, scripted models
 runs/                     answers/ conversations/ evals/ (gitignored; persisted answers double as replay fixtures)
