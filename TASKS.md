@@ -62,6 +62,14 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] README: live eval results + agent-level failure-mode table
 - [x] README: UI screenshot of the §7.7 example (`docs/ui-mk3475-rcc.jpg`); UI exercised live in Chrome: timeline, gate badge, table, evidence panel, trace, trial drawer, SQL console, permalink reload; two-turn conversation verified via the API
 
+## Hardening after the review pass (2026-09-04) ✅
+- [x] Router: dose regex code-aware + chained tails; regimen split after salt/form strips; CJK marks; tests
+- [x] Gates: assay/procedure tails, specimens, bare biology words, rescue/adjuvant/care/medical/ADT class labels
+- [x] Aliases: long-list single-trial rule; curated synonym groups (`lexicons/asset_synonyms.yaml`)
+- [x] Mechanisms: curated tier (`lexicons/curated_moa.yaml`, 36 assets) between chembl and nlm_class; funnel line
+- [x] Q7: backbone pairs excluded, `same_mechanism` flag + PARTNER house rule in the schema card
+- [x] README: deliverables map, refreshed funnel/examples/dials/failure modes, second screenshot (two-turn conversation)
+
 ## Needs the user (blocked)
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
 - [x] Phase 3b pilot — done: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`

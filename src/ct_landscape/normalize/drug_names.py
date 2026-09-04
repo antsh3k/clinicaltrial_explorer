@@ -86,7 +86,7 @@ _DOSE = re.compile(
     r"\d+(?:[.,]\d+)?\s*(?:x\s*\d+\s*)?"
     r"(?:mg|mcg|µg|ug|g|kg|ml|mL|l|iu|units?|u|mmol|µmol|umol|meq|mci|mbq|gbq|gy|ppm|%|ng|pg|mg/kg|mg/m2|mg/m²|cells?/kg|"
     r"cells|copies|vg/kg|vg|pfu|tcid50|ccid50|cfu|spores|dose|doses|tablets?|capsules?|puffs?|drops?|sprays?|vials?|patches?|cycles?|courses?|infusions?|injections?)"
-    r"(?:\s*/\s*(?:kg|m2|m²|ml|mL|l|day|d|dose|h|hr|hour|week|wk|kg/day|kg/dose|min))*\b",  # "mg/m²/day": every per-unit tail
+    r"(?:\s*/\s*(?:kg|m2|m²|ml|mL|l|day|d|dose|h|hr|hrs|hour|hours|week|wk|kg/day|kg/dose|min|\d+\s*(?:h|hr|hrs|hours?)))*\b",  # "mg/m²/day", "mg/24 hrs"
     re.IGNORECASE,
 )
 _PERCENT = re.compile(r"\d+(?:[.,]\d+)?\s*%(?:\s*(?:w/w|w/v|v/v))?", re.IGNORECASE)
@@ -200,7 +200,9 @@ def is_code_name(surface: str) -> bool:
 
 # ---------------------------------------------------------------- router
 
-_COMBO_SPLIT = re.compile(r"\s*/\s*|\s*\+\s*|\s+and\s+|\s+with\s+|\s*&\s*")
+_COMBO_SPLIT = re.compile(
+    r"\s*/\s*|\s*\+\s*|\s+and\s+|\s+with\s+|\s*&\s*|\s*[、；;]\s*"
+)  # CJK enumeration marks too
 _EITHER_OR = re.compile(r"\s+or\s+")
 _GREEK = re.compile(r"\b(?:alfa|alpha|beta|gamma|delta|epsilon|zeta|lambda|theta|kappa)\b")
 _BIO_STEM = re.compile(

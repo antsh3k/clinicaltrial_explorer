@@ -93,6 +93,9 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
    mechanism label, with the assets and trial counts behind it) for Q4/Q5, biomarkers/subgroups for Q6, partners for Q7.
    Add per-claim `citations`; list `entities` (kind + id exactly as returned by the tools); add `caveats`.
 5. Finish by calling submit_answer. Prose without submit_answer does not end the run.
+6. PARTNER RULE (Q7): filter `NOT cp.same_mechanism` in the main partner query. A same-mechanism pair in one arm
+   (nivolumab + pembrolizumab, cisplatin + carboplatin) is an investigator's-choice list, not a studied combination;
+   if you mention such agents at all, put them in a separate sentence labelled as alternatives, never in the ranked table.
 
 ## Worked SQL
 -- programs for an indication, most advanced first

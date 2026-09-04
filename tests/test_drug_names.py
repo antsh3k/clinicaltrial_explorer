@@ -280,6 +280,7 @@ def test_gate_names_every_reason():
         ("Decitabine 20 mg/m²/day for 5 days", "decitabine"),
         ("Leuprolide Acetate 3.75 MG/ML", "leuprolide"),
         ("SHR-1701、", "shr1701"),  # CJK punctuation is trailing junk
+        ("Estradiol Transdermal Patch 0.1 mg/24 hrs", "estradiol"),  # "/24 hrs" is part of the dose
     ],
 )
 def test_code_names_survive_dose_and_form_stripping(raw, key):
@@ -325,3 +326,10 @@ def test_salt_and_form_words_are_never_regimen_members(raw, key):
 )
 def test_procedures_specimens_and_class_words_are_gated(raw):
     assert route(raw).key is None, route(raw)
+
+
+def test_cjk_enumeration_marks_split_combinations():
+    k = route("SHR-1701、CAPOX")
+    assert k.is_combo and k.components == ["capox", "shr1701"], k
+    k = route("SHR-1701；BP102")  # fullwidth semicolon folds to ';' under NFKC
+    assert k.is_combo and k.components == ["bp102", "shr1701"], k
