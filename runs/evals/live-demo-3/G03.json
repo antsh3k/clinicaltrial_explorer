@@ -1,0 +1,984 @@
+{
+ "case_id": "G03",
+ "question": "Which companies are most active in multiple myeloma? Please count J&J and Celgene programs correctly.",
+ "answer": null,
+ "gate": null,
+ "trace": [
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "Celgene",
+    "kind": "company"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 35
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "Johnson & Johnson",
+    "kind": "company"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 36
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "multiple myeloma",
+    "kind": "condition"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 62
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT company_id, company_name, agency_class, n_trials, n_active_trials, n_active_readout_trials, n_assets, n_phase3_plus, latest_activity\nFROM v_sponsor_condition\nWHERE condition_key = 'D009101' AND agency_class = 'INDUSTRY'\nORDER BY n_active_trials DESC, n_trials DESC\nLIMIT 15"
+   },
+   "rows": 15,
+   "elapsed_ms": 18,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 19
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT nct_ids FROM v_sponsor_condition WHERE condition_key='D009101' AND company_id IN ('johnson johnson janssen','bristol myers squibb')"
+   },
+   "rows": 2,
+   "elapsed_ms": 10,
+   "ncts_seen": 188,
+   "elapsed_total_ms": 10
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT00044018"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT lead_company_id, count(*) n, min(start_date) minstart, max(start_date) maxstart\nFROM v_trials t JOIN trial_sponsors_norm ts USING (nct_id)\nWHERE t.nct_id IN (SELECT nct_id FROM trial_conditions_norm WHERE condition_key='D009101')\nAND ts.role='lead' AND ts.name ILIKE '%celgene%'\nGROUP BY 1"
+   },
+   "error": "BinderException: Binder Error: Table \"ts\" does not have a column named \"name\"\n\nCandidate bindings: : \"agency_class\"\n\nLINE 4: AND ts.role='lead' AND ts.name ILIKE '%celgene%'\n                               ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "DESCRIBE trial_sponsors_norm"
+   },
+   "error": "statement must start with SELECT or WITH"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT * FROM trial_sponsors_norm LIMIT 3"
+   },
+   "rows": 3,
+   "elapsed_ms": 1,
+   "ncts_seen": 3,
+   "elapsed_total_ms": 1
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT company_id, count(*) n\nFROM companies WHERE company_name ILIKE '%celgene%' OR company_id ILIKE '%celgene%'\n"
+   },
+   "error": "BinderException: Binder Error: Referenced column \"company_name\" not found in FROM clause!\nCandidate bindings: \"company_id\", \"canonical_name\"\n\nLINE 2: FROM companies WHERE company_name ILIKE '%celgene%' OR company_id ILIKE '%celgene...\n                             ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT company_id, canonical_name FROM companies WHERE canonical_name ILIKE '%celgene%' OR company_id ILIKE '%celgene%'"
+   },
+   "rows": 1,
+   "elapsed_ms": 4,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 4
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT tsn.company_id, count(DISTINCT tsn.nct_id) n_trials,\n  count(DISTINCT tsn.nct_id) FILTER (WHERE t.program_exists) n_active_trials\nFROM trial_sponsors_norm tsn\nJOIN trial_conditions_norm tc ON tc.nct_id = tsn.nct_id\nJOIN v_trials t ON t.nct_id = tsn.nct_id\nWHERE tc.condition_key='D009101' AND tsn.role='lead'\n  AND tsn.company_id = 'celgene a wholly owned subsidiary of bms'\nGROUP BY 1"
+   },
+   "rows": 0,
+   "elapsed_ms": 6,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 6
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT tsn.company_id, count(DISTINCT tsn.nct_id) n\nFROM trial_sponsors_norm tsn\nWHERE tsn.company_id = 'celgene a wholly owned subsidiary of bms'\nGROUP BY 1"
+   },
+   "rows": 1,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 2
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "\nSELECT company_id, count(*) n FROM companies WHERE company_id ILIKE '%celgen%' or company_id ILIKE '%bms%' or company_id ILIKE '%bristol%'"
+   },
+   "error": "BinderException: Binder Error: column \"company_id\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use \"ANY_VALUE(company_id)\" if the exact value of \"company_id\" is not important.\n\nLINE 1: SELECT company_id, count(*) n FROM companies WHERE company_id ILIKE...\n               ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT company_id, canonical_name FROM companies WHERE company_id ILIKE '%celgen%' or company_id ILIKE '%bristol%' or company_id ILIKE '%bms%'"
+   },
+   "rows": 3,
+   "elapsed_ms": 5,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 5
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT * FROM asset_aliases LIMIT 3"
+   },
+   "rows": 3,
+   "elapsed_ms": 1,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 1
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "\nSELECT s.name, count(*) FROM sponsors s WHERE s.name ILIKE '%celgene%' GROUP BY 1"
+   },
+   "error": "BinderException: Binder Error: Table \"s\" does not have a column named \"name\"\n\nCandidate bindings: : \"name_raw\", \"agency_class\"\n\nLINE 1: SELECT s.name, count(*) FROM sponsors s WHERE s.name ILIKE '%celgene%' GROUP BY 1\n                                                      ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT name_raw, count(*) n FROM sponsors WHERE name_raw ILIKE '%celgene%' GROUP BY 1 ORDER BY n DESC LIMIT 20"
+   },
+   "rows": 4,
+   "elapsed_ms": 4,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 5
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT sp.name_raw, tsn.company_id, count(*) n\nFROM sponsors sp\nJOIN trial_sponsors_norm tsn ON tsn.nct_id = sp.nct_id AND tsn.role='lead'\nWHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\nGROUP BY 1,2"
+   },
+   "rows": 2,
+   "elapsed_ms": 3,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 3
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT sp.name_raw, count(DISTINCT sp.nct_id) n, count(DISTINCT sp.nct_id) FILTER (WHERE tc.condition_key='D009101') n_mm\nFROM sponsors sp\nLEFT JOIN trial_conditions_norm tc ON tc.nct_id = sp.nct_id AND tc.condition_key='D009101'\nWHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\nGROUP BY 1"
+   },
+   "rows": 2,
+   "elapsed_ms": 3,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 3
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n)\nSELECT\n  count(DISTINCT t.nct_id) AS n_trials_mm,\n  count(DISTINCT t.nct_id) FILTER (WHERE t.program_exists) AS n_active_trials_mm,\n  count(DISTINCT t.nct_id) FILTER (WHERE t.is_active_readout) AS n_recruiting_mm,\n  max(t.phase_rank) AS max_phase,\n  count(DISTINCT ta.asset_id) AS n_assets\nFROM celgene_trials ct\nJOIN v_trials t ON t.nct_id = ct.nct_id\nJOIN trial_conditions_norm tc ON tc.nct_id = ct.nct_id AND tc.condition_key='D009101'\nLEFT JOIN trial_assets ta ON ta.nct_id = ct.nct_id AND ta.role IN ('subject','unknown')"
+   },
+   "rows": 1,
+   "elapsed_ms": 7,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 7
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n)\nSELECT list(DISTINCT t.nct_id) AS ncts\nFROM celgene_trials ct\nJOIN v_trials t ON t.nct_id = ct.nct_id\nJOIN trial_conditions_norm tc ON tc.nct_id = ct.nct_id AND tc.condition_key='D009101'"
+   },
+   "rows": 1,
+   "elapsed_ms": 7,
+   "ncts_seen": 101,
+   "elapsed_total_ms": 8
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n)\nSELECT count(*) n_bms_only_trials, count(*) FILTER (WHERE t.program_exists) n_active\nFROM v_sponsor_condition sc\nJOIN v_trials t ON false  \nWHERE false"
+   },
+   "rows": 1,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 2
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nbms_mm AS (\n  SELECT DISTINCT nct_id FROM trial_sponsors_norm WHERE role='lead' AND company_id='bristol myers squibb'\n  INTERSECT\n  SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'\n)\nSELECT\n  (SELECT count(*) FROM bms_mm) AS bms_all_mm_trials,\n  (SELECT count(*) FROM bms_mm WHERE nct_id IN (SELECT nct_id FROM celgene_trials)) AS bms_mm_via_celgene,\n  (SELECT count(*) FROM bms_mm WHERE nct_id NOT IN (SELECT nct_id FROM celgene_trials)) AS bms_mm_true_bms"
+   },
+   "rows": 1,
+   "elapsed_ms": 5,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 6
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT t.nct_id FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n),\ncelgene_only AS (\n  SELECT t.nct_id FROM v_trials t JOIN celgene_trials ct ON ct.nct_id=t.nct_id JOIN mm ON mm.nct_id=t.nct_id\n)\nSELECT 'BMS (non-Celgene-branded)' AS grp, count(*) n_trials,\n  count(*) FILTER (WHERE t.program_exists) n_active,\n  count(DISTINCT ta.asset_id) n_assets, max(t.phase_rank) max_phase\nFROM bms_true t\nLEFT JOIN trial_assets ta ON ta.nct_id=t.nct_id AND ta.role IN ('subject','unknown')\nUNION ALL\nSELECT 'Celgene-branded (BMS subsidiary)', count(*),\n  count(*) FILTER (WHERE t.program_exists),\n  count(DISTINCT ta.asset_id), max(t.phase_rank)\nFROM celgene_only t\nLEFT JOIN trial_assets ta ON ta.nct_id=t.nct_id AND ta.role IN ('subject','unknown')\n"
+   },
+   "error": "BinderException: Binder Error: Values list \"t\" does not have a column named \"program_exists\"\n\nLINE 17:   count(*) FILTER (WHERE t.program_exists) n_active,\n                                  ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n),\ncelgene_only AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t JOIN celgene_trials ct ON ct.nct_id=t.nct_id JOIN mm ON mm.nct_id=t.nct_id\n)\nSELECT 'BMS (non-Celgene-branded)' AS grp, count(*) n_trials,\n  count(*) FILTER (WHERE program_exists) n_active,\n  count(DISTINCT ta.asset_id) n_assets, max(phase_rank) max_phase\nFROM bms_true\nLEFT JOIN trial_assets ta ON ta.nct_id=bms_true.nct_id AND ta.role IN ('subject','unknown')\nUNION ALL\nSELECT 'Celgene-branded (BMS subsidiary)', count(*),\n  count(*) FILTER (WHERE program_exists),\n  count(DISTINCT ta.asset_id), max(phase_rank)\nFROM celgene_only\nLEFT JOIN trial_assets ta ON ta.nct_id=celgene_only.nct_id AND ta.role IN ('subject','unknown')"
+   },
+   "rows": 2,
+   "elapsed_ms": 8,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 8
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n),\ncelgene_only AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t JOIN celgene_trials ct ON ct.nct_id=t.nct_id JOIN mm ON mm.nct_id=t.nct_id\n)\nSELECT 'BMS (non-Celgene-branded)' AS grp, count(*) n_trials, count(*) FILTER (WHERE program_exists) n_active\nFROM bms_true\nUNION ALL\nSELECT 'Celgene-branded', count(*), count(*) FILTER (WHERE program_exists)\nFROM celgene_only"
+   },
+   "rows": 2,
+   "elapsed_ms": 8,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 8
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101')\nSELECT list(DISTINCT nct_id) FROM celgene_trials JOIN mm USING (nct_id)"
+   },
+   "rows": 1,
+   "elapsed_ms": 4,
+   "ncts_seen": 101,
+   "elapsed_total_ms": 4
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "WITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT DISTINCT t.nct_id FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n)\nSELECT list(nct_id) FROM bms_true"
+   },
+   "rows": 1,
+   "elapsed_ms": 7,
+   "ncts_seen": 44,
+   "elapsed_total_ms": 8
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT sp.name_raw, count(*) n FROM sponsors sp WHERE sp.name_raw ILIKE '%janssen%' OR sp.name_raw ILIKE '%johnson%' GROUP BY 1 ORDER BY n DESC"
+   },
+   "rows": 32,
+   "elapsed_ms": 3,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 3
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT DISTINCT tsn.company_id, count(*) n FROM sponsors sp\nJOIN trial_sponsors_norm tsn ON tsn.nct_id=sp.nct_id AND tsn.role='lead'\nWHERE (sp.name_raw ILIKE '%janssen%' OR sp.name_raw ILIKE '%johnson%') AND sp.role='lead'\nGROUP BY 1"
+   },
+   "rows": 7,
+   "elapsed_ms": 6,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 6
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_active_trials, p.n_trials\nFROM v_programs p JOIN assets a USING (asset_id)\nJOIN trial_assets ta ON false  \nWHERE false"
+   },
+   "rows": 0,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 2
+  }
+ ],
+ "error": "UsageLimitExceeded: The next request would exceed the request_limit of 30. Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+ "usage": null,
+ "events": [
+  {
+   "event": "tool_call",
+   "step": 1,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_017p5BBynqWTagFJVTQJKibU",
+   "input": {
+    "query": "multiple myeloma",
+    "kind": "condition"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 2,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01K97Nke9wdfuV5MosFfkFrJ",
+   "input": {
+    "query": "Johnson & Johnson",
+    "kind": "company"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_015Wezzk46adWn35WhWnTsdz",
+   "input": {
+    "query": "Celgene",
+    "kind": "company"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_015Wezzk46adWn35WhWnTsdz",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 36,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01K97Nke9wdfuV5MosFfkFrJ",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 36,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_017p5BBynqWTagFJVTQJKibU",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 62,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 4,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MRpvTwUtpEY8aZgSm4amkZ",
+   "input": {
+    "sql": "SELECT company_id, company_name, agency_class, n_trials, n_active_trials, n_active_readout_trials, n_assets, n_phase3_plus, latest_activity\nFROM v_sponsor_condition\nWHERE condition_key = 'D009101' AND agency_class = 'INDUSTRY'\nORDER BY n_active_trials DESC, n_trials DESC\nLIMIT 15;"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 4,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MRpvTwUtpEY8aZgSm4amkZ",
+   "rows": 15,
+   "n_candidates": null,
+   "elapsed_ms": 18,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01ScaKPn5dHRbU4d4FVdqsGh",
+   "input": {
+    "sql": "SELECT nct_ids FROM v_sponsor_condition WHERE condition_key='D009101' AND company_id IN ('johnson johnson janssen','bristol myers squibb')"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01ScaKPn5dHRbU4d4FVdqsGh",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 10,
+   "ncts_seen": 188,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 6,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01JiQkfCbXduxQPV3m4oijeY",
+   "input": {
+    "nct_id": "NCT00044018"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 6,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01JiQkfCbXduxQPV3m4oijeY",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 188,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_011KBkbrupWh5ALj65Ui4G2J",
+   "input": {
+    "sql": "SELECT lead_company_id, count(*) n, min(start_date) minstart, max(start_date) maxstart\nFROM v_trials t JOIN trial_sponsors_norm ts USING (nct_id)\nWHERE t.nct_id IN (SELECT nct_id FROM trial_conditions_norm WHERE condition_key='D009101')\nAND ts.role='lead' AND ts.name ILIKE '%celgene%'\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_011KBkbrupWh5ALj65Ui4G2J",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 188,
+   "error": "BinderException: Binder Error: Table \"ts\" does not have a column named \"name\"\n\nCandidate bindings: : \"agency_class\"\n\nLINE 4: AND ts.role='lead' AND ts.name ILIKE '%celgene%'\n                               ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 8,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015iUfkCzevWJyW299zGbC3M",
+   "input": {
+    "sql": "DESCRIBE trial_sponsors_norm"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 8,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015iUfkCzevWJyW299zGbC3M",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 188,
+   "error": "statement must start with SELECT or WITH",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01EfXt5GLwBGcMcdDS4QA5m3",
+   "input": {
+    "sql": "SELECT * FROM trial_sponsors_norm LIMIT 3"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01EfXt5GLwBGcMcdDS4QA5m3",
+   "rows": 3,
+   "n_candidates": null,
+   "elapsed_ms": 1,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015RxAufaYp6KJ8tqc2YVCHm",
+   "input": {
+    "sql": "SELECT company_id, count(*) n\nFROM companies WHERE company_name ILIKE '%celgene%' OR company_id ILIKE '%celgene%'\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015RxAufaYp6KJ8tqc2YVCHm",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 191,
+   "error": "BinderException: Binder Error: Referenced column \"company_name\" not found in FROM clause!\nCandidate bindings: \"company_id\", \"canonical_name\"\n\nLINE 2: FROM companies WHERE company_name ILIKE '%celgene%' OR company_id ILIKE '%celgene...\n                             ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_019TZGmJGqkD6ytfbkihMHDD",
+   "input": {
+    "sql": "SELECT company_id, canonical_name FROM companies WHERE canonical_name ILIKE '%celgene%' OR company_id ILIKE '%celgene%'"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_019TZGmJGqkD6ytfbkihMHDD",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 4,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MiyNMgo32AwYyd6sAuPnwE",
+   "input": {
+    "sql": "\nSELECT tsn.company_id, count(DISTINCT tsn.nct_id) n_trials,\n  count(DISTINCT tsn.nct_id) FILTER (WHERE t.program_exists) n_active_trials\nFROM trial_sponsors_norm tsn\nJOIN trial_conditions_norm tc ON tc.nct_id = tsn.nct_id\nJOIN v_trials t ON t.nct_id = tsn.nct_id\nWHERE tc.condition_key='D009101' AND tsn.role='lead'\n  AND tsn.company_id = 'celgene a wholly owned subsidiary of bms'\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MiyNMgo32AwYyd6sAuPnwE",
+   "rows": 0,
+   "n_candidates": null,
+   "elapsed_ms": 6,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015a6T18Jd2dZoV6No1xnKD1",
+   "input": {
+    "sql": "\nSELECT tsn.company_id, count(DISTINCT tsn.nct_id) n\nFROM trial_sponsors_norm tsn\nWHERE tsn.company_id = 'celgene a wholly owned subsidiary of bms'\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015a6T18Jd2dZoV6No1xnKD1",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 2,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01BbakEBQtXkEppsLkCTktWf",
+   "input": {
+    "sql": "\nSELECT company_id, count(*) n FROM companies WHERE company_id ILIKE '%celgen%' or company_id ILIKE '%bms%' or company_id ILIKE '%bristol%'"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01BbakEBQtXkEppsLkCTktWf",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 191,
+   "error": "BinderException: Binder Error: column \"company_id\" must appear in the GROUP BY clause or must be part of an aggregate function.\nEither add it to the GROUP BY list, or use \"ANY_VALUE(company_id)\" if the exact value of \"company_id\" is not important.\n\nLINE 1: SELECT company_id, count(*) n FROM companies WHERE company_id ILIKE...\n               ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01EXtJK6CirEAiZe1Kv7eWpo",
+   "input": {
+    "sql": "SELECT company_id, canonical_name FROM companies WHERE company_id ILIKE '%celgen%' or company_id ILIKE '%bristol%' or company_id ILIKE '%bms%'"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01EXtJK6CirEAiZe1Kv7eWpo",
+   "rows": 3,
+   "n_candidates": null,
+   "elapsed_ms": 5,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 16,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PXQ9a15vTQoqFHYoaAwDK8",
+   "input": {
+    "sql": "SELECT * FROM asset_aliases LIMIT 3"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 16,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PXQ9a15vTQoqFHYoaAwDK8",
+   "rows": 3,
+   "n_candidates": null,
+   "elapsed_ms": 1,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HLn2KaVmjpPGfkTyxhbiie",
+   "input": {
+    "sql": "\nSELECT s.name, count(*) FROM sponsors s WHERE s.name ILIKE '%celgene%' GROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HLn2KaVmjpPGfkTyxhbiie",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 191,
+   "error": "BinderException: Binder Error: Table \"s\" does not have a column named \"name\"\n\nCandidate bindings: : \"name_raw\", \"agency_class\"\n\nLINE 1: SELECT s.name, count(*) FROM sponsors s WHERE s.name ILIKE '%celgene%' GROUP BY 1\n                                                      ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_014PcrPqGdzEykjC28Nq1Eti",
+   "input": {
+    "sql": "SELECT name_raw, count(*) n FROM sponsors WHERE name_raw ILIKE '%celgene%' GROUP BY 1 ORDER BY n DESC LIMIT 20"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_014PcrPqGdzEykjC28Nq1Eti",
+   "rows": 4,
+   "n_candidates": null,
+   "elapsed_ms": 4,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 19,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01KqQM1H86Q8wMDEaVm13mzq",
+   "input": {
+    "sql": "\nSELECT sp.name_raw, tsn.company_id, count(*) n\nFROM sponsors sp\nJOIN trial_sponsors_norm tsn ON tsn.nct_id = sp.nct_id AND tsn.role='lead'\nWHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\nGROUP BY 1,2"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 19,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01KqQM1H86Q8wMDEaVm13mzq",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 3,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 20,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UwCUz8FGyZhAT3rtBqMjEq",
+   "input": {
+    "sql": "\nSELECT sp.name_raw, count(DISTINCT sp.nct_id) n, count(DISTINCT sp.nct_id) FILTER (WHERE tc.condition_key='D009101') n_mm\nFROM sponsors sp\nLEFT JOIN trial_conditions_norm tc ON tc.nct_id = sp.nct_id AND tc.condition_key='D009101'\nWHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 20,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UwCUz8FGyZhAT3rtBqMjEq",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 3,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 21,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NeCvwUcb7kvUWjQkMUbCuF",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n)\nSELECT\n  count(DISTINCT t.nct_id) AS n_trials_mm,\n  count(DISTINCT t.nct_id) FILTER (WHERE t.program_exists) AS n_active_trials_mm,\n  count(DISTINCT t.nct_id) FILTER (WHERE t.is_active_readout) AS n_recruiting_mm,\n  max(t.phase_rank) AS max_phase,\n  count(DISTINCT ta.asset_id) AS n_assets\nFROM celgene_trials ct\nJOIN v_trials t ON t.nct_id = ct.nct_id\nJOIN trial_conditions_norm tc ON tc.nct_id = ct.nct_id AND tc.condition_key='D009101'\nLEFT JOIN trial_assets ta ON ta.nct_id = ct.nct_id AND ta.role IN ('subject','unknown')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 21,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NeCvwUcb7kvUWjQkMUbCuF",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 7,
+   "ncts_seen": 191,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 22,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Ls8FGsRDEGZEs4hKacmKWp",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n)\nSELECT list(DISTINCT t.nct_id) AS ncts\nFROM celgene_trials ct\nJOIN v_trials t ON t.nct_id = ct.nct_id\nJOIN trial_conditions_norm tc ON tc.nct_id = ct.nct_id AND tc.condition_key='D009101'\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 22,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Ls8FGsRDEGZEs4hKacmKWp",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 7,
+   "ncts_seen": 219,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 23,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01FjTgEPMfH5oCK1FH9aTizN",
+   "input": {
+    "sql": "\n-- BMS-lead trials in MM that are NOT under the Celgene sponsor names (i.e., true BMS-branded), for comparison\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n)\nSELECT count(*) n_bms_only_trials, count(*) FILTER (WHERE t.program_exists) n_active\nFROM v_sponsor_condition sc\nJOIN v_trials t ON false -- placeholder\nWHERE false\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 23,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01FjTgEPMfH5oCK1FH9aTizN",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 2,
+   "ncts_seen": 219,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 24,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01L4W3gutBTeMAVoZAFoC6Hg",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nbms_mm AS (\n  SELECT DISTINCT nct_id FROM trial_sponsors_norm WHERE role='lead' AND company_id='bristol myers squibb'\n  INTERSECT\n  SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'\n)\nSELECT\n  (SELECT count(*) FROM bms_mm) AS bms_all_mm_trials,\n  (SELECT count(*) FROM bms_mm WHERE nct_id IN (SELECT nct_id FROM celgene_trials)) AS bms_mm_via_celgene,\n  (SELECT count(*) FROM bms_mm WHERE nct_id NOT IN (SELECT nct_id FROM celgene_trials)) AS bms_mm_true_bms\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 24,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01L4W3gutBTeMAVoZAFoC6Hg",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 5,
+   "ncts_seen": 219,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 25,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_013Cu9fDwqzzmM8WyJjVQzFk",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT t.nct_id FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n),\ncelgene_only AS (\n  SELECT t.nct_id FROM v_trials t JOIN celgene_trials ct ON ct.nct_id=t.nct_id JOIN mm ON mm.nct_id=t.nct_id\n)\nSELECT 'BMS (non-Celgene-branded)' AS grp, count(*) n_trials,\n  count(*) FILTER (WHERE t.program_exists) n_active,\n  count(DISTINCT ta.asset_id) n_assets, max(t.phase_rank) max_phase\nFROM bms_true t\nLEFT JOIN trial_assets ta ON ta.nct_id=t.nct_id AND ta.role IN ('subject','unknown')\nUNION ALL\nSELECT 'Celgene-branded (BMS subsidiary)', count(*),\n  count(*) FILTER (WHERE t.program_exists),\n  count(DISTINCT ta.asset_id), max(t.phase_rank)\nFROM celgene_only t\nLEFT JOIN trial_assets ta ON ta.nct_id=t.nct_id AND ta.role IN ('subject','unknown')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 25,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_013Cu9fDwqzzmM8WyJjVQzFk",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 219,
+   "error": "BinderException: Binder Error: Values list \"t\" does not have a column named \"program_exists\"\n\nLINE 17:   count(*) FILTER (WHERE t.program_exists) n_active,\n                                  ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 26,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_017ZxD5sX1Bm7yVSgXtUUKfS",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n),\ncelgene_only AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t JOIN celgene_trials ct ON ct.nct_id=t.nct_id JOIN mm ON mm.nct_id=t.nct_id\n)\nSELECT 'BMS (non-Celgene-branded)' AS grp, count(*) n_trials,\n  count(*) FILTER (WHERE program_exists) n_active,\n  count(DISTINCT ta.asset_id) n_assets, max(phase_rank) max_phase\nFROM bms_true\nLEFT JOIN trial_assets ta ON ta.nct_id=bms_true.nct_id AND ta.role IN ('subject','unknown')\nUNION ALL\nSELECT 'Celgene-branded (BMS subsidiary)', count(*),\n  count(*) FILTER (WHERE program_exists),\n  count(DISTINCT ta.asset_id), max(phase_rank)\nFROM celgene_only\nLEFT JOIN trial_assets ta ON ta.nct_id=celgene_only.nct_id AND ta.role IN ('subject','unknown')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 26,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_017ZxD5sX1Bm7yVSgXtUUKfS",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 8,
+   "ncts_seen": 219,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 27,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U7wzi25LaPySco5NWgTBG9",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n),\ncelgene_only AS (\n  SELECT t.nct_id, t.program_exists, t.phase_rank FROM v_trials t JOIN celgene_trials ct ON ct.nct_id=t.nct_id JOIN mm ON mm.nct_id=t.nct_id\n)\nSELECT 'BMS (non-Celgene-branded)' AS grp, count(*) n_trials, count(*) FILTER (WHERE program_exists) n_active\nFROM bms_true\nUNION ALL\nSELECT 'Celgene-branded', count(*), count(*) FILTER (WHERE program_exists)\nFROM celgene_only\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 27,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U7wzi25LaPySco5NWgTBG9",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 8,
+   "ncts_seen": 219,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 28,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01SYPE7qQFJu8ASuDdG1ahej",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101')\nSELECT list(DISTINCT nct_id) FROM celgene_trials JOIN mm USING (nct_id)\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 28,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01SYPE7qQFJu8ASuDdG1ahej",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 4,
+   "ncts_seen": 219,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 29,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NUiQ8avSimTR7CWUynhohH",
+   "input": {
+    "sql": "\nWITH celgene_trials AS (\n  SELECT DISTINCT sp.nct_id\n  FROM sponsors sp\n  WHERE sp.name_raw IN ('Celgene','Celgene Corporation') AND sp.role='lead'\n),\nmm AS (SELECT DISTINCT nct_id FROM trial_conditions_norm WHERE condition_key='D009101'),\nbms_true AS (\n  SELECT DISTINCT t.nct_id FROM v_trials t\n  JOIN trial_sponsors_norm tsn ON tsn.nct_id=t.nct_id AND tsn.role='lead' AND tsn.company_id='bristol myers squibb'\n  JOIN mm ON mm.nct_id=t.nct_id\n  WHERE t.nct_id NOT IN (SELECT nct_id FROM celgene_trials)\n)\nSELECT list(nct_id) FROM bms_true\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 29,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NUiQ8avSimTR7CWUynhohH",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 7,
+   "ncts_seen": 233,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 30,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_013NZzymJqjyzF977MHBsEsA",
+   "input": {
+    "sql": "\n-- J&J/Janssen: check for any other name variants merged, and confirm program count via v_programs for J&J in MM\nSELECT sp.name_raw, count(*) n FROM sponsors sp WHERE sp.name_raw ILIKE '%janssen%' OR sp.name_raw ILIKE '%johnson%' GROUP BY 1 ORDER BY n DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 30,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_013NZzymJqjyzF977MHBsEsA",
+   "rows": 32,
+   "n_candidates": null,
+   "elapsed_ms": 3,
+   "ncts_seen": 233,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 31,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UJ5gmZ3h3quh1GCWfmPrj6",
+   "input": {
+    "sql": "\nSELECT DISTINCT tsn.company_id, count(*) n FROM sponsors sp\nJOIN trial_sponsors_norm tsn ON tsn.nct_id=sp.nct_id AND tsn.role='lead'\nWHERE (sp.name_raw ILIKE '%janssen%' OR sp.name_raw ILIKE '%johnson%') AND sp.role='lead'\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 31,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UJ5gmZ3h3quh1GCWfmPrj6",
+   "rows": 7,
+   "n_candidates": null,
+   "elapsed_ms": 6,
+   "ncts_seen": 233,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 32,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Tqp3BegMFNQnU9DBEBLNmD",
+   "input": {
+    "sql": "\n-- Confirm J&J MM active-trials n_assets already matches v_sponsor_condition; get full nct list for citation and top asset programs (Q2-style) for J&J and BMS/Celgene combined\nSELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_active_trials, p.n_trials\nFROM v_programs p JOIN assets a USING (asset_id)\nJOIN trial_assets ta ON false -- unused\nWHERE false\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 32,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Tqp3BegMFNQnU9DBEBLNmD",
+   "rows": 0,
+   "n_candidates": null,
+   "elapsed_ms": 2,
+   "ncts_seen": 233,
+   "error": null,
+   "input": null
+  }
+ ],
+ "elapsed_ms": 72442
+}
