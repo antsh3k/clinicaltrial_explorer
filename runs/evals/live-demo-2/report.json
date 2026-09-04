@@ -1,0 +1,1347 @@
+{
+ "mode": "live",
+ "stamp": "20260904-155929",
+ "db": "data/ctg_demo.duckdb",
+ "n_cases": 14,
+ "passed": false,
+ "obj_score": 0.9,
+ "floor_breaches": [
+  "hard_failure_count"
+ ],
+ "floor_breach_cases": [
+  "G04"
+ ],
+ "case_scores": {
+  "G01": 1.0,
+  "G02": 1.0,
+  "G03": 1.0,
+  "G04": 0.0,
+  "G05": 1.0,
+  "G06": 0.8,
+  "G07": 1.0,
+  "G08": 1.0,
+  "G09": 1.0,
+  "G10": 1.0,
+  "G11": 1.0,
+  "G12": 1.0,
+  "G05b": 1.0,
+  "G03b": 1.0
+ },
+ "results": [
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G01",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G01",
+   "detail": [
+    {
+     "case": "G01"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G01",
+   "detail": [
+    {
+     "case": "G01"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G01",
+   "detail": [
+    {
+     "case": "G01",
+     "n_sql": 3
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G01",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G01",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G01",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 12.0,
+   "role": "DIAG",
+   "section": "case:G01",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 15.0,
+   "role": "DIAG",
+   "section": "case:G01",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G02",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G02",
+   "detail": [
+    {
+     "case": "G02"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G02",
+   "detail": [
+    {
+     "case": "G02"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G02",
+   "detail": [
+    {
+     "case": "G02",
+     "n_sql": 3
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G02",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G02",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G02",
+   "detail": [
+    {
+     "case": "G02",
+     "hits": [
+      "pegcetacoplan",
+      "avacincaptad pegol"
+     ],
+     "prose_hits": [],
+     "misses": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 10.0,
+   "role": "DIAG",
+   "section": "case:G02",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 22.0,
+   "role": "DIAG",
+   "section": "case:G02",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03",
+     "n_sql": 4
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03",
+     "hits": [
+      "johnson johnson janssen",
+      "bristol myers squibb"
+     ],
+     "prose_hits": [],
+     "misses": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 2.0,
+   "role": "DIAG",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 14.0,
+   "role": "DIAG",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04",
+     "n_sql": 24
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 1.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04",
+     "error": "UsageLimitExceeded: The next request would exceed the request_limit of 30. Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 0.0,
+   "role": "OBJ",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05",
+   "detail": [
+    {
+     "case": "G05"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05",
+   "detail": [
+    {
+     "case": "G05"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05",
+   "detail": [
+    {
+     "case": "G05",
+     "n_sql": 19
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G05",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 11.0,
+   "role": "DIAG",
+   "section": "case:G05",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 6.0,
+   "role": "DIAG",
+   "section": "case:G05",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G06",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G06",
+   "detail": [
+    {
+     "case": "G06"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G06",
+   "detail": [
+    {
+     "case": "G06"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G06",
+   "detail": [
+    {
+     "case": "G06",
+     "n_sql": 6
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G06",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G06",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 0.8,
+   "role": "OBJ",
+   "section": "case:G06",
+   "detail": [
+    {
+     "case": "G06",
+     "hits": [
+      "EGFR",
+      "ALK",
+      "PDL1",
+      "KRAS_G12C"
+     ],
+     "prose_hits": [],
+     "misses": [
+      "MET"
+     ]
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 2.0,
+   "role": "DIAG",
+   "section": "case:G06",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 32.0,
+   "role": "DIAG",
+   "section": "case:G06",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G07",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G07",
+   "detail": [
+    {
+     "case": "G07"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G07",
+   "detail": [
+    {
+     "case": "G07"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G07",
+   "detail": [
+    {
+     "case": "G07",
+     "n_sql": 4
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G07",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G07",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G07",
+   "detail": [
+    {
+     "case": "G07",
+     "hits": [
+      "lenvatinib",
+      "axitinib",
+      "belzutifan"
+     ],
+     "prose_hits": [],
+     "misses": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 6.0,
+   "role": "DIAG",
+   "section": "case:G07",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 43.0,
+   "role": "DIAG",
+   "section": "case:G07",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G08",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G08",
+   "detail": [
+    {
+     "case": "G08"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G08",
+   "detail": [
+    {
+     "case": "G08"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G08",
+   "detail": [
+    {
+     "case": "G08",
+     "n_sql": 2
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G08",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G08",
+   "detail": [
+    {
+     "case": "G08"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G08",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 0.0,
+   "role": "DIAG",
+   "section": "case:G08",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 2.0,
+   "role": "DIAG",
+   "section": "case:G08",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G09",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G09",
+   "detail": [
+    {
+     "case": "G09"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G09",
+   "detail": [
+    {
+     "case": "G09"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G09",
+   "detail": [
+    {
+     "case": "G09",
+     "n_sql": 1
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G09",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G09",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G09",
+   "detail": [
+    {
+     "case": "G09",
+     "forbidden_phrases_found": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 3.0,
+   "role": "DIAG",
+   "section": "case:G09",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 4.0,
+   "role": "DIAG",
+   "section": "case:G09",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G10",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G10",
+   "detail": [
+    {
+     "case": "G10"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G10",
+   "detail": [
+    {
+     "case": "G10"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G10",
+   "detail": [
+    {
+     "case": "G10",
+     "n_sql": 2
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G10",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G10",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G10",
+   "detail": [
+    {
+     "case": "G10",
+     "missing_mentions": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 17.0,
+   "role": "DIAG",
+   "section": "case:G10",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 3.0,
+   "role": "DIAG",
+   "section": "case:G10",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G11",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G11",
+   "detail": [
+    {
+     "case": "G11"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G11",
+   "detail": [
+    {
+     "case": "G11"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G11",
+   "detail": [
+    {
+     "case": "G11",
+     "n_sql": 8
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G11",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G11",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G11",
+   "detail": [
+    {
+     "case": "G11",
+     "sql_combo_trials": 111,
+     "sql_program_trials": 125,
+     "numbers_in_answer": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9,
+      11,
+      14,
+      17,
+      100,
+      111,
+      112,
+      125,
+      427,
+      564
+     ]
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 3.0,
+   "role": "DIAG",
+   "section": "case:G11",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 15.0,
+   "role": "DIAG",
+   "section": "case:G11",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G12",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G12",
+   "detail": [
+    {
+     "case": "G12"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G12",
+   "detail": [
+    {
+     "case": "G12"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G12",
+   "detail": [
+    {
+     "case": "G12",
+     "n_sql": 22
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G12",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G12",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G12",
+   "detail": [
+    {
+     "case": "G12",
+     "missing_mentions": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 1.0,
+   "role": "DIAG",
+   "section": "case:G12",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 13.0,
+   "role": "DIAG",
+   "section": "case:G12",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05b",
+   "detail": [
+    {
+     "case": "G05b"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05b",
+   "detail": [
+    {
+     "case": "G05b"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05b",
+   "detail": [
+    {
+     "case": "G05b",
+     "n_sql": 4
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G05b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "DIAG",
+   "section": "case:G05b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 11.0,
+   "role": "DIAG",
+   "section": "case:G05b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 12.0,
+   "role": "DIAG",
+   "section": "case:G05b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03b",
+   "detail": [
+    {
+     "case": "G03b"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03b",
+   "detail": [
+    {
+     "case": "G03b"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03b",
+   "detail": [
+    {
+     "case": "G03b",
+     "n_sql": 3
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "DIAG",
+   "section": "case:G03b",
+   "detail": [
+    {
+     "case": "G03b",
+     "hits": [
+      "johnson johnson janssen"
+     ],
+     "prose_hits": [],
+     "misses": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 3.0,
+   "role": "DIAG",
+   "section": "case:G03b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 28.0,
+   "role": "DIAG",
+   "section": "case:G03b",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "unadjudicated_set_cases",
+   "value": 3.0,
+   "role": "DIAG",
+   "section": "pooled",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "replay_mismatch_count",
+   "value": 0.0,
+   "role": "DIAG",
+   "section": "replay",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "total_input_tokens",
+   "value": 1655820.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "total_output_tokens",
+   "value": 50445.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "mean_latency_ms",
+   "value": 41457.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "pct_answers_touching_2plus_views",
+   "value": 57.1,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  }
+ ]
+}

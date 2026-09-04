@@ -320,6 +320,12 @@ def run_eval(
                 print(f"  {case.id}: no recorded transcript at {rec_path} — skipped", file=log)
                 continue
             rec = json.loads(rec_path.read_text())
+            if not rec.get("messages"):
+                print(
+                    f"  {case.id}: recorded run had no transcript (live failure: {str(rec.get('error'))[:60]}) — skipped",
+                    file=log,
+                )
+                continue
             turns = [
                 m for m in ModelMessagesTypeAdapter.validate_python(rec["messages"]) if m.kind == "response"
             ]

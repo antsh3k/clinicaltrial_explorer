@@ -58,7 +58,11 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
   ranked by n_active_trials, total n_trials as tiebreak — state the scope and the metric in the answer.
 - MoA: use the highest provenance tier present; MoA/target answers MUST state their own completeness computed by SQL:
   "N of M in-scope assets for this indication carry a mechanism label" by tier (chembl / nlm_class / llm / none).
-  If an asset has no v_moa row, its mechanism is UNLABELED in this index — report that; do not probe other tables for it.
+  v_moa is the ONLY mechanism source (chembl_moa, asset_nlm_classes and asset_enrichment are its inputs, already
+  folded in). If an asset has no v_moa row, its mechanism is UNLABELED in this index: report the unlabeled count and
+  name the biggest unlabeled assets (by trial count) as "mechanism not labeled in this index" — STOP there, never
+  query other tables or get_trial hoping to find a mechanism. One SQL for the labeled fraction + one for the
+  target/mechanism rollup + one for the unlabeled assets is the whole Q4 workflow.
 - population_mentions is lexicon-based (recall-limited) and does not know inclusion vs exclusion. Say so as a caveat;
   spot-check AT MOST 2–3 example trials with get_trial (in ONE turn, in parallel) before asserting a population is
   TARGETED — never verify every hit.
@@ -102,6 +106,14 @@ WHERE cp.asset_id = 'pembrolizumab' AND cp.condition_key = 'D002292' GROUP BY 1,
 SELECT cp.partner_asset_id, count(DISTINCT cp.nct_id) AS n_trials, list(DISTINCT cp.nct_id) AS nct_ids
 FROM v_combo_partners cp JOIN v_moa m ON m.asset_id = cp.asset_id
 WHERE m.moa_key = 'pdcd1' AND cp.condition_key = 'D002289' GROUP BY 1 ORDER BY n_trials DESC;
+-- Q4: targets under investigation in an indication (one row per gene symbol; assets + trials behind it)
+WITH t AS (SELECT m.asset_id, unnest(m.targets) AS symbol, m.provenance FROM v_moa m WHERE m.targets IS NOT NULL)
+SELECT t.symbol, count(DISTINCT t.asset_id) AS n_assets, count(DISTINCT p.nct_id) AS n_trials, max(p.phase_rank) AS max_phase,
+       list(DISTINCT t.asset_id) AS assets, list(DISTINCT p.nct_id) AS nct_ids
+FROM t JOIN v_moa_trials p ON p.asset_id = t.asset_id AND p.condition_key = 'D054990' GROUP BY 1 ORDER BY n_trials DESC;
+-- Q4: the biggest UNLABELED assets in an indication (report them as unlabeled; do not hunt for their mechanism)
+SELECT p.asset_id, a.canonical_name, p.n_trials, p.max_phase_ever FROM v_programs p JOIN assets a USING (asset_id)
+WHERE p.condition_key = 'D054990' AND p.asset_id NOT IN (SELECT asset_id FROM v_moa) ORDER BY p.n_trials DESC LIMIT 15;
 -- the MoA labeled-fraction query (state this in every MoA/target answer)
 WITH scope AS (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D054990')
 SELECT coalesce(b.provenance, 'none') AS tier, count(*) AS n_assets FROM scope s LEFT JOIN v_moa_best b USING (asset_id) GROUP BY 1;
