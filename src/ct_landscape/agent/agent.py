@@ -26,7 +26,9 @@ from ct_landscape.agent.gate import Answer, gate
 from ct_landscape.agent.schema_card import schema_card
 
 MODEL = "anthropic:claude-sonnet-5"
-LIMITS = UsageLimits(request_limit=16, tool_calls_limit=24)
+# request_limit is the hard turn/cost cap; tool_calls_limit is generous because the model batches get_trial
+# calls in parallel (one turn, many calls) — the schema card asks it to keep get_trial to a handful.
+LIMITS = UsageLimits(request_limit=16, tool_calls_limit=80)
 MAX_TURNS = 20
 
 

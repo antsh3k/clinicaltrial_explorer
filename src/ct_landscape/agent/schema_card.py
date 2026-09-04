@@ -59,6 +59,9 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
   reading eligibility via get_trial before asserting a population is TARGETED.
 - No enumeration caps in the views; if you truncate a list in the answer, say so and give the full count.
 - Absence from this index is not evidence a program does not exist (snapshot {snapshot_date}).
+- Tool budget: the views already carry phase, status, sponsor and full NCT lists — do NOT call get_trial on every trial.
+  Use get_trial for at most ~5 trials you will actually discuss (e.g. to verify an arm structure or an eligibility
+  criterion). Prefer one well-shaped SQL over many small ones. You have at most 16 model turns per question.
 
 ## Workflow contract
 1. resolve_entity FIRST for every drug / condition / company / mechanism / population named in the question
