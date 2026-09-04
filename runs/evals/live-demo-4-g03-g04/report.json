@@ -1,0 +1,256 @@
+{
+ "mode": "live",
+ "stamp": "20260904-184445",
+ "db": "data/ctg_demo.duckdb",
+ "gold_ncts_absent_from_db": {},
+ "n_cases": 2,
+ "passed": true,
+ "obj_score": 1.0,
+ "floor_breaches": [],
+ "floor_breach_cases": [],
+ "case_scores": {
+  "G03": 1.0,
+  "G04": 1.0
+ },
+ "results": [
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03",
+     "n_sql": 14
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G03",
+   "detail": [
+    {
+     "case": "G03",
+     "hits": [
+      "johnson johnson janssen",
+      "bristol myers squibb"
+     ],
+     "prose_hits": [],
+     "misses": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 5.0,
+   "role": "DIAG",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 14.0,
+   "role": "DIAG",
+   "section": "case:G03",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04",
+     "n_sql": 15
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 1.0,
+   "role": "OBJ",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04",
+     "hits": [
+      "PDE4B",
+      "ITGB6",
+      "LPAR1"
+     ],
+     "prose_hits": [],
+     "misses": []
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 21.0,
+   "role": "DIAG",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 57.0,
+   "role": "DIAG",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "unadjudicated_set_cases",
+   "value": 0.0,
+   "role": "DIAG",
+   "section": "pooled",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "replay_mismatch_count",
+   "value": 0.0,
+   "role": "DIAG",
+   "section": "replay",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "total_input_tokens",
+   "value": 478142.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "total_output_tokens",
+   "value": 13687.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "mean_latency_ms",
+   "value": 67937.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "pct_answers_touching_2plus_views",
+   "value": 100.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  }
+ ]
+}

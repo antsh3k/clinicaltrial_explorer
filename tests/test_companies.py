@@ -58,6 +58,21 @@ def test_declared_parent_extraction():
         declared_parent("Immune Design, a subsidiary of Merck & Co., Inc. (Rahway, New Jersey USA)")
         == "Merck & Co., Inc."
     )
+    # comma-less declared parent (live-eval G03: this string survived as its own company id)
+    assert declared_parent("Celgene a wholly owned subsidiary of BMS") == "BMS"
+    assert company_key("Celgene a wholly owned subsidiary of BMS") == company_key("Bristol-Myers Squibb")
+    assert company_key("Juno Therapeutics, a Subsidiary of Celgene") == company_key("Bristol-Myers Squibb")
+    assert company_key("Wyeth is now a wholly owned subsidiary of Pfizer") == "pfizer"
+    # chained declarations resolve to the ultimate parent (37 full-corpus trials keyed on the middle link before)
+    assert (
+        declared_parent(
+            "ArQule, Inc., a subsidiary of Merck Sharp & Dohme LLC, a subsidiary of Merck & Co., Inc. (Rahway, NJ USA)"
+        )
+        == "Merck & Co., Inc."
+    )
+    # the article is required, so an academic "Division of X" is never read as a parent declaration
+    assert declared_parent("Cardiology Division of Harvard University") is None
+    assert declared_parent("Division of Cardiology, Boston Medical Center") is None
     assert declared_parent("Pfizer") is None
     assert (
         declared_parent("Mochida Pharmaceutical Company, Ltd.") is None

@@ -61,7 +61,8 @@ def declared_parent(raw: str) -> str | None:
             parent = m.group(2).strip()
             parent = _TRAILING_PAREN.sub("", parent)
             if parent:
-                return parent
+                # chained declarations: "ArQule, a subsidiary of MSD LLC, a subsidiary of Merck & Co." → Merck & Co.
+                return declared_parent(parent) or parent
     return None
 
 

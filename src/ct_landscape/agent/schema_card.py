@@ -63,6 +63,9 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
   MeSH ANCESTORS are recall surfaces — never use them in precise counting joins. A child condition ("juvenile X") is never rewritten to its parent; state rollup behaviour explicitly.
 - Companies: lead sponsor by default; collaborators only if asked; sponsor ≠ owner. Q3 default = industry lead sponsors
   ranked by n_active_trials, total n_trials as tiebreak — state the scope and the metric in the answer.
+  resolve_entity(kind='company') IS the fold: when it maps "Celgene" to company_id 'bristol myers squibb' (or "Janssen"
+  to J&J), the index already counts them together — say so and query that id. Never re-derive a merge from
+  sponsors / trial_sponsors_norm / companies by ILIKE; those tables are inputs the views have already folded.
 - MoA: use the highest provenance tier present; MoA/target answers MUST state their own completeness computed by SQL:
   "N of M in-scope assets for this indication carry a mechanism label" by tier (chembl / nlm_class / llm / none).
   v_moa is the ONLY mechanism source (chembl_moa, asset_nlm_classes and asset_enrichment are its inputs, already
@@ -70,6 +73,9 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
   name the biggest unlabeled assets (by trial count) as "mechanism not labeled in this index" — STOP there, never
   query other tables or get_trial hoping to find a mechanism. One SQL for the labeled fraction + one for the
   target/mechanism rollup + one for the unlabeled assets is the whole Q4 workflow.
+  Q4 RANKING: order the target/mechanism table by max phase FIRST, then trial count (see the worked SQL). Trial
+  counts are dominated by old repurposed drugs; a 25-row cut ranked by count drops the late-phase pipeline targets
+  (the PDE4B / integrin / LPA1 agents in IPF) that a landscape question is really asking about.
 - population_mentions is lexicon-based (recall-limited) and does not know inclusion vs exclusion. Say so as a caveat;
   spot-check AT MOST 2–3 example trials with get_trial (in ONE turn, in parallel) before asserting a population is
   TARGETED — never verify every hit.
@@ -136,11 +142,14 @@ GROUP BY 1, 2 ORDER BY n_trials DESC;
 SELECT cp.partner_asset_id, count(DISTINCT cp.nct_id) AS n_trials, list(DISTINCT cp.nct_id) AS nct_ids
 FROM v_combo_partners cp JOIN v_moa m ON m.asset_id = cp.asset_id
 WHERE m.moa_key = 'pdcd1' AND cp.condition_key = 'D002289' GROUP BY 1 ORDER BY n_trials DESC;
--- Q4: targets under investigation in an indication (one row per gene symbol; assets + trials behind it)
+-- Q4: targets under investigation in an indication (one row per gene symbol; assets + trials behind it),
+-- most advanced first — max phase, then trial count — so late-phase pipeline targets never fall off the 25-row cut
 WITH t AS (SELECT m.asset_id, unnest(m.targets) AS symbol, m.provenance FROM v_moa m WHERE m.targets IS NOT NULL)
 SELECT t.symbol, count(DISTINCT t.asset_id) AS n_assets, count(DISTINCT p.nct_id) AS n_trials, max(p.phase_rank) AS max_phase,
+       max(p.phase_rank) FILTER (WHERE p.program_exists) AS max_phase_active,
        list(DISTINCT t.asset_id) AS assets, list(DISTINCT p.nct_id) AS nct_ids
-FROM t JOIN v_moa_trials p ON p.asset_id = t.asset_id AND p.condition_key = 'D054990' GROUP BY 1 ORDER BY n_trials DESC;
+FROM t JOIN v_moa_trials p ON p.asset_id = t.asset_id AND p.condition_key = 'D054990' GROUP BY 1
+ORDER BY max_phase_active DESC NULLS LAST, max_phase DESC NULLS LAST, n_trials DESC;
 -- Q4: the biggest UNLABELED assets in an indication (report them as unlabeled; do not hunt for their mechanism)
 SELECT p.asset_id, a.canonical_name, p.n_trials, p.max_phase_ever FROM v_programs p JOIN assets a USING (asset_id)
 WHERE p.condition_key = 'D054990' AND p.asset_id NOT IN (SELECT asset_id FROM v_moa) ORDER BY p.n_trials DESC LIMIT 15;

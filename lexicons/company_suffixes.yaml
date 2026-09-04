@@ -132,6 +132,8 @@ alias_lookup_words:
 declared_parent_patterns:
   - '^(.+?),?\s+(?:is\s+)?now\s+(?:a\s+)?(?:wholly[- ]owned\s+)?(?:subsidiary|part|division|member|affiliate)\s+of\s+(.+)$'
   - '^(.+?),\s+(?:an?\s+)?(?:wholly[- ]owned\s+)?(?:subsidiary|affiliate|division|unit|member|part)\s+of\s+(.+)$'
+  # comma-less form: the article is REQUIRED so "Cardiology Division of X" never matches
+  - '^(.+?)\s+an?\s+(?:wholly[- ]owned\s+)?(?:subsidiary|affiliate|division|unit|member|part)\s+of\s+(.+)$'
   - '^(.+?)\s+\((?:an?\s+)?(?:wholly[- ]owned\s+)?(?:subsidiary|affiliate|division)\s+of\s+(.+)\)$'
   - '^(.+?),\s+an?\s+(.+?)\s+(?:company|group|subsidiary|affiliate|division)$'
   - '^(.+?)\s+-\s+an?\s+(.+?)\s+(?:company|group)$'
