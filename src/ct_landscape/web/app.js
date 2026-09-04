@@ -1,4 +1,4 @@
-/* ct-landscape chat UI — no build step. Trust affordances (spec §7.6): live derivation timeline, structured
+/* Clinical Trial Explorer chat UI — no build step. Trust affordances (spec §7.6): live derivation timeline, structured
    table + citations with phase/status pulled LIVE from the index, machine-verified gate badge, NCT auto-linking
    (same scanner as the gate), trace panel with coverage footer, permalinks (#/answers/{id}), SQL console.
 

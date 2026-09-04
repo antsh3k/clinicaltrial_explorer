@@ -49,7 +49,7 @@ class ProfileBody(BaseModel):
 
 def create_app(db_path: str, runs_dir: Path | None = None, model: Any | None = None) -> FastAPI:
     """`model` lets tests inject TestModel/FunctionModel; production uses the agent's configured model."""
-    app = FastAPI(title="ct-landscape", version="0.1.0")
+    app = FastAPI(title="Clinical Trial Explorer", version="0.1.0")
     store = Store(runs_dir) if runs_dir else Store()
     locks: dict[str, asyncio.Lock] = {}
     state = {"db_path": db_path, "model": model}
