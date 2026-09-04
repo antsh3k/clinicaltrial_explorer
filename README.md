@@ -4,32 +4,95 @@ A ClinicalTrials.gov landscape-question agent: **one DuckDB index**, a **small t
 
 Brief: `argon-brief.md` · Design specification: `ct-landscape-agent-design.md` · Build log / resumable checklist: `TASKS.md` · How AI coding agents were used: `PROMPTS.md`.
 
-**Where each deliverable in the brief lives:** source + run instructions → [5-minute reviewer path](#5-minute-reviewer-path) · agent / query interface → the chat UI (`ctl serve`) and `ctl sql`, [What it answers](#what-it-answers-and-how) · output experience for inspecting the evidence → [the evidence dashboard](#the-evidence-dashboard-inspecting-what-the-agent-saw-not-just-what-it-said) · example questions and answers → [Example landscape questions](#example-landscape-questions-zero-llm-spend--straight-from-the-views) and the [UI walkthrough](#the-chat-ui-on-the-specs-worked-example) · indexing / ontology architecture, where it performs well and poorly → [Architecture](#architecture) and [Where it performs well, where it performs poorly](#where-it-performs-well-where-it-performs-poorly) · precision/recall tradeoffs → [the dials](#precision--recall-tradeoffs-the-dials) · evaluation results and failure modes → [Evaluation](#evaluation) · use of coding agents → [How AI coding agents were used](#how-ai-coding-agents-were-used) and `PROMPTS.md`.
+**Where each deliverable in the brief lives:** source + run instructions → [Getting started](#getting-started) · agent / query interface → the chat UI (`ctl serve`) and `ctl sql`, [What it answers](#what-it-answers-and-how) · output experience for inspecting the evidence → [the evidence dashboard](#the-evidence-dashboard-inspecting-what-the-agent-saw-not-just-what-it-said) · example questions and answers → [Example landscape questions](#example-landscape-questions-zero-llm-spend--straight-from-the-views) and the [UI walkthrough](#the-chat-ui-on-the-specs-worked-example) · indexing / ontology architecture, where it performs well and poorly → [Architecture](#architecture) and [Where it performs well, where it performs poorly](#where-it-performs-well-where-it-performs-poorly) · precision/recall tradeoffs → [the dials](#precision--recall-tradeoffs-the-dials) · evaluation results and failure modes → [Evaluation](#evaluation) · use of coding agents → [How AI coding agents were used](#how-ai-coding-agents-were-used) and `PROMPTS.md`.
 
 ---
 
-## 5-minute reviewer path
+## Getting started
+
+Everything runs locally from one checkout: a `uv`-managed Python 3.12 environment, one DuckDB file, one FastAPI process. There are two ways to get an index — the shipped demo slice (one minute, no download) or the full ClinicalTrials.gov corpus (one 2.7 GB download, about ten minutes of build) — and the app is identical on either.
+
+### Prerequisites
+
+- macOS or Linux, `git`, and [`uv`](https://docs.astral.sh/uv/) (it installs Python 3.12 for you if needed):
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+- Disk: ~1 GB for the demo path; ~6 GB for the full corpus (2.7 GB zip + 2.7 GB index).
+- An Anthropic API key **only** for live chat and live evals. Building, the SQL console, trial cards, the evidence dashboard on recorded answers, and the offline eval replay all work without one.
+
+### 1. Clone and install
 
 ```bash
-uv sync                                    # Python 3.12 + deps (uv creates .venv)
-uv run pytest                              # ~230 offline tests: hand-built records, the shipped mini.zip, scripted agents — no network, no LLM
-uv run ctl build --demo                    # ~1 min: data/fixtures/demo.zip (15,484 studies) → data/ctg_demo.duckdb (raw → entities → views → funnel)
-cp .env.example .env                       # set ANTHROPIC_API_KEY=… for live chat
-uv run ctl serve --demo                    # http://127.0.0.1:8000
+git clone <this repository> ct-landscape && cd ct-landscape
+uv sync                       # creates .venv with Python 3.12 and every dependency; nothing is installed globally
+uv run pytest                 # optional, ~2 min: ~250 offline tests (no network, no LLM) — confirms the environment
 ```
 
-The demo slice ships in-repo and holds **every** trial for the gold-set indications (Erdheim-Chester disease, geographic atrophy, multiple myeloma, IPF, NSCLC, renal cell carcinoma) plus a random sample, so gold questions are complete within it by construction; every corpus-level number below comes from the full build.
+Run every command below from the repository root: `.env`, `data/`, `lexicons/` and `runs/` are resolved relative to it.
 
-**Works without an API key:** `ctl build`, `ctl sql`, the SQL-console tab, trial cards, permalinked recorded answers, `ctl eval --mode replay`, the whole test suite. **Needs a key:** live chat, `ctl eval --mode live`, `ctl enrich llm` (the optional LLM mechanism tier).
+### 2. Build an index
 
-### Full build
+**Option A — demo slice (recommended first run, ~1 min).** `data/fixtures/demo.zip` (48 MB, 15,484 studies) ships in the repo and contains **every** trial for the six gold-set indications (Erdheim-Chester disease, geographic atrophy, multiple myeloma, IPF, NSCLC, renal cell carcinoma) plus a random sample, so the example questions are complete within it.
 
 ```bash
-uv run ctl fetch          # 2.74 GB, 601,694 per-study JSON files (the site's empty-search "Download → JSON" zip; the documented v2 pager is the --pager fallback)
-uv run ctl build          # 70 s ingest + ~6 min normalize on 13 cores → data/ctg.duckdb; prints the census + funnel
-uv run ctl enrich chembl  # optional: re-derive the ChEMBL mechanism tier live (the shipped JSONL is loaded by `ctl build` at $0)
-uv run ctl serve
+uv run ctl build --demo       # data/fixtures/demo.zip → data/ctg_demo.duckdb (raw → entities → views → mechanism tiers → funnel)
 ```
+
+**Option B — the full corpus (~10 min on a laptop).**
+
+```bash
+uv run ctl fetch              # downloads the site's empty-search "Download → JSON" zip: 2.7 GB, 601,694 per-study files → data/raw/ctg-studies.json.zip
+uv run ctl build              # ~70 s ingest + ~6 min normalize (uses cpu_count-1 processes; --workers N to cap) → data/ctg.duckdb (2.7 GB)
+```
+
+`ctl fetch` streams from `https://clinicaltrials.gov/api/int/studies/download?format=json.zip` with a progress line; if that endpoint is unavailable, `uv run ctl fetch --pager` crawls the documented v2 API into the same zip layout (slower, same result). The build prints the completeness census and funnel as it goes and loads the shipped mechanism artifacts (`data/enrichment/*.jsonl`, ChEMBL + the LLM pilot) at no cost. `ctl build --skip-ingest` re-runs only normalize + views on an already-ingested database (for lexicon or view edits); `ctl build --limit 20000` builds a pilot from the first N studies.
+
+### 3. Add the API key (for live chat)
+
+```bash
+cp .env.example .env          # then set ANTHROPIC_API_KEY=sk-ant-…
+```
+
+`.env` is gitignored and is the only secret. The agent runs on `anthropic:claude-sonnet-5`; a typical landscape question costs a few cents with prompt caching.
+
+### 4. Start the app
+
+```bash
+uv run ctl serve --demo       # serves data/ctg_demo.duckdb
+uv run ctl serve              # serves data/ctg.duckdb (the full build)
+# options: --host 0.0.0.0 --port 8080 --db path/to/other.duckdb
+```
+
+Open **http://127.0.0.1:8000**. The page has three surfaces: **Chat** (ask a landscape question; the timeline shows each tool call, the badge shows the grounding-gate verdict, the right panel shows the cited trials with live phase/status/sponsor, the evidence dashboard and the full derivation trace), the **evidence dashboard** for any answer, and the **SQL console** (read-only, sandboxed, the same views the agent uses). Every answer gets a permalink (`#/answers/<id>`) and is stored under `runs/answers/`. The server opens the index read-only, so you can rebuild in another terminal while it runs; stop it (`Ctrl-C`) before rebuilding the same file.
+
+Try, in order: *What combination partners are being studied with MK-3475 in renal cell carcinoma?* → *Of those partners, which have a Phase 3 trial that is still active, and who sponsors it?* (a follow-up in the same conversation) → *Is pembrolizumab approved for renal cell carcinoma?* (the answer must refuse to infer approval from trial phase).
+
+### 5. Check that it works without spending anything
+
+```bash
+uv run ctl sql "SELECT asset_id, max_phase_active, n_active_trials FROM v_programs WHERE condition_key = 'D002292' ORDER BY 2 DESC NULLS LAST, 3 DESC LIMIT 10" --db data/ctg_demo.duckdb
+uv run ctl eval --demo --mode replay --replay-dir runs/evals/live-demo-2     # replays the recorded Sonnet 5 transcripts through the real agent, tools and gate, no model
+```
+
+The first prints the most advanced renal-cell-carcinoma programs straight from the definition-of-record view (`--csv` for machine-readable output; omit `--db` to query the full index). The second re-scores the shipped gold set offline and must report `replay_mismatch_count = 0`; `uv run ctl eval --demo --mode live` runs the same 14 cases against the live model (~$4).
+
+### Optional: refresh the mechanism tiers
+
+```bash
+uv run ctl enrich chembl                  # re-derive the ChEMBL tier live from the EMBL-EBI REST API ($0, ~10 min, then ctl build --skip-ingest)
+uv run ctl enrich llm --dry-run           # plan the LLM tier: how many assets, estimated cost; nothing is sent
+uv run ctl enrich llm --limit 300         # the pilot actually run for this write-up ($0.21); the full tail is ~$22 under a $35 ceiling
+```
+
+### Troubleshooting
+
+- **`ANTHROPIC_API_KEY` not found** — the key is read from `.env` in the current directory; run from the repository root, or export the variable in the shell.
+- **`Could not set lock on file` / database is locked** — one writer at a time: stop a running `ctl build`/`ctl enrich` before starting another on the same file. `ctl serve` and `ctl sql` open read-only and coexist with each other.
+- **Port 8000 in use** — `uv run ctl serve --demo --port 8080`.
+- **Build is slow or memory-bound** — `--workers 4` caps the parser processes; the full normalize step needs ~4 GB of RAM.
+- **`ctl fetch` stalls** — the download is a single 2.7 GB stream with a 10-minute read timeout; re-run it (it restarts from scratch), or use `--pager`.
+- **Wrong index served** — `ctl serve` defaults to `data/ctg.duckdb`; use `--demo` (or `--db`) if you only built the demo. The header of the page shows the snapshot date and study count of whatever it is serving.
 
 `ctl` is the ops surface (`fetch / build / enrich / serve / eval / sql`); the product interface is the web app.
 
