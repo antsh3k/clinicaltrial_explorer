@@ -159,3 +159,8 @@ def test_trial_resolve_and_sql_console(client):
     assert bad.status_code == 400 and "SELECT" in bad.json()["detail"]
     bad2 = client.post("/api/sql", json={"sql": "COPY (SELECT 1) TO '/tmp/x'"})
     assert bad2.status_code == 400
+
+
+def test_index_page_declares_a_favicon_so_browsers_do_not_request_one(client):
+    html = client.get("/").text
+    assert 'rel="icon"' in html

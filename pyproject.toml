@@ -36,6 +36,10 @@ packages = ["src/ct_landscape"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+filterwarnings = [
+    # starlette.testclient still uses the anyio.abc.BlockingPortal alias; goes away on the next starlette bump
+    "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning:starlette.testclient",
+]
 
 [tool.ruff]
 line-length = 110

@@ -365,6 +365,11 @@ def normalize_populations(con: duckdb.DuckDBPyConnection, log, workers: int | No
     chunk = 4000
     chunks = [rows[i : i + chunk] for i in range(0, len(rows), chunk)]
     workers = workers or max(1, (os.cpu_count() or 2) - 1)
+    _log(
+        log,
+        f"populations: scanning {len(rows):,} studies for typed mentions "
+        f"({len(chunks)} chunks, {workers} workers; the longest step of the build)",
+    )
     mentions: list[tuple] = []
     if workers == 1 or len(chunks) <= 1:
         for c in chunks:

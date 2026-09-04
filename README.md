@@ -26,16 +26,16 @@ Everything runs locally from one checkout: a `uv`-managed Python 3.14 environmen
 ### 1. Clone and install
 
 ```bash
-git clone <this repository> ct-landscape && cd ct-landscape
+git clone https://github.com/antsh3k/clinicaltrial_explorer.git && cd clinicaltrial_explorer
 uv sync                       # creates .venv with Python 3.14 and every dependency; nothing is installed globally
-uv run pytest                 # optional, ~2 min: ~350 offline tests (no network, no LLM) — confirms the environment
+uv run pytest                 # optional, ~20 s: ~370 offline tests (no network, no LLM) — confirms the environment
 ```
 
 Run every command below from the repository root: `.env`, `data/`, `lexicons/` and `runs/` are resolved relative to it.
 
 ### 2. Build an index
 
-**Option A — demo slice (recommended first run, ~1 min).** `data/fixtures/demo.zip` (48 MB, 15,484 studies) ships in the repo and contains **every** trial for the six gold-set indications (Erdheim-Chester disease, geographic atrophy, multiple myeloma, IPF, NSCLC, renal cell carcinoma) plus a random sample, so the example questions are complete within it.
+**Option A — demo slice (recommended first run, 1–2 min depending on core count; the populations scan is the longest step).** `data/fixtures/demo.zip` (48 MB, 15,484 studies) ships in the repo and contains **every** trial for the six gold-set indications (Erdheim-Chester disease, geographic atrophy, multiple myeloma, IPF, NSCLC, renal cell carcinoma) plus a random sample, so the example questions are complete within it.
 
 ```bash
 uv run ctl build --demo       # data/fixtures/demo.zip → data/ctg_demo.duckdb (raw → entities → views → mechanism tiers → funnel)
@@ -53,10 +53,10 @@ uv run ctl build              # ~70 s ingest + ~6 min normalize (uses cpu_count-
 ### 3. Add the API key (for live chat)
 
 ```bash
-cp .env.example .env          # then set ANTHROPIC_API_KEY=sk-ant-…
+cp .env.example .env          # then set ANTHROPIC_API_KEY=sk-ant-…  (or export it in your shell; an exported key wins over .env)
 ```
 
-`.env` is gitignored and is the only secret. The agent runs on `anthropic:claude-sonnet-5`; a typical landscape question costs a few cents with prompt caching.
+`.env` is gitignored and is the only secret; if the key is already exported in your shell you can skip this step. The agent runs on `anthropic:claude-sonnet-5`; a typical landscape question costs a few cents with prompt caching.
 
 ### 4. Start the app
 
@@ -94,7 +94,7 @@ uv run ctl enrich llm --limit 300         # the pilot actually run for this writ
 - **Port 8000 in use** — `uv run ctl serve --demo --port 8080`.
 - **Build is slow or memory-bound** — `--workers 4` caps the parser processes; the full normalize step needs ~4 GB of RAM.
 - **`ctl fetch` stalls** — the download is a single 2.7 GB stream with a 10-minute read timeout; re-run it (it restarts from scratch), or use `--pager`.
-- **Wrong index served** — `ctl serve` defaults to `data/ctg.duckdb`; use `--demo` (or `--db`) if you only built the demo. The header of the page shows the snapshot date and study count of whatever it is serving.
+- **`no index at data/ctg.duckdb`** — `ctl serve` (and `ctl eval`, `ctl sql`) default to the full index; use `--demo` (or `--db`) if you only built the demo. The message says so when the demo index exists. The header of the page shows the snapshot date and study count of whatever it is serving.
 
 `ctl` is the ops surface (`fetch / build / enrich / serve / eval / sql`); the product interface is the web app.
 

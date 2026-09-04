@@ -25,6 +25,19 @@ def _not_implemented(phase: str):
     return run
 
 
+def _missing_index(db_path: Path, demo: bool) -> int:
+    """Print the fail-fast message for an absent index and return the exit code.
+
+    When the full index was asked for but only the demo index exists (the common state after a
+    first `ctl build --demo`), say so instead of sending the user back to a full build.
+    """
+    hint = f"run `ctl build{' --demo' if demo else ''}` first"
+    if not demo and db_path == DEFAULT_DB and DEMO_DB.exists():
+        hint += f", or use `--demo` to serve the demo index that already exists at {DEMO_DB}"
+    print(f"no index at {db_path}; {hint}", file=sys.stderr)
+    return 1
+
+
 def cmd_build(args: argparse.Namespace) -> int:
     from ct_landscape.db import connect
     from ct_landscape.ingest import ingest
@@ -83,8 +96,7 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
     db_path = Path(args.db) if args.db else DEFAULT_DB
     if not db_path.exists():
-        print(f"no index at {db_path}; run `ctl build` first", file=sys.stderr)
-        return 1
+        return _missing_index(db_path, demo=False)
     con = connect(db_path)
     if args.tier == "chembl":
         from ct_landscape.enrich.chembl import run
@@ -144,10 +156,7 @@ def cmd_serve(args: argparse.Namespace) -> int:
     load_dotenv(find_dotenv(usecwd=True))
     db_path = Path(args.db) if args.db else (DEMO_DB if args.demo else DEFAULT_DB)
     if not db_path.exists():
-        print(
-            f"no index at {db_path}; run `ctl build{' --demo' if args.demo else ''}` first", file=sys.stderr
-        )
-        return 1
+        return _missing_index(db_path, demo=args.demo)
     if not os.environ.get("ANTHROPIC_API_KEY"):
         print(
             "warning: ANTHROPIC_API_KEY not set — SQL console, trial cards and permalinks work; live chat will error",
@@ -167,8 +176,7 @@ def cmd_eval(args: argparse.Namespace) -> int:
     load_dotenv(find_dotenv(usecwd=True))
     db_path = Path(args.db) if args.db else (DEMO_DB if args.demo else DEFAULT_DB)
     if not db_path.exists():
-        print(f"no index at {db_path}; run `ctl build` first", file=sys.stderr)
-        return 1
+        return _missing_index(db_path, demo=args.demo)
     if args.mode == "live" and not os.environ.get("ANTHROPIC_API_KEY"):
         print(
             "live eval needs ANTHROPIC_API_KEY (put it in .env); use --mode replay for the offline gate",
@@ -190,8 +198,7 @@ def cmd_sql(args: argparse.Namespace) -> int:
 
     db_path = Path(args.db) if args.db else DEFAULT_DB
     if not db_path.exists():
-        print(f"no index at {db_path}; run `ctl build` first", file=sys.stderr)
-        return 1
+        return _missing_index(db_path, demo=False)
     con = connect_sandboxed(db_path)
     rel = con.sql(args.query)
     if rel is None:

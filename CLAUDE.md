@@ -18,11 +18,12 @@ uv run pytest                    # full offline test suite (never hits network o
 uv run pytest tests/test_x.py -k name   # one test
 uv run ruff check . && uv run ruff format .
 uv run ctl --help                # ops CLI: build / enrich / serve / eval / sql
-uv run ctl build --demo          # ~1 min: data/fixtures/demo.zip → data/ctg_demo.duckdb (raw + entities + views + funnel)
+uv run ctl build --demo          # 1–2 min: data/fixtures/demo.zip → data/ctg_demo.duckdb (raw + entities + views + funnel)
 uv run ctl build                 # full corpus from data/raw/ctg-studies.json.zip → data/ctg.duckdb (~8 min)
 uv run ctl build --skip-ingest   # re-run normalize + views only (lexicon / views.sql edits) on an ingested DB
 uv run ctl sql "SELECT ..." [--db data/ctg_demo.duckdb] [--csv]   # sandboxed read-only console
-uv run ctl serve                 # FastAPI + chat UI on :8000 (Phase 5+; needs ANTHROPIC_API_KEY in .env)
+uv run ctl serve --demo          # FastAPI + chat UI on :8000 against data/ctg_demo.duckdb (live chat needs ANTHROPIC_API_KEY in .env or the shell)
+uv run ctl serve                 # same, against the full build data/ctg.duckdb
 ```
 
 Iterating on normalization: edit a YAML under `lexicons/` or a `normalize/*.py`, run the unit tests, then `ctl build --demo`
