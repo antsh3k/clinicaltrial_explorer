@@ -24,6 +24,7 @@
   const PHASE_ORDER = ["Phase 4", "Phase 3", "Phase 2", "Phase 1", "Early Ph1", "N/A", "unknown"];
   const STATUS_ORDER = ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION", "ACTIVE_NOT_RECRUITING", "COMPLETED", "TERMINATED", "WITHDRAWN", "SUSPENDED", "UNKNOWN", "unknown"];
   const TIER_ORDER = ["chembl", "nlm_class", "llm", "none"];
+  const KIND_SHORT = { disease_stage: "stage", disease_severity: "severity", demographic: "demo", biomarker: "biomarker", prior_therapy: "prior tx", line_of_therapy: "line" };
   async function api(path, opts) {
     const r = await fetch(path, opts);
     if (!r.ok) { let d = ""; try { d = (await r.json()).detail; } catch {} throw new Error(d || r.statusText); }
@@ -230,6 +231,7 @@
       <span class="hint" title="cited = citations[] · in answer = every NCT in the prose or table · retrieved = every NCT that appeared in any tool result this conversation (the gate's set)">?</span></div>`;
     html += `<div id="filters" class="filters"></div><div id="charts" class="charts"><div class="hint">profiling ${retrieved.size} trials from the index…</div></div>`;
     html += `<div id="trials"></div>`;
+    html += `<div id="refcheck"></div>`;
     if (ents.length) html += `<div id="landscapes"><h4>Landscape of the entities named in this answer <span class="hint">(deterministic, from the views — the agent's numbers can be checked against these)</span></h4>${ents.slice(0, 4).map((e) => `<details class="land" data-kind="${esc(e.kind)}" data-id="${esc(e.id)}" ${ents.length === 1 ? "open" : ""}><summary><code>${esc(e.kind)}</code> ${esc(e.id)}</summary><div class="land-body hint">loading…</div></details>`).join("")}</div>`;
     if (a.entities && a.entities.length) html += `<div class="footer">entities: ${a.entities.map((e) => `<code>${esc(e.kind)}:${esc(e.id)}</code>`).join(" ")}</div>`;
     html += renderTrace(d);
@@ -240,10 +242,50 @@
       state.dash.rows = p.rows; state.dash.profileSql = p.sql; state.dash.missing = p.missing || [];
     } catch (e) { $("#charts").innerHTML = `<div class="refusal">profile failed: ${esc(e.message)}</div>`; return; }
     drawDashboard();
-    for (const det of document.querySelectorAll("#landscapes details.land")) {
-      const load = async () => { if (det.dataset.loaded) return; det.dataset.loaded = "1"; try { renderLandscape($(".land-body", det), await api(`/api/entities/${det.dataset.kind}/${encodeURIComponent(det.dataset.id)}/landscape`)); } catch (e) { $(".land-body", det).textContent = e.message; } };
-      if (det.open) load(); else det.addEventListener("toggle", () => det.open && load());
+    const loaded = await Promise.all([...document.querySelectorAll("#landscapes details.land")].map(async (det) => {
+      try { const L = await api(`/api/entities/${det.dataset.kind}/${encodeURIComponent(det.dataset.id)}/landscape`); renderLandscape($(".land-body", det), L); return L; }
+      catch (e) { $(".land-body", det).textContent = e.message; return null; }
+    }));
+    if (state.dash.answerId !== answerId) return;
+    const rc = $("#refcheck"); if (rc) rc.innerHTML = renderReference(loaded.filter(Boolean));
+  }
+
+  // ---------------------------------------------------------------- reference check: the agent's table vs the definition of record
+  // For each entity landscape carrying a `reference` block (v_programs / v_sponsor_condition rows keyed by exact id
+  // and exact canonical name), every answer-table row whose cell equals a key verbatim gets the index's numbers laid
+  // beside the agent's. Equal numbers mean the agent used the view of record; different numbers mean a different
+  // metric or scope (read the column header and the caveats) — the check shows, it does not judge.
+  function renderReference(Ls) {
+    const t = state.dash.d.answer.table;
+    if (!t || !t.columns || !t.rows.length) return "";
+    const refs = Ls.filter((L) => L.reference && Object.keys(L.reference.rows).length);
+    if (!refs.length) return "";
+    const norm = (c) => String(c ?? "").trim().toLowerCase();
+    let best = null;
+    for (const L of refs) {
+      const matches = t.rows.map((row) => { for (const c of row) { const hit = L.reference.rows[norm(c)]; if (hit) return hit; } return null; });
+      const n = matches.filter(Boolean).length;
+      if (n && (!best || n > best.n)) best = { L, matches, n };
     }
+    if (!best) return `<h4>Reference check</h4><div class="hint">no table cell equals an entity id or canonical name in the named entities' definition-of-record rows, so there is nothing to lay side by side.</div>`;
+    const { L, matches } = best, ref = L.reference;
+    const nums = numericColumns(t), lab = labelColumn(t, nums[0] ?? -1);
+    const metrics = Object.keys(Object.values(ref.rows)[0]).filter((k) => !["name", ref.key].includes(k));
+    let eq = 0, tot = 0;
+    let html = `<h4>Reference check <span class="hint">${best.n} of ${t.rows.length} table rows matched a ${esc(ref.kind)} in <b>${esc(L.name)}</b> by exact id / name · agent's numbers left, index's right</span> <button class="open" data-open="${esc(ref.sql)}">SQL</button></h4>`;
+    html += `<div class="tablewrap"><table class="refcheck"><thead><tr><th>${esc(t.columns[lab])}</th>${nums.map((i) => `<th class="agent">agent: ${esc(t.columns[i])}</th>`).join("")}${metrics.map((m) => `<th class="index">index: ${esc(m.replace(/_/g, " "))}</th>`).join("")}</tr></thead><tbody>`;
+    t.rows.forEach((row, i) => {
+      const m = matches[i]; if (!m) return;
+      const refVals = metrics.map((k) => m[k]);
+      html += `<tr><td>${esc(row[lab])}<div class="hint">${esc(m.name || "")}</div></td>`;
+      for (const ci of nums) { const v = row[ci]; const phaseCol = /phase/i.test(t.columns[ci]);
+        const like = metrics.map((k, j) => [k, refVals[j]]).filter(([k]) => /phase/i.test(k) === phaseCol);
+        const same = isNum(v) && like.some(([, x]) => isNum(x) && Math.abs(parseFloat(x) - parseFloat(v)) < 1e-9); if (isNum(v)) { tot++; if (same) eq++; }
+        html += `<td class="agent ${same ? "eq" : ""}" title="${same ? "equals an index number in this row" : "no index number in this row equals this value — a different metric or scope, not necessarily an error"}">${esc(v)}</td>`; }
+      html += refVals.map((x) => `<td class="index">${x == null ? "—" : esc(x)}</td>`).join("") + `</tr>`;
+    });
+    html += `</tbody></table></div><div class="hint">${eq} of ${tot} agent numbers equal a like-kind index number in the same row (phase columns vs phase metrics, counts vs counts). Reference = ${esc(ref.note)}. Unmatched rows are omitted, not judged.</div>`;
+    return html;
   }
 
   function scopedRows() {
@@ -256,7 +298,8 @@
       status: r.overall_status || "unknown",
       sponsor: r.lead_company_name || "unknown",
       year: r.start_year != null ? String(r.start_year) : "unknown",
-      tiers: [...new Set((r.assets || []).map((x) => x.tier || "none"))],
+      tier: [...new Set((r.assets || []).map((x) => x.tier || "none"))],
+      population: [...new Set((r.populations || []).map((p) => `${KIND_SHORT[p.kind] || p.kind}: ${p.label}`))],
       industry: r.is_industry == null ? "unknown" : r.is_industry ? "industry lead" : "non-industry lead",
     };
   }
@@ -265,7 +308,7 @@
     for (const [dim, vals] of Object.entries(f)) {
       if (dim === except || !vals) continue;
       if (dim === "row") { if (!vals.ncts.has(r.nct_id) && !(r.assets || []).some((x) => vals.assets && vals.assets.has(String(x.asset_id).toLowerCase()))) return false; continue; }
-      const have = dim === "tier" ? dm.tiers : [dm[dim]];
+      const have = Array.isArray(dm[dim]) ? dm[dim] : [dm[dim]];
       if (![...vals].some((v) => have.includes(v))) return false;
     }
     return true;
@@ -279,7 +322,7 @@
   function tally(rows, dim, order) {
     const m = new Map();
     for (const r of rows) {
-      const dm = rowDims(r), keys = dim === "tier" ? dm.tiers : [dm[dim]];
+      const dm = rowDims(r), keys = Array.isArray(dm[dim]) ? dm[dim] : [dm[dim]];
       for (const k of keys) { const e = m.get(k) || { key: k, label: k, value: 0, cited: 0, assets: new Set() }; e.value++; if (state.dash.cited.has(r.nct_id)) e.cited++; m.set(k, e); }
     }
     const items = [...m.values()];
@@ -308,14 +351,44 @@
     html += chart("status", "Status", STATUS_ORDER);
     html += chart("sponsor", "Lead sponsor", null, { top: 8 });
     html += chart("tier", "MoA label tier of assets in these trials", TIER_ORDER, { note: "per trial: tiers of its named assets (chembl > nlm_class > llm); 'none' = an asset with no mechanism label" });
+    html += chart("population", "Biomarkers & subgroups mentioned", null, { top: 10, note: "lexicon mentions in eligibility text (recall-limited); inclusion vs exclusion is NOT parsed — verify via the trial card" });
     html += `</div>`;
     html += chart("year", "Start year", null, { columns: true });
+    html += evidenceMatrix(all);
     chartsEl.innerHTML = html;
     // sort years ascending for the column strip
     const yc = $('.chart[data-dim="year"] .cols', chartsEl);
     if (yc) [...yc.children].sort((a, b) => a.dataset.key.localeCompare(b.dataset.key)).forEach((c) => yc.appendChild(c));
     document.querySelectorAll(".scopebtn").forEach((b) => b.classList.toggle("on", b.dataset.scope === s.scope));
     drawTrials(visible);
+  }
+  // sponsor × phase matrix over the evidence set (every other filter applied); a cell sets both filters at once
+  function evidenceMatrix(all) {
+    const s = state.dash;
+    const rows = all.filter((r) => { const f = s.filters, keep = {}; for (const d of ["sponsor", "phase"]) if (f[d]) { keep[d] = f[d]; delete f[d]; } const ok = passes(r); Object.assign(f, keep); return ok; });
+    const bySponsor = tally(rows, "sponsor").slice(0, 8);
+    if (!bySponsor.length) return "";
+    const cols = PHASE_ORDER.filter((p) => rows.some((r) => rowDims(r).phase === p));
+    const cells = {}, cited = {};
+    for (const r of rows) { const d = rowDims(r); const k = d.sponsor + "\u0000" + d.phase; cells[k] = (cells[k] || 0) + 1; if (s.cited.has(r.nct_id)) cited[k] = (cited[k] || 0) + 1; }
+    const max = Math.max(1, ...Object.values(cells));
+    const on = (sp, ph) => s.filters.sponsor && s.filters.sponsor.has(sp) && s.filters.phase && s.filters.phase.has(ph);
+    let html = `<div class="chart" data-dim="matrix"><div class="chart-title">Lead sponsor × phase <span class="hint">${rows.length} trials · top 8 sponsors · click a cell to filter to it</span></div><div class="tablewrap"><table class="matrix"><thead><tr><th></th>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}<th>all</th></tr></thead><tbody>`;
+    for (const sp of bySponsor) {
+      html += `<tr><th title="${esc(sp.label)}">${esc(sp.label)}</th>`;
+      for (const c of cols) { const k = sp.key + "\u0000" + c, n = cells[k] || 0, ci = cited[k] || 0;
+        html += `<td class="cell ${n ? "" : "zero"} ${on(sp.key, c) ? "on" : ""}" data-sponsor="${esc(sp.key)}" data-phase="${esc(c)}" style="--w:${n / max}" title="${esc(sp.label)} · ${esc(c)}: ${n} trial(s), ${ci} cited">${n || ""}${ci ? `<sup>${ci}</sup>` : ""}</td>`; }
+      html += `<td class="sum">${sp.value}</td></tr>`;
+    }
+    html += `</tbody></table></div><div class="hint">superscript = cited; lead sponsor from the index, phase = trial phase (Phase 4 ≠ approval)</div></div>`;
+    return html;
+  }
+  function matrixTable(c) {
+    const max = Math.max(1, ...c.rows.flatMap((r) => c.cols.map((k) => Number((c.cells[r] || {})[k] || 0))));
+    return `<div class="tablewrap"><table class="matrix"><thead><tr><th></th>${c.cols.map((k) => `<th>${esc(k)}</th>`).join("")}<th>all</th></tr></thead><tbody>${c.rows.map((r) => {
+      const vals = c.cols.map((k) => Number((c.cells[r] || {})[k] || 0));
+      return `<tr><th title="${esc(r)}">${esc(r)}</th>${vals.map((n) => `<td class="cell ${n ? "" : "zero"}" style="--w:${n / max}">${n || ""}</td>`).join("")}<td class="sum">${vals.reduce((a, b) => a + b, 0)}</td></tr>`;
+    }).join("")}</tbody></table></div>`;
   }
   function drawTrials(rows) {
     const s = state.dash, el = $("#trials"); if (!el) return;
@@ -336,9 +409,9 @@
   function renderLandscape(el, L) {
     const head = Object.entries(L.headline || {}).map(([k, v]) => `<div class="kpi"><div class="kpi-v">${typeof v === "number" ? fmt(v) : esc(v)}</div><div class="kpi-k">${esc(k.replace(/_/g, " "))}</div></div>`).join("");
     const charts = (L.charts || []).map((c) => {
-      const items = c.items.map((x) => ({ key: x.label, label: x.label, value: Number(x.value) || 0 }));
-      const cols = /year/i.test(c.title);
-      return `<div class="chart"><div class="chart-title">${esc(c.title)} <button class="open" data-open="${esc(c.sql)}">SQL</button></div>${bars(items, { columns: cols })}${c.note ? `<div class="hint">${esc(c.note)}</div>` : ""}</div>`;
+      const head = `<div class="chart-title">${esc(c.title)} <button class="open" data-open="${esc(c.sql)}">SQL</button></div>`;
+      const body = c.type === "matrix" ? matrixTable(c) : bars(c.items.map((x) => ({ key: x.label, label: x.label, value: Number(x.value) || 0 })), { columns: /year/i.test(c.title) });
+      return `<div class="chart ${c.type === "matrix" ? "wide" : ""}">${head}${body}${c.note ? `<div class="hint">${esc(c.note)}</div>` : ""}</div>`;
     }).join("");
     el.classList.remove("hint");
     el.innerHTML = `<div class="land-name">${esc(L.name)} <button class="open" data-open="${esc(L.headline_sql || "")}">SQL</button></div><div class="kpis">${head}</div><div class="chart-grid">${charts}</div>`;
@@ -348,6 +421,9 @@
     const chip = e.target.closest(".chip"); if (chip) { setFilter(chip.dataset.dim, chip.dataset.dim === "row" ? null : chip.dataset.val); return; }
     if (e.target.closest(".clear")) { state.dash.filters = {}; document.querySelectorAll(".figure").forEach((f) => (f.dataset.active = "")); drawDashboard(); return; }
     if (e.target.closest(".showall")) { state.dash.showAll = true; drawDashboard(); return; }
+    const cell = e.target.closest("#charts td.cell[data-sponsor]"); if (cell) { const f = state.dash.filters, sp = cell.dataset.sponsor, ph = cell.dataset.phase;
+      if (f.sponsor && f.sponsor.size === 1 && f.sponsor.has(sp) && f.phase && f.phase.size === 1 && f.phase.has(ph)) { delete f.sponsor; delete f.phase; } else { f.sponsor = new Set([sp]); f.phase = new Set([ph]); }
+      drawDashboard(); return; }
     const bar = e.target.closest("#charts .bar-row, #charts .col"); if (bar) { const dim = bar.closest(".chart").dataset.dim; setFilter(dim, bar.dataset.key); }
   });
 
