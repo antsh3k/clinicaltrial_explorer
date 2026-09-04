@@ -1,0 +1,25 @@
+{
+ "n_members": 15484,
+ "source_snapshot_date": "2026-09-04",
+ "seed": 20260904,
+ "pruned": [
+  "annotationSection",
+  "contactsLocationsModule",
+  "descriptionModule.detailedDescription",
+  "documentSection",
+  "identificationModule.secondaryIdInfos",
+  "ipdSharingStatementModule",
+  "outcomesModule",
+  "referencesModule",
+  "resultsSection"
+ ],
+ "selection": {
+  "erdheim_chester": 22,
+  "geographic_atrophy": 185,
+  "multiple_myeloma": 3666,
+  "ipf": 565,
+  "nsclc": 7706,
+  "rcc": 1955,
+  "random_sample": 1500
+ }
+}

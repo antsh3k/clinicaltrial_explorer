@@ -7,18 +7,18 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] uv project: `pyproject.toml`, Python 3.12 pinned, deps synced (duckdb, pydantic, pydantic-ai-slim[anthropic], fastapi, uvicorn, pyyaml, httpx, anthropic; dev: pytest, ruff)
 - [x] Package skeleton `src/ct_landscape/{normalize,enrich,agent,api,web,evals}` + `ctl` console script with stub subcommands
 - [x] `CLAUDE.md`, `TASKS.md`, `PROMPTS.md`, `.env.example`, gitignore for raw dump / duckdb / runs
-- [ ] Fixture-builder script `scripts/make_fixtures.py` (mini.zip ~200 studies covering every §2.5 case; demo.zip ~5–10k) — needs the raw dump first (Phase 1)
+- [x] Fixture-builder script `scripts/make_fixtures.py` (mini.zip 213 studies covering every §2.5 case; demo.zip ~17k = all gold-indication trials + 1,500 random)
 
 ## Phase 1 — fetch + ingest → raw tables + census (§5 Stage 0–1, §4.1)
-- [ ] `fetch.py`: internal download URL (`/api/int/studies/download?format=json.zip`) primary; documented v2 pager fallback; census bytes + n_files
-- [ ] Acquire the full dump into `data/raw/` (gitignored) — the user may need to run the UI download
-- [ ] `normalize/phases.py`: round-UP rule, NA stays NA, empty → NULL; set-intersection whitelist; tests incl. `test_combined_phase_rounds_up`
-- [ ] `ingest.py`: zip member → `json.loads` → lean Pydantic boundary models (`extra="ignore"`) → DuckDB appenders for all §4.1 raw tables; arm join by `armGroupLabels` with `interventionNames` fallback (count both paths); partial-date parsing + `date_precision`; parse failures listed
-- [ ] `db.py`: schema DDL, `build_meta` writer, `snapshot_date = max(last_update_date_parsed)`
-- [ ] Census printed + written to `build_meta` (n_read, n_loaded, per-module absence counts)
-- [ ] `scripts/make_fixtures.py` → ship `data/fixtures/mini.zip` and `data/fixtures/demo.zip`; tests assert exact counts on mini.zip
-- [ ] `ctl build --demo` end-to-end; `ctl sql` read-only console
-- [ ] Measure full-corpus ingest time (target ≤ 15 min; parallelize by zip-member chunks if slower)
+- [x] `fetch.py`: internal download URL primary; documented v2 pager fallback (`ctl fetch --pager`); census bytes + n_files
+- [x] Acquire the full dump into `data/raw/` (gitignored) — 2.74 GB, 601,694 studies, snapshot 2026-09-04
+- [x] `normalize/phases.py`: round-UP rule, NA stays NA, empty → NULL; set-intersection whitelist; tests incl. `test_combined_phase_rounds_up`
+- [x] `ingest.py`: zip member → `json.loads` → lean Pydantic boundary models (`extra="ignore"`) → Arrow batches → DuckDB for all §4.1 raw tables; arm join by `armGroupLabels` with `interventionNames` fallback (count both paths); partial-date parsing + `date_precision`; parse failures listed
+- [x] `db.py`: schema DDL, `build_meta` writer, `snapshot_date = max(last_update_date_parsed)`, sandboxed read-only connection
+- [x] Census printed + written to `build_meta` (n_read, n_loaded, per-module absence counts)
+- [x] `scripts/make_fixtures.py` → ship `data/fixtures/mini.zip` and `data/fixtures/demo.zip` (+ manifests); tests assert exact counts on mini.zip
+- [x] `ctl build --demo` end-to-end; `ctl sql` read-only console
+- [x] Measured full-corpus ingest: 69 s with 13 worker processes (~8.5k studies/s), 0 parse failures
 
 ## Phase 2 — normalize/ + views.sql (§5.1–5.5, §4.2–4.3, App. B)
 - [ ] Lexicon YAMLs under `lexicons/`: `noise_names`, `non_molecule`, `salt_dose_suffixes`, `populations`, `mesh_areas`, `company_suffixes`, `company_aliases`, `target_aliases`
@@ -61,5 +61,9 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [ ] 5-minute reviewer path, full build, funnel numbers, example Q&As with evidence, tradeoffs (§9), limitations (§10.3), choices the brief left open (§10.1), works-without-key vs needs-key, AI-usage section (from `PROMPTS.md`)
 
 ## Deviations from the spec
+- Dump is 2.74 GB / 601,694 studies (spec's 703 MB / 601,158 was measured on an older snapshot); §2.3 counts reproduce within ~0.2%.
+- Fixture zips are *pruned* copies (resultsSection, documentSection, contacts/locations, references, outcomes, detailedDescription, secondaryIdInfos dropped) so demo.zip stays < 50 MB; ingest never reads those modules.
+- Raw layer has two extras beyond §4.1: `study_keywords` (conditionsModule.keywords) and `arm_interventions.via` ('label' | 'name') so the arm-join path is auditable per row. Fresh-snapshot finding: every arm link came via `armGroupLabels`; the `interventionNames` fallback was never needed (0 rows).
+- `studies.study_first_submit_date` and `primary_purpose` kept as pass-through columns.
 - Installed `pydantic-ai` is 2.x (spec snippets assume ~0.4); API names verified present, signatures to be checked at Phase 4.
 - Repo root is `clincialtrial_explorer/` (not `ct-landscape/`); package name is `ct_landscape` as specified.

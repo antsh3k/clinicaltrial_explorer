@@ -1,0 +1,351 @@
+{
+ "n_members": 255,
+ "source_snapshot_date": "2026-09-04",
+ "seed": 20260904,
+ "pruned": [
+  "annotationSection",
+  "contactsLocationsModule",
+  "descriptionModule.detailedDescription",
+  "documentSection",
+  "identificationModule.secondaryIdInfos",
+  "ipdSharingStatementModule",
+  "outcomesModule",
+  "referencesModule",
+  "resultsSection"
+ ],
+ "selection": {
+  "anchors": [
+   "NCT02142738",
+   "NCT02811861",
+   "NCT02853331"
+  ],
+  "placebo_comparator": [
+   "NCT04321343",
+   "NCT02080637",
+   "NCT03142269",
+   "NCT00473473",
+   "NCT05762042",
+   "NCT06912035",
+   "NCT06649773",
+   "NCT05744479",
+   "NCT05730426",
+   "NCT06160531",
+   "NCT01343966",
+   "NCT02488538",
+   "NCT02226510",
+   "NCT00374907",
+   "NCT05440773"
+  ],
+  "sham_comparator": [
+   "NCT02613949",
+   "NCT03267212",
+   "NCT04898205",
+   "NCT01449747"
+  ],
+  "other_typed_arms_only": [
+   "NCT05121207",
+   "NCT00816426",
+   "NCT02776995",
+   "NCT03450850",
+   "NCT01082991",
+   "NCT03155464",
+   "NCT02054819",
+   "NCT06454097"
+  ],
+  "single_arm": [
+   "NCT07731607",
+   "NCT05690568",
+   "NCT07213115",
+   "NCT01687114",
+   "NCT06486584",
+   "NCT04368130",
+   "NCT05013827",
+   "NCT07261956"
+  ],
+  "multi_arm_4plus": [
+   "NCT02141607",
+   "NCT06132126",
+   "NCT05614739",
+   "NCT02702713",
+   "NCT01387516",
+   "NCT02717013"
+  ],
+  "combo_name_plus": [
+   "NCT05268289",
+   "NCT00752934",
+   "NCT07777822",
+   "NCT03632668",
+   "NCT00259402",
+   "NCT03999216",
+   "NCT04927299",
+   "NCT03447873"
+  ],
+  "combo_name_slash": [
+   "NCT04816968",
+   "NCT07448142",
+   "NCT00950222",
+   "NCT02463747",
+   "NCT05889390",
+   "NCT05835011"
+  ],
+  "combination_product": [
+   "NCT05554276",
+   "NCT06801665",
+   "NCT07803445",
+   "NCT06129643",
+   "NCT06808568"
+  ],
+  "biological_with_other_names": [
+   "NCT06827665",
+   "NCT04114643",
+   "NCT02127905",
+   "NCT01088464",
+   "NCT01065311",
+   "NCT00509496",
+   "NCT02312986",
+   "NCT00412594",
+   "NCT01935921",
+   "NCT04021043"
+  ],
+  "many_other_names": [
+   "NCT05127850",
+   "NCT01652794",
+   "NCT00335764",
+   "NCT05062395",
+   "NCT05455606",
+   "NCT01371981",
+   "NCT07578025",
+   "NCT00075725"
+  ],
+  "dose_in_name": [
+   "NCT00382538",
+   "NCT02433236",
+   "NCT00310765",
+   "NCT01789606",
+   "NCT00985959",
+   "NCT03555890",
+   "NCT01365052",
+   "NCT07104097"
+  ],
+  "salt_in_name": [
+   "NCT00423098",
+   "NCT04006769",
+   "NCT00002499",
+   "NCT00292071",
+   "NCT00028756",
+   "NCT01359592",
+   "NCT00616785",
+   "NCT00024271"
+  ],
+  "code_name": [
+   "NCT02831257",
+   "NCT01026402",
+   "NCT00316459",
+   "NCT04736394",
+   "NCT01970488",
+   "NCT00789035",
+   "NCT03573505",
+   "NCT06847724",
+   "NCT00613106",
+   "NCT00584740"
+  ],
+  "prefixed_name": [
+   "NCT01081951",
+   "NCT00580814",
+   "NCT01805388",
+   "NCT07804563",
+   "NCT02168127"
+  ],
+  "class_label_name": [
+   "NCT06389201",
+   "NCT02246660",
+   "NCT04643067",
+   "NCT07684820",
+   "NCT04576949",
+   "NCT00331721",
+   "NCT06158152",
+   "NCT07528898",
+   "NCT00547898",
+   "NCT02024373"
+  ],
+  "observational": [
+   "NCT06405815",
+   "NCT00542659",
+   "NCT05107063",
+   "NCT07368647",
+   "NCT05484531",
+   "NCT00584363",
+   "NCT03096405",
+   "NCT01062958",
+   "NCT05912491",
+   "NCT04188912"
+  ],
+  "expanded_access": [
+   "NCT00854841",
+   "NCT02547675",
+   "NCT02355054",
+   "NCT02635841"
+  ],
+  "early_phase1": [
+   "NCT00625131",
+   "NCT04361175",
+   "NCT05346692"
+  ],
+  "phase4": [
+   "NCT02134808",
+   "NCT07217600",
+   "NCT00412867",
+   "NCT01475123",
+   "NCT01852396"
+  ],
+  "phase_na_interventional": [
+   "NCT04632654",
+   "NCT03659695",
+   "NCT03219892",
+   "NCT04312321"
+  ],
+  "no_arms_but_interventions": [
+   "NCT00089622",
+   "NCT00205322",
+   "NCT06035926",
+   "NCT00056381",
+   "NCT00880061",
+   "NCT05639842"
+  ],
+  "month_precision_dates": [
+   "NCT01301352",
+   "NCT01628510",
+   "NCT02092506",
+   "NCT05403645",
+   "NCT00986024",
+   "NCT02918110"
+  ],
+  "no_completion_date": [
+   "NCT01304290",
+   "NCT00883649",
+   "NCT00295724",
+   "NCT00002455"
+  ],
+  "status_unknown": [
+   "NCT02544672",
+   "NCT04956679",
+   "NCT05612607",
+   "NCT04777123"
+  ],
+  "status_terminated_withdrawn": [
+   "NCT00776555",
+   "NCT00261352",
+   "NCT02117440",
+   "NCT01238887",
+   "NCT05452681",
+   "NCT04837040"
+  ],
+  "recruiting_industry_drug": [
+   "NCT06907628",
+   "NCT05716100",
+   "NCT07694375",
+   "NCT06640361",
+   "NCT07276581",
+   "NCT06662097",
+   "NCT07357610",
+   "NCT07158242",
+   "NCT07240675",
+   "NCT07596901"
+  ],
+  "juvenile_or_pediatric_condition": [
+   "NCT07461376",
+   "NCT06895278",
+   "NCT04357249",
+   "NCT07736664",
+   "NCT00883688",
+   "NCT02995525"
+  ],
+  "listed_only_no_mesh": [
+   "NCT01502657",
+   "NCT03565783",
+   "NCT04271683",
+   "NCT02285426",
+   "NCT01199900",
+   "NCT02844192",
+   "NCT07663825",
+   "NCT05043493"
+  ],
+  "healthy_volunteers_condition": [
+   "NCT01698697",
+   "NCT07431320",
+   "NCT01258491",
+   "NCT01398150"
+  ],
+  "mesh_id_artifact_condition": [
+   "NCT04708964",
+   "NCT07567573",
+   "NCT07543679"
+  ],
+  "many_conditions": [
+   "NCT05658796",
+   "NCT02375204",
+   "NCT07492511",
+   "NCT03537807"
+  ],
+  "sponsor_suffix_variants": [
+   "NCT04511975",
+   "NCT00466869",
+   "NCT01790113",
+   "NCT02211534",
+   "NCT07611214",
+   "NCT02928445",
+   "NCT03365791",
+   "NCT00972075"
+  ],
+  "curated_alias_sponsors": [
+   "NCT02906605",
+   "NCT00697203",
+   "NCT01516541",
+   "NCT02688374",
+   "NCT04604795",
+   "NCT00369993",
+   "NCT00112918",
+   "NCT00894114"
+  ],
+  "with_collaborators": [
+   "NCT01781273",
+   "NCT03769259",
+   "NCT04249232",
+   "NCT03421444",
+   "NCT04832620"
+  ],
+  "biomarker_in_title": [
+   "NCT04181060",
+   "NCT02504346",
+   "NCT05638594",
+   "NCT05400915",
+   "NCT05577442",
+   "NCT05662813",
+   "NCT00696072",
+   "NCT04508829"
+  ],
+  "subgroup_in_title": [
+   "NCT00021268",
+   "NCT02620618",
+   "NCT01012804",
+   "NCT00042939",
+   "NCT00308256",
+   "NCT00532194",
+   "NCT06963463",
+   "NCT00286832"
+  ],
+  "device_or_behavioral": [
+   "NCT06610513",
+   "NCT05222698",
+   "NCT05673759",
+   "NCT03827174",
+   "NCT01584024",
+   "NCT07795580"
+  ],
+  "missing_enrollment": [
+   "NCT00006083",
+   "NCT04338347",
+   "NCT00054314"
+  ]
+ }
+}

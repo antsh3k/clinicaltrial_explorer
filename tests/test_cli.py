@@ -13,4 +13,8 @@ def test_help_lists_ops_subcommands(capsys):
 
 
 def test_unimplemented_subcommand_exits_nonzero():
-    assert main(["build", "--demo"]) == 2
+    assert main(["eval"]) == 2
+
+
+def test_build_demo_without_slice_fails_cleanly(tmp_path):
+    assert main(["build", "--zip", str(tmp_path / "missing.zip"), "--db", str(tmp_path / "x.duckdb")]) == 1
