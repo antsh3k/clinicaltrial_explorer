@@ -118,6 +118,12 @@ Every number is a claim the eval can audit; the UI's coverage footer restates th
 
 ---
 
+## The chat UI on the spec's worked example
+
+![ct-landscape answering "What combination partners are being studied with MK-3475 in renal cell carcinoma?": live timeline, gate badge 14/14, ranked partner table, evidence panel with phase/status/sponsor pulled from the index, permalink](docs/ui-mk3475-rcc.jpg)
+
+Left: the derivation timeline (`resolve_entity` MK-3475 → pembrolizumab; `run_sql` over `v_combo_partners`), the machine-verified gate badge, and the structured table with every NCT auto-linked. Right: the citations with phase, status and sponsor pulled live from the index, the entity list, and the expandable trace (each SQL statement, row counts, timings, coverage footer). Answered in 4 model turns, ~30 s, with prompt caching.
+
 ## Example landscape questions (zero LLM spend — straight from the views)
 
 These are the queries the agent writes; the chat UI adds the prose, the gate, and the evidence panel.
