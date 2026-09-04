@@ -123,6 +123,23 @@ def test_trial_counted_once_across_condition_surfaces(con):
     assert q(con, "SELECT count(*) FROM v_sponsor_activity WHERE area='Unclassified'")[0][0] > 0
 
 
+def test_sponsor_condition_view_counts_lead_sponsors_per_condition(con):
+    rows = q(
+        con,
+        "SELECT company_id, n_trials, n_active_trials, len(nct_ids) FROM v_sponsor_condition WHERE condition_key='D002289' ORDER BY n_trials DESC LIMIT 5",
+    )
+    assert rows and all(n == ln and act <= n for _, n, act, ln in rows)
+    # every (sponsor, condition) trial is an interventional drug trial led by that sponsor
+    assert (
+        q(
+            con,
+            """SELECT count(*) FROM v_sponsor_condition sc, unnest(sc.nct_ids) AS u(nct_id)
+                     JOIN v_trials t USING (nct_id) WHERE t.lead_company_id <> sc.company_id OR NOT t.is_drug_trial""",
+        )[0][0]
+        == 0
+    )
+
+
 def test_unknown_status_is_neither_active_nor_inactive(con):
     rows = q(
         con,

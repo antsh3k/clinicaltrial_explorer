@@ -128,6 +128,23 @@ LEFT JOIN trial_assets tas ON tas.nct_id = t.nct_id
 WHERE t.study_type = 'INTERVENTIONAL' AND t.is_drug_trial
 GROUP BY 1, 2, 3, 4;
 
+-- ---------------------------------------------------------------- v_sponsor_condition: Q3 at CONDITION grain (lead sponsor × condition)
+CREATE OR REPLACE VIEW v_sponsor_condition AS
+SELECT t.lead_company_id AS company_id, c.canonical_name AS company_name, t.lead_agency_class AS agency_class, tc.condition_key,
+       count(DISTINCT t.nct_id)                                                      AS n_trials,
+       count(DISTINCT t.nct_id) FILTER (WHERE t.program_exists)                      AS n_active_trials,
+       count(DISTINCT t.nct_id) FILTER (WHERE t.is_active_readout)                   AS n_active_readout_trials,
+       count(DISTINCT tas.asset_id) FILTER (WHERE tas.role IN ('subject','unknown'))   AS n_assets,
+       count(DISTINCT t.nct_id) FILTER (WHERE t.phase_rank >= 3)                     AS n_phase3_plus,
+       max(t.last_update_date_parsed)                                                AS latest_activity,
+       list(DISTINCT t.nct_id ORDER BY t.nct_id)                                     AS nct_ids
+FROM v_trials t
+JOIN companies c ON c.company_id = t.lead_company_id
+JOIN v_trial_conditions_primary tc ON tc.nct_id = t.nct_id
+LEFT JOIN trial_assets tas ON tas.nct_id = t.nct_id
+WHERE t.study_type = 'INTERVENTIONAL' AND t.is_drug_trial
+GROUP BY 1, 2, 3, 4;
+
 -- ---------------------------------------------------------------- v_asset_sponsors: per asset, lead sponsors + originator PROXY
 CREATE OR REPLACE VIEW v_asset_sponsors AS
 WITH per AS (
