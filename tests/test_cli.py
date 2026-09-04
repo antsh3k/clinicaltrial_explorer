@@ -12,8 +12,8 @@ def test_help_lists_ops_subcommands(capsys):
         assert cmd in out
 
 
-def test_unimplemented_subcommand_exits_nonzero():
-    assert main(["eval"]) == 2
+def test_eval_without_index_fails_cleanly(tmp_path):
+    assert main(["eval", "--db", str(tmp_path / "missing.duckdb")]) == 1
 
 
 def test_build_demo_without_slice_fails_cleanly(tmp_path):
