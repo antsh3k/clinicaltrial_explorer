@@ -1,0 +1,186 @@
+# Suffix vocabularies for the dedup-key router (spec App. B.2). All matched case-insensitively as whole
+# trailing tokens; the router alternates salt and dose-form strips to a fixed point.
+salts:
+  - hcl
+  - hydrochloride
+  - dihydrochloride
+  - hydrobromide
+  - acetate
+  - diacetate
+  - sodium
+  - disodium
+  - potassium
+  - calcium
+  - magnesium
+  - dimesylate
+  - mesylate
+  - mesilate
+  - besylate
+  - tosylate
+  - maleate
+  - fumarate
+  - hemifumarate
+  - tartrate
+  - bitartrate
+  - succinate
+  - citrate
+  - phosphate
+  - diphosphate
+  - sulfate
+  - sulphate
+  - nitrate
+  - decanoate
+  - enanthate
+  - propionate
+  - valerate
+  - butyrate
+  - bromide
+  - chloride
+  - iodide
+  - lactate
+  - malate
+  - oxalate
+  - palmitate
+  - pamoate
+  - pivalate
+  - stearate
+  - trihydrate
+  - dihydrate
+  - monohydrate
+  - hydrate
+  - anhydrous
+  - usp
+  - bp
+  - ep
+
+dose_forms:
+  - injection
+  - injections
+  - injectable
+  - for injection
+  - tablet
+  - tablets
+  - tab
+  - tabs
+  - capsule
+  - capsules
+  - cap
+  - caps
+  - cream
+  - ointment
+  - gel
+  - lotion
+  - solution
+  - suspension
+  - emulsion
+  - powder
+  - granules
+  - patch
+  - patches
+  - spray
+  - inhaler
+  - inhalation
+  - drops
+  - eye drops
+  - suppository
+  - suppositories
+  - chewable
+  - orally disintegrating
+  - odt
+  - oral
+  - topical
+  - ophthalmic
+  - nasal
+  - rectal
+  - vaginal
+  - intravenous
+  - iv
+  - subcutaneous
+  - sc
+  - intramuscular
+  - im
+  - infusion
+  - concentrate
+  - extended-release
+  - extended release
+  - delayed-release
+  - delayed release
+  - sustained-release
+  - sustained release
+  - modified-release
+  - modified release
+  - immediate-release
+  - immediate release
+  - controlled-release
+  - controlled release
+  - long-acting
+  - long acting
+  - er
+  - sr
+  - cr
+  - dr
+  - xl
+  - xr
+  - la
+  - mr
+  - ir
+  - once daily
+  - once weekly
+  - film-coated
+  - film coated
+  - coated
+  - enteric-coated
+  - enteric coated
+  - liposomal
+  - fixed dose combination
+  - fixed-dose combination
+  - fdc
+
+device_pack:
+  - pen
+  - pens
+  - flexpen
+  - kwikpen
+  - solostar
+  - sensoready
+  - auto-injector
+  - autoinjector
+  - prefilled
+  - pre-filled
+  - syringe
+  - pfs
+  - vial
+  - vials
+  - kit
+  - cartridge
+  - depot
+  - lar
+  - pack
+  - quadrivalent
+  - quad
+  - trivalent
+  - bivalent
+  - monovalent
+
+# electrolyte guard: "<cation> <anion>" is a molecule name, never strip the anion
+electrolyte_cations:
+  - sodium
+  - potassium
+  - calcium
+  - magnesium
+  - lithium
+  - zinc
+  - iron
+  - ferric
+  - ferrous
+  - ammonium
+  - aluminum
+  - aluminium
+  - barium
+  - bismuth
+  - strontium
+  - selenium
+  - copper
+  - manganese
+  - chromium
+  - silver

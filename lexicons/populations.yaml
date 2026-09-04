@@ -1,0 +1,209 @@
+# Typed population lexicon (spec §5.5, App. B.8): biomarkers AND patient subgroups. Word-boundary regexes
+# (case-insensitive) run over title + listed conditions + eligibility text; the matched line is stored as
+# evidence. Deliberately v1-modest: high precision, labeled recall.
+#
+# kinds: biomarker | demographic | disease_severity | prior_therapy | line_of_therapy | disease_stage
+entries:
+  # ---------------------------------------------------------------- biomarkers (oncology)
+  - {term_id: EGFR, kind: biomarker, label: "EGFR mutation", patterns: ['\bEGFR\b', '\bEGFR[- ](?:mutant|mutated|mutation|positive|exon)']}
+  - {term_id: EGFR_EXON20, kind: biomarker, label: "EGFR exon 20 insertion", patterns: ['\bexon\s*20\s*insertion']}
+  - {term_id: EGFR_T790M, kind: biomarker, label: "EGFR T790M", patterns: ['\bT790M\b']}
+  - {term_id: ALK, kind: biomarker, label: "ALK rearrangement", patterns: ['\bALK[- ](?:positive|rearrange|fusion|mutant|mutation|translocation)', '\bALK\+']}
+  - {term_id: ROS1, kind: biomarker, label: "ROS1 fusion", patterns: ['\bROS1\b']}
+  - {term_id: KRAS_G12C, kind: biomarker, label: "KRAS G12C", patterns: ['\bKRAS[- ]?G12C\b', '\bG12C\b']}
+  - {term_id: KRAS_G12D, kind: biomarker, label: "KRAS G12D", patterns: ['\bKRAS[- ]?G12D\b', '\bG12D\b']}
+  - {term_id: KRAS, kind: biomarker, label: "KRAS mutation", patterns: ['\bKRAS[- ](?:mutant|mutated|mutation|positive|wild)', '\bKRAS\b']}
+  - {term_id: NRAS, kind: biomarker, label: "NRAS mutation", patterns: ['\bNRAS\b']}
+  - {term_id: BRAF_V600, kind: biomarker, label: "BRAF V600", patterns: ['\bBRAF[- ]?V600[EK]?\b', '\bV600E\b']}
+  - {term_id: BRAF, kind: biomarker, label: "BRAF mutation", patterns: ['\bBRAF\b']}
+  - {term_id: PDL1, kind: biomarker, label: "PD-L1 expression", patterns: ['\bPD-?L1\b', '\bPD-?L1\s*(?:≥|>=|>)\s*\d+\s*%', '\bTPS\s*(?:≥|>=|>)\s*\d+\s*%', '\bCPS\s*(?:≥|>=|>)\s*\d+']}
+  - {term_id: HER2_POS, kind: biomarker, label: "HER2-positive", patterns: ['\bHER-?2[- ]?(?:positive|pos|\+|overexpress|amplif)', '\bERBB2[- ]?(?:positive|amplif)']}
+  - {term_id: HER2_LOW, kind: biomarker, label: "HER2-low", patterns: ['\bHER-?2[- ]?low\b']}
+  - {term_id: HER2_NEG, kind: biomarker, label: "HER2-negative", patterns: ['\bHER-?2[- ]?(?:negative|neg|-)\b']}
+  - {term_id: HER2_MUT, kind: biomarker, label: "HER2 mutation", patterns: ['\bHER-?2[- ]?(?:mutant|mutated|mutation)']}
+  - {term_id: HR_POS, kind: biomarker, label: "hormone receptor-positive", patterns: ['\b(?:HR|ER|hormone receptor|estrogen receptor|oestrogen receptor)[- ]?(?:positive|pos|\+)', '\bER\+', '\bHR\+']}
+  - {term_id: TNBC, kind: biomarker, label: "triple-negative", patterns: ['\btriple[- ]negative\b', '\bTNBC\b']}
+  - {term_id: BRCA, kind: biomarker, label: "BRCA1/2 mutation", patterns: ['\bBRCA[12]?\b', '\bgBRCA\b']}
+  - {term_id: HRD, kind: biomarker, label: "homologous recombination deficiency", patterns: ['\bHRD\b', '\bhomologous recombination[- ]deficien']}
+  - {term_id: MSI_H, kind: biomarker, label: "MSI-H / dMMR", patterns: ['\bMSI-?H\b', '\bdMMR\b', '\bmicrosatellite instability[- ]high', '\bmismatch repair[- ]deficien']}
+  - {term_id: MSS, kind: biomarker, label: "microsatellite stable", patterns: ['\bMSS\b', '\bmicrosatellite[- ]stable', '\bpMMR\b']}
+  - {term_id: TMB_H, kind: biomarker, label: "TMB-high", patterns: ['\bTMB-?H\b', '\btumou?r mutational? burden']}
+  - {term_id: NTRK, kind: biomarker, label: "NTRK fusion", patterns: ['\bNTRK[123]?\b', '\bTRK fusion']}
+  - {term_id: MET_EXON14, kind: biomarker, label: "MET exon 14 skipping", patterns: ['\bMET\s*exon\s*14', '\bMETex14\b']}
+  - {term_id: MET_AMP, kind: biomarker, label: "MET amplification", patterns: ['\bMET[- ]amplif', '\bc-?MET[- ](?:positive|overexpress|amplif)']}
+  - {term_id: RET, kind: biomarker, label: "RET fusion/mutation", patterns: ['\bRET[- ](?:fusion|positive|rearrange|mutant|mutation|altered)', '\bRET\+']}
+  - {term_id: FGFR, kind: biomarker, label: "FGFR alteration", patterns: ['\bFGFR[1-4]?[- ]?(?:fusion|mutation|mutant|amplif|alter|rearrange|positive)', '\bFGFR[1-4]\b']}
+  - {term_id: IDH1, kind: biomarker, label: "IDH1 mutation", patterns: ['\bIDH-?1\b']}
+  - {term_id: IDH2, kind: biomarker, label: "IDH2 mutation", patterns: ['\bIDH-?2\b']}
+  - {term_id: FLT3, kind: biomarker, label: "FLT3 mutation", patterns: ['\bFLT-?3\b']}
+  - {term_id: NPM1, kind: biomarker, label: "NPM1 mutation", patterns: ['\bNPM1\b']}
+  - {term_id: JAK2_V617F, kind: biomarker, label: "JAK2 V617F", patterns: ['\bJAK2[- ]?V617F\b', '\bV617F\b']}
+  - {term_id: BCR_ABL, kind: biomarker, label: "BCR-ABL / Philadelphia+", patterns: ['\bBCR-?ABL1?\b', '\bPhiladelphia[- ]chromosome', '\bPh\+', '\bPh-positive']}
+  - {term_id: TP53, kind: biomarker, label: "TP53 mutation", patterns: ['\bTP53\b', '\bp53[- ](?:mutant|mutated|mutation)']}
+  - {term_id: PIK3CA, kind: biomarker, label: "PIK3CA mutation", patterns: ['\bPIK3CA\b']}
+  - {term_id: ESR1, kind: biomarker, label: "ESR1 mutation", patterns: ['\bESR1\b']}
+  - {term_id: STK11, kind: biomarker, label: "STK11/LKB1", patterns: ['\bSTK11\b', '\bLKB1\b']}
+  - {term_id: KEAP1, kind: biomarker, label: "KEAP1 mutation", patterns: ['\bKEAP1\b']}
+  - {term_id: MTAP, kind: biomarker, label: "MTAP deletion", patterns: ['\bMTAP[- ]?(?:delet|null|deficien|loss)']}
+  - {term_id: CD19, kind: biomarker, label: "CD19-positive", patterns: ['\bCD19[- ]?(?:positive|\+|expressing)']}
+  - {term_id: CD20, kind: biomarker, label: "CD20-positive", patterns: ['\bCD20[- ]?(?:positive|\+|expressing)']}
+  - {term_id: CD38, kind: biomarker, label: "CD38-positive", patterns: ['\bCD38[- ]?(?:positive|\+|expressing)']}
+  - {term_id: CD30, kind: biomarker, label: "CD30-positive", patterns: ['\bCD30[- ]?(?:positive|\+|expressing)']}
+  - {term_id: CD33, kind: biomarker, label: "CD33-positive", patterns: ['\bCD33[- ]?(?:positive|\+|expressing)']}
+  - {term_id: CD123, kind: biomarker, label: "CD123-positive", patterns: ['\bCD123[- ]?(?:positive|\+|expressing)']}
+  - {term_id: BCMA, kind: biomarker, label: "BCMA-expressing", patterns: ['\bBCMA[- ]?(?:positive|\+|expressing)']}
+  - {term_id: TROP2, kind: biomarker, label: "TROP2 expression", patterns: ['\bTROP-?2\b']}
+  - {term_id: CLDN18_2, kind: biomarker, label: "Claudin 18.2-positive", patterns: ['\bclaudin[- ]?18\.2', '\bCLDN18\.2\b']}
+  - {term_id: NECTIN4, kind: biomarker, label: "Nectin-4", patterns: ['\bnectin-?4\b']}
+  - {term_id: DLL3, kind: biomarker, label: "DLL3", patterns: ['\bDLL3\b']}
+  - {term_id: B7H3, kind: biomarker, label: "B7-H3", patterns: ['\bB7-?H3\b']}
+  - {term_id: PSMA, kind: biomarker, label: "PSMA-positive", patterns: ['\bPSMA[- ]?(?:positive|\+|expressing|avid)']}
+  - {term_id: SSTR, kind: biomarker, label: "somatostatin receptor-positive", patterns: ['\bSSTR[- ]?(?:positive|\+|expressing)', '\bsomatostatin receptor[- ]positive']}
+  - {term_id: GPC3, kind: biomarker, label: "GPC3-positive", patterns: ['\bGPC3[- ]?(?:positive|\+|expressing)', '\bglypican-?3[- ]positive']}
+  - {term_id: MESOTHELIN, kind: biomarker, label: "mesothelin-positive", patterns: ['\bmesothelin[- ]?(?:positive|\+|expressing)']}
+  - {term_id: HLA_A0201, kind: biomarker, label: "HLA-A*02:01", patterns: ['\bHLA-?A\*?0?2(?::0?1)?\b', '\bHLA-A2\b']}
+  - {term_id: MYCN, kind: biomarker, label: "MYCN amplification", patterns: ['\bMYCN\b']}
+  - {term_id: MGMT, kind: biomarker, label: "MGMT methylation", patterns: ['\bMGMT\b']}
+  - {term_id: EBV, kind: biomarker, label: "EBV-positive", patterns: ['\bEBV[- ]?(?:positive|\+|associated)', '\bEpstein-?Barr']}
+  - {term_id: HPV, kind: biomarker, label: "HPV-positive", patterns: ['\bHPV[- ]?(?:positive|\+|associated|16|18)', '\bp16[- ]?(?:positive|\+)']}
+  - {term_id: CTDNA, kind: biomarker, label: "ctDNA / MRD", patterns: ['\bctDNA\b', '\bcirculating tumou?r DNA']}
+  - {term_id: MRD, kind: biomarker, label: "minimal residual disease", patterns: ['\bMRD[- ]?(?:positive|negative|\+|-)', '\bminimal residual disease', '\bmeasurable residual disease']}
+  - {term_id: DEL17P, kind: biomarker, label: "del(17p)", patterns: ['\bdel\s*\(?17p\)?', '\b17p deletion']}
+  - {term_id: T_11_14, kind: biomarker, label: "t(11;14)", patterns: ['\bt\s*\(\s*11\s*;\s*14\s*\)']}
+  - {term_id: HIGH_RISK_CYTO, kind: biomarker, label: "high-risk cytogenetics", patterns: ['\bhigh[- ]risk cytogenetic']}
+  # ---------------------------------------------------------------- biomarkers (immunology / other)
+  - {term_id: RF_POS, kind: biomarker, label: "RF-positive", patterns: ['\b(?:RF|rheumatoid factor)[- ]?(?:positive|\+)']}
+  - {term_id: ANTI_CCP, kind: biomarker, label: "anti-CCP positive", patterns: ['\banti-?CCP\b', '\bACPA\b', '\banti-?citrullinated']}
+  - {term_id: SEROPOSITIVE, kind: biomarker, label: "seropositive", patterns: ['\bseropositive\b']}
+  - {term_id: SERONEGATIVE, kind: biomarker, label: "seronegative", patterns: ['\bseronegative\b']}
+  - {term_id: HLA_B27, kind: biomarker, label: "HLA-B27", patterns: ['\bHLA-?B27\b']}
+  - {term_id: ANA, kind: biomarker, label: "ANA-positive", patterns: ['\bANA[- ]?(?:positive|\+)', '\bantinuclear antibod']}
+  - {term_id: ANTI_DSDNA, kind: biomarker, label: "anti-dsDNA", patterns: ['\banti-?dsDNA\b']}
+  - {term_id: ANCA, kind: biomarker, label: "ANCA-associated", patterns: ['\bANCA\b']}
+  - {term_id: AQP4, kind: biomarker, label: "AQP4-IgG", patterns: ['\bAQP-?4\b', '\baquaporin-?4']}
+  - {term_id: ACHR_AB, kind: biomarker, label: "AChR antibody-positive", patterns: ['\bAChR[- ]?(?:antibod|Ab|positive)']}
+  - {term_id: IGE, kind: biomarker, label: "IgE level", patterns: ['\bIgE\b']}
+  - {term_id: EOSINOPHIL, kind: biomarker, label: "eosinophil count", patterns: ['\beosinophil(?:s|ic)?\b.{0,20}(?:count|≥|>=|>|cells|/\s*[µu]L)', '\bblood eosinophil']}
+  - {term_id: FENO, kind: biomarker, label: "FeNO", patterns: ['\bFeNO\b', '\bfractional exhaled nitric oxide']}
+  - {term_id: CALPROTECTIN, kind: biomarker, label: "fecal calprotectin", patterns: ['\bf(?:a)?ecal calprotectin']}
+  - {term_id: CRP, kind: biomarker, label: "CRP elevated", patterns: ['\b(?:hs-?)?CRP\b.{0,20}(?:≥|>=|>|elevated|mg)']}
+  - {term_id: HBA1C, kind: biomarker, label: "HbA1c threshold", patterns: ['\bHbA1c\b']}
+  - {term_id: EGFR_RENAL, kind: biomarker, label: "eGFR threshold", patterns: ['\beGFR\b.{0,25}(?:≥|>=|>|<|<=|≤|mL/min)']}
+  - {term_id: UACR, kind: biomarker, label: "albuminuria (UACR)", patterns: ['\bUACR\b', '\balbumin[- ]?(?:to[- ])?creatinine ratio']}
+  - {term_id: NTPROBNP, kind: biomarker, label: "NT-proBNP", patterns: ['\bNT-?pro-?BNP\b', '\bBNP\b.{0,20}(?:≥|>=|>|pg)']}
+  - {term_id: LVEF, kind: biomarker, label: "LVEF threshold", patterns: ['\bLVEF\b', '\bejection fraction\b.{0,15}(?:≤|<=|<|≥|>=|>|\d+\s*%)']}
+  - {term_id: LDL, kind: biomarker, label: "LDL-C threshold", patterns: ['\bLDL-?C?\b.{0,25}(?:≥|>=|>|mg/dL|mmol)']}
+  - {term_id: LPA, kind: biomarker, label: "Lp(a) elevated", patterns: ['\bLp\s*\(\s*a\s*\)', '\blipoprotein\s*\(\s*a\s*\)']}
+  - {term_id: APOE4, kind: biomarker, label: "APOE ε4 carrier", patterns: ['\bAPOE[- ]?(?:ε|e|epsilon)?4\b', '\bApoE4\b']}
+  - {term_id: AMYLOID_POS, kind: biomarker, label: "amyloid-positive", patterns: ['\bamyloid[- ]positive', '\bamyloid PET[- ]positive', '\bamyloid-?β?\s*(?:positiv|confirmed)']}
+  - {term_id: TAU, kind: biomarker, label: "tau pathology", patterns: ['\btau[- ]PET', '\bp-?tau\s*\d*', '\bphospho-?tau']}
+  - {term_id: HBV_DNA, kind: biomarker, label: "HBV DNA", patterns: ['\bHBV[- ]DNA\b', '\bHBsAg[- ]?(?:positive|\+)', '\bHBeAg']}
+  - {term_id: HCV_GENOTYPE, kind: biomarker, label: "HCV genotype", patterns: ['\b(?:HCV )?genotype\s*[1-6][a-b]?\b']}
+  - {term_id: HIV_VIRAL_LOAD, kind: biomarker, label: "HIV viral load", patterns: ['\bHIV-?1?\s*RNA\b', '\bviral load\b.{0,20}(?:<|≤|>|≥|copies)']}
+  - {term_id: CD4_COUNT, kind: biomarker, label: "CD4 count", patterns: ['\bCD4\+?\s*(?:cell )?count', '\bCD4\b.{0,15}(?:≥|>=|>|<|<=|≤|cells)']}
+  - {term_id: CFTR_F508DEL, kind: biomarker, label: "CFTR F508del", patterns: ['\bF508del\b', '\bΔF508\b', '\bdelta ?F508']}
+  - {term_id: SMN2_COPY, kind: biomarker, label: "SMN2 copy number", patterns: ['\bSMN2\b']}
+  - {term_id: DMD_EXON, kind: biomarker, label: "dystrophin exon-skip amenable", patterns: ['\bexon\s*(?:51|53|45|44)\s*skipping', '\bamenable to exon']}
+  - {term_id: TTR_MUT, kind: biomarker, label: "TTR variant (hATTR)", patterns: ['\bhATTR\b', '\bATTRv\b', '\bTTR (?:mutation|variant)']}
+  # ---------------------------------------------------------------- demographic
+  - {term_id: NEONATE, kind: demographic, label: "neonates", patterns: ['\bneonat(?:e|es|al)\b', '\bnewborns?\b', '\bpreterm\b', '\bpremature infants?\b']}
+  - {term_id: INFANT, kind: demographic, label: "infants", patterns: ['\binfants?\b']}
+  - {term_id: PEDIATRIC, kind: demographic, label: "pediatric / children", patterns: ['\bp(?:a)?ediatric\b', '\bchildren\b', '\bchild\b', '\bchildhood\b']}
+  - {term_id: ADOLESCENT, kind: demographic, label: "adolescents", patterns: ['\badolescen(?:t|ts|ce)\b', '\bteenagers?\b']}
+  - {term_id: YOUNG_ADULT, kind: demographic, label: "young adults", patterns: ['\byoung adults?\b']}
+  - {term_id: ELDERLY, kind: demographic, label: "elderly / older adults", patterns: ['\belderly\b', '\bolder (?:adults?|patients?|people|persons?)\b', '\bgeriatric\b', '\baged?\s*(?:≥|>=|>)\s*(?:65|70|75|80)\b', '\b(?:65|70|75|80)\s*years?\s*(?:of age\s*)?(?:or|and) (?:older|above)']}
+  - {term_id: POSTMENOPAUSAL, kind: demographic, label: "postmenopausal women", patterns: ['\bpost-?menopausal\b']}
+  - {term_id: PREMENOPAUSAL, kind: demographic, label: "premenopausal women", patterns: ['\bpre-?menopausal\b']}
+  - {term_id: PREGNANT, kind: demographic, label: "pregnant women", patterns: ['\bpregnant\b', '\bpregnancy\b']}
+  - {term_id: FEMALE_ONLY, kind: demographic, label: "women only", patterns: ['\bwomen only\b', '\bfemale (?:patients|participants|subjects) only\b']}
+  - {term_id: MALE_ONLY, kind: demographic, label: "men only", patterns: ['\bmen only\b', '\bmale (?:patients|participants|subjects) only\b']}
+  - {term_id: JAPANESE, kind: demographic, label: "Japanese participants", patterns: ['\bJapanese\b']}
+  - {term_id: CHINESE, kind: demographic, label: "Chinese participants", patterns: ['\bChinese\b']}
+  - {term_id: OBESE, kind: demographic, label: "obese / overweight", patterns: ['\bobes(?:e|ity)\b', '\boverweight\b', '\bBMI\s*(?:≥|>=|>)\s*\d+']}
+  # ---------------------------------------------------------------- disease_severity
+  - {term_id: MILD, kind: disease_severity, label: "mild", patterns: ['\bmild\b(?![\s-]*(?:to)?[\s-]*moderate)(?!ly)']}
+  - {term_id: MILD_TO_MODERATE, kind: disease_severity, label: "mild-to-moderate", patterns: ['\bmild[- ]to[- ]moderate\b', '\bmild[- ]moderate\b']}
+  - {term_id: MODERATE, kind: disease_severity, label: "moderate", patterns: ['(?<!to )(?<!to-)(?<!mild )(?<!mild-)\bmoderate\b(?![\s-]*(?:to)?[\s-]*severe)(?!ly)']}
+  - {term_id: MODERATE_TO_SEVERE, kind: disease_severity, label: "moderate-to-severe", patterns: ['\bmoderate(?:ly)?[- ]to[- ]severe\b', '\bmoderate(?:ly)?[- ]severe\b']}
+  - {term_id: SEVERE, kind: disease_severity, label: "severe", patterns: ['(?<!to )(?<!to-)(?<!moderate )(?<!moderate-)(?<!moderately )(?<!very )\bsevere\b(?!ly)']}
+  - {term_id: VERY_SEVERE, kind: disease_severity, label: "very severe", patterns: ['\bvery severe\b']}
+  - {term_id: CRITICAL, kind: disease_severity, label: "critically ill", patterns: ['\bcritically ill\b', '\bcritical(?:ly)? (?:illness|disease)\b']}
+  - {term_id: HIGH_RISK, kind: disease_severity, label: "high-risk", patterns: ['\bhigh[- ]risk\b']}
+  - {term_id: LOW_RISK, kind: disease_severity, label: "low-risk", patterns: ['\blow[- ]risk\b']}
+  - {term_id: NYHA_II_IV, kind: disease_severity, label: "NYHA class II-IV", patterns: ['\bNYHA\b', '\bNew York Heart Association\b']}
+  - {term_id: GOLD_STAGE, kind: disease_severity, label: "GOLD stage", patterns: ['\bGOLD\s*(?:stage|grade|group)?\s*(?:[1-4]|I{1,3}V?|[A-E])\b']}
+  - {term_id: CHILD_PUGH, kind: disease_severity, label: "Child-Pugh class", patterns: ['\bChild[- ]Pugh\b']}
+  - {term_id: ECOG, kind: disease_severity, label: "ECOG performance status", patterns: ['\bECOG\b', '\bKarnofsky\b']}
+  # ---------------------------------------------------------------- prior_therapy
+  - {term_id: TREATMENT_NAIVE, kind: prior_therapy, label: "treatment-naive", patterns: ['\btreatment[- ]na[iï]ve\b', '\btherapy[- ]na[iï]ve\b', '\bpreviously untreated\b', '\bno prior (?:systemic )?(?:therapy|treatment)\b', '\buntreated\b']}
+  - {term_id: BIOLOGIC_NAIVE, kind: prior_therapy, label: "biologic-naive", patterns: ['\bbiologic[- ]na[iï]ve\b', '\bbio-?na[iï]ve\b', '\bbiologic[- ]?(?:therapy )?(?:naive|inexperienced)']}
+  - {term_id: BIOLOGIC_EXPERIENCED, kind: prior_therapy, label: "biologic-experienced", patterns: ['\bbiologic[- ]experienced\b', '\bbio-?experienced\b', '\bbiologic[- ]?(?:therapy )?(?:failure|failed|refractory|exposed)', '\bprior biologic']}
+  - {term_id: TNF_IR, kind: prior_therapy, label: "TNF inhibitor-inadequate response", patterns: ['\bTNF[- ]?IR\b', '\banti-?TNF[- ](?:failure|failed|refractory|inadequate|exposed|experienced)', '\bTNF(?:i| inhibitor)?[- ](?:failure|failed|refractory|inadequate|experienced)', '\binadequate response to (?:one or more )?(?:anti-?TNF|TNF)']}
+  - {term_id: MTX_IR, kind: prior_therapy, label: "methotrexate-inadequate response", patterns: ['\bMTX[- ]?IR\b', '\binadequate response to (?:MTX|methotrexate)', '\bmethotrexate[- ](?:failure|failed|refractory|inadequate)']}
+  - {term_id: CSDMARD_IR, kind: prior_therapy, label: "csDMARD-inadequate response", patterns: ['\b(?:cs)?DMARD[- ]?IR\b', '\binadequate response to (?:one or more )?(?:cs)?DMARDs?']}
+  - {term_id: JAK_EXPERIENCED, kind: prior_therapy, label: "JAK inhibitor-experienced", patterns: ['\bJAK(?:i| inhibitor)?[- ](?:failure|failed|experienced|exposed)']}
+  - {term_id: PLATINUM_PRETREATED, kind: prior_therapy, label: "platinum-pretreated", patterns: ['\bplatinum[- ](?:pretreated|pre-treated|treated|based chemotherapy|refractory|resistant|sensitive|experienced|failure)', '\b(?:after|following|progressed on|failure of) (?:prior )?platinum']}
+  - {term_id: PLATINUM_RESISTANT, kind: prior_therapy, label: "platinum-resistant", patterns: ['\bplatinum[- ]resistant\b', '\bplatinum[- ]refractory\b']}
+  - {term_id: PLATINUM_SENSITIVE, kind: prior_therapy, label: "platinum-sensitive", patterns: ['\bplatinum[- ]sensitive\b']}
+  - {term_id: CPI_PRETREATED, kind: prior_therapy, label: "checkpoint inhibitor-pretreated", patterns: ['\b(?:immune )?checkpoint inhibitor[- ](?:pretreated|pre-treated|treated|refractory|resistant|experienced|failure|exposed)', '\b(?:anti-?PD-?1|PD-?1|PD-?L1|IO)[- ](?:pretreated|refractory|resistant|experienced|failure|exposed|progress)', '\bprior (?:anti-?)?PD-?(?:1|L1)']}
+  - {term_id: ANTHRACYCLINE_PRETREATED, kind: prior_therapy, label: "anthracycline-pretreated", patterns: ['\banthracycline[- ](?:pretreated|pre-treated|treated|containing)', '\bprior anthracycline']}
+  - {term_id: TAXANE_PRETREATED, kind: prior_therapy, label: "taxane-pretreated", patterns: ['\btaxane[- ](?:pretreated|pre-treated|treated|containing|refractory)', '\bprior taxane']}
+  - {term_id: EGFR_TKI_PRETREATED, kind: prior_therapy, label: "EGFR TKI-pretreated", patterns: ['\b(?:EGFR[- ])?TKI[- ](?:pretreated|pre-treated|treated|refractory|resistant|failure|experienced)', '\b(?:after|following|progressed on|failure of) (?:prior )?(?:EGFR[- ])?TKI', '\bosimertinib[- ](?:pretreated|refractory|resistant|failure)', '\bpost-?osimertinib']}
+  - {term_id: CDK46_PRETREATED, kind: prior_therapy, label: "CDK4/6 inhibitor-pretreated", patterns: ['\bCDK4/?6(?:i| inhibitor)?[- ](?:pretreated|refractory|resistant|experienced|failure|exposed)', '\bprior CDK4/?6']}
+  - {term_id: PARP_PRETREATED, kind: prior_therapy, label: "PARP inhibitor-pretreated", patterns: ['\bPARP(?:i| inhibitor)?[- ](?:pretreated|refractory|resistant|experienced|failure|exposed)', '\bprior PARP']}
+  - {term_id: LENALIDOMIDE_REFRACTORY, kind: prior_therapy, label: "lenalidomide-refractory", patterns: ['\blenalidomide[- ]refractory\b']}
+  - {term_id: PI_REFRACTORY, kind: prior_therapy, label: "proteasome inhibitor-refractory", patterns: ['\bproteasome inhibitor[- ](?:refractory|exposed|pretreated)', '\bPI[- ]refractory\b', '\bbortezomib[- ]refractory\b']}
+  - {term_id: ANTI_CD38_REFRACTORY, kind: prior_therapy, label: "anti-CD38-refractory", patterns: ['\banti-?CD38[- ](?:refractory|exposed|pretreated)', '\bdaratumumab[- ](?:refractory|exposed|pretreated)']}
+  - {term_id: TRIPLE_CLASS_REFRACTORY, kind: prior_therapy, label: "triple-class refractory", patterns: ['\btriple[- ]class[- ](?:refractory|exposed)', '\bpenta[- ](?:refractory|exposed)']}
+  - {term_id: BTKI_PRETREATED, kind: prior_therapy, label: "BTK inhibitor-pretreated", patterns: ['\bBTK(?:i| inhibitor)?[- ](?:pretreated|refractory|resistant|experienced|failure|exposed|intolerant)', '\bprior BTK']}
+  - {term_id: CART_PRETREATED, kind: prior_therapy, label: "prior CAR-T", patterns: ['\bprior CAR-?T\b', '\bCAR-?T[- ](?:refractory|exposed|pretreated|failure)', '\bafter CAR-?T']}
+  - {term_id: PRIOR_TRANSPLANT, kind: prior_therapy, label: "prior transplant", patterns: ['\bprior (?:stem cell |bone marrow |autologous |allogeneic )?transplant', '\bpost-?transplant\b', '\btransplant[- ](?:eligible|ineligible)']}
+  - {term_id: TRANSPLANT_INELIGIBLE, kind: prior_therapy, label: "transplant-ineligible", patterns: ['\btransplant[- ]ineligible\b', '\bnot eligible for (?:stem cell |autologous )?transplant', '\bineligible for (?:stem cell |autologous )?transplant']}
+  - {term_id: STEROID_DEPENDENT, kind: prior_therapy, label: "steroid-dependent", patterns: ['\b(?:cortico)?steroid[- ]dependent\b', '\bglucocorticoid[- ]dependent\b']}
+  - {term_id: STEROID_REFRACTORY, kind: prior_therapy, label: "steroid-refractory", patterns: ['\b(?:cortico)?steroid[- ](?:refractory|resistant)\b', '\bglucocorticoid[- ](?:refractory|resistant)\b']}
+  - {term_id: STATIN_INTOLERANT, kind: prior_therapy, label: "statin-intolerant", patterns: ['\bstatin[- ]intoleran']}
+  - {term_id: INSULIN_NAIVE, kind: prior_therapy, label: "insulin-naive", patterns: ['\binsulin[- ]na[iï]ve\b']}
+  - {term_id: METFORMIN_BACKGROUND, kind: prior_therapy, label: "on metformin", patterns: ['\b(?:on|with|add-?on to) (?:stable )?metformin\b', '\bmetformin (?:monotherapy|background)']}
+  - {term_id: ART_NAIVE, kind: prior_therapy, label: "ART-naive", patterns: ['\b(?:ART|antiretroviral)[- ]na[iï]ve\b', '\btreatment[- ]na[iï]ve HIV']}
+  - {term_id: VIROLOGICALLY_SUPPRESSED, kind: prior_therapy, label: "virologically suppressed", patterns: ['\bvirolog(?:ic|ically) suppress']}
+  - {term_id: TREATMENT_RESISTANT, kind: prior_therapy, label: "treatment-resistant", patterns: ['\btreatment[- ]resistant\b', '\btreatment[- ]refractory\b', '\bdrug[- ]resistant\b']}
+  - {term_id: INADEQUATE_RESPONSE, kind: prior_therapy, label: "inadequate response to prior therapy", patterns: ['\binadequate(?:ly)? (?:response|responders?|controlled)\b', '\binadequately controlled\b', '\buncontrolled (?:on|despite)\b']}
+  # ---------------------------------------------------------------- line_of_therapy
+  - {term_id: FIRST_LINE, kind: line_of_therapy, label: "first-line", patterns: ['\bfirst[- ]line\b', '\b1(?:st)?[- ]?L\b', '\bfront[- ]line\b', '\binitial (?:therapy|treatment)\b']}
+  - {term_id: SECOND_LINE, kind: line_of_therapy, label: "second-line", patterns: ['\bsecond[- ]line\b', '\b2(?:nd)?[- ]?L\b']}
+  - {term_id: THIRD_LINE_PLUS, kind: line_of_therapy, label: "third-line or later", patterns: ['\bthird[- ]line\b', '\b3(?:rd)?[- ]?L\+?\b', '\bthird[- ]line or (?:later|beyond)', '\blater[- ]line\b', '\bheavily pretreated\b', '\b(?:≥|>=|at least)\s*(?:2|3|two|three) prior (?:lines|therapies|regimens)']}
+  - {term_id: MAINTENANCE, kind: line_of_therapy, label: "maintenance", patterns: ['\bmaintenance (?:therapy|treatment|setting|phase)?\b']}
+  - {term_id: ADJUVANT, kind: line_of_therapy, label: "adjuvant", patterns: ['\b(?<!neo)adjuvant\b']}
+  - {term_id: NEOADJUVANT, kind: line_of_therapy, label: "neoadjuvant", patterns: ['\bneo-?adjuvant\b', '\bperioperative\b', '\bpre-?operative (?:therapy|treatment|chemotherapy)']}
+  - {term_id: CONSOLIDATION, kind: line_of_therapy, label: "consolidation", patterns: ['\bconsolidation\b']}
+  - {term_id: INDUCTION, kind: line_of_therapy, label: "induction", patterns: ['\binduction (?:therapy|treatment|phase|chemotherapy|regimen)\b']}
+  - {term_id: SALVAGE, kind: line_of_therapy, label: "salvage", patterns: ['\bsalvage\b']}
+  - {term_id: BRIDGING, kind: line_of_therapy, label: "bridging", patterns: ['\bbridging (?:therapy|treatment)\b']}
+  - {term_id: ADD_ON, kind: line_of_therapy, label: "add-on therapy", patterns: ['\badd-?on\b', '\badjunct(?:ive)?\b']}
+  - {term_id: MONOTHERAPY, kind: line_of_therapy, label: "monotherapy", patterns: ['\bmonotherapy\b', '\bsingle[- ]agent\b']}
+  # ---------------------------------------------------------------- disease_stage
+  - {term_id: NEWLY_DIAGNOSED, kind: disease_stage, label: "newly diagnosed", patterns: ['\bnewly[- ]diagnosed\b', '\bnew(?:ly)? onset\b', '\brecent(?:ly)?[- ]diagnosed\b', '\bde novo\b']}
+  - {term_id: EARLY_STAGE, kind: disease_stage, label: "early-stage", patterns: ['\bearly[- ]stage\b', '\bstage\s*(?:I|1|II|2)[AB]?\b(?![- ]?(?:I|V))', '\bearly (?:breast cancer|disease|\w+ cancer)\b']}
+  - {term_id: LOCALLY_ADVANCED, kind: disease_stage, label: "locally advanced", patterns: ['\blocally[- ]advanced\b', '\bstage\s*(?:III|3)[ABC]?\b']}
+  - {term_id: ADVANCED, kind: disease_stage, label: "advanced", patterns: ['\badvanced\b(?![- ]stage )']}
+  - {term_id: UNRESECTABLE, kind: disease_stage, label: "unresectable", patterns: ['\bunresectable\b', '\binoperable\b', '\bnon-?resectable\b']}
+  - {term_id: RESECTABLE, kind: disease_stage, label: "resectable", patterns: ['\b(?<!un)resectable\b', '\boperable\b']}
+  - {term_id: METASTATIC, kind: disease_stage, label: "metastatic", patterns: ['\bmetastatic\b', '\bmetastas(?:is|es)\b', '\bstage\s*(?:IV|4)[AB]?\b']}
+  - {term_id: RELAPSED, kind: disease_stage, label: "relapsed", patterns: ['\brelapsed\b(?!\s*(?:/|or|and)\s*refractory)', '\brelapsing\b']}
+  - {term_id: REFRACTORY, kind: disease_stage, label: "refractory", patterns: ['(?<!relapsed[/ ])(?<!relapsed or )(?<!relapsed and )\brefractory\b']}
+  - {term_id: RELAPSED_REFRACTORY, kind: disease_stage, label: "relapsed/refractory", patterns: ['\brelapsed\s*(?:/|or|and|,)\s*refractory\b', '\bR/R\b', '\bRRMM\b', '\bR/R MM\b']}
+  - {term_id: RECURRENT, kind: disease_stage, label: "recurrent", patterns: ['\brecurrent\b', '\brecurrence\b']}
+  - {term_id: PROGRESSIVE, kind: disease_stage, label: "progressive", patterns: ['\bprogressive (?:disease|\w+)\b', '\bdisease progression\b', '\bprogressed (?:on|after|following)\b']}
+  - {term_id: CHRONIC, kind: disease_stage, label: "chronic", patterns: ['\bchronic\b']}
+  - {term_id: ACUTE, kind: disease_stage, label: "acute", patterns: ['\bacute\b']}
+  - {term_id: STABLE, kind: disease_stage, label: "stable disease", patterns: ['\bstable (?:disease|\w+)\b', '\bclinically stable\b']}
+  - {term_id: MRD_NEGATIVE, kind: disease_stage, label: "MRD-negative", patterns: ['\bMRD[- ]negative\b', '\bMRD-\b']}
+  - {term_id: SMOLDERING, kind: disease_stage, label: "smoldering", patterns: ['\bsmou?ldering\b']}
+  - {term_id: HORMONE_SENSITIVE, kind: disease_stage, label: "hormone-sensitive", patterns: ['\bhormone[- ]sensitive\b', '\bcastration[- ]sensitive\b', '\b(?:m)?HSPC\b', '\bCSPC\b']}
+  - {term_id: CASTRATION_RESISTANT, kind: disease_stage, label: "castration-resistant", patterns: ['\bcastration[- ]resistant\b', '\b(?:m|nm)?CRPC\b']}
+  - {term_id: EXTENSIVE_STAGE, kind: disease_stage, label: "extensive-stage", patterns: ['\bextensive[- ]stage\b', '\bES-?SCLC\b']}
+  - {term_id: LIMITED_STAGE, kind: disease_stage, label: "limited-stage", patterns: ['\blimited[- ]stage\b', '\bLS-?SCLC\b']}
+  - {term_id: NON_METASTATIC, kind: disease_stage, label: "non-metastatic", patterns: ['\bnon-?metastatic\b']}
+  - {term_id: BRAIN_METS, kind: disease_stage, label: "brain metastases", patterns: ['\bbrain metasta', '\bCNS metasta', '\bleptomeningeal']}
+  - {term_id: PRODROMAL, kind: disease_stage, label: "prodromal / preclinical", patterns: ['\bprodromal\b', '\bpreclinical\b', '\bpresymptomatic\b']}
+  - {term_id: MCI, kind: disease_stage, label: "mild cognitive impairment", patterns: ['\bmild cognitive impairment\b', '\bMCI\b']}

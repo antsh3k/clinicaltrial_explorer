@@ -1,0 +1,100 @@
+# Curated company alias groups (spec App. B.6): name variants that share no token, plus a short, dated
+# list of completed acquisitions. Each entry is a curated DECISION, disclosed in the README. Members are
+# matched after the suffix-pop normalization (so write them in normalized form: lowercase, no legal forms).
+# `canonical` is the display name.
+groups:
+  - canonical: "Johnson & Johnson (Janssen)"
+    members: [johnson johnson, j j, jnj, janssen, janssen cilag, janssen biotech, janssen scientific affairs,
+              janssen vaccines prevention, janssen infectious diseases, ortho mcneil janssen scientific affairs,
+              xian janssen, janssen ortho, janssen alzheimer immunotherapy, janssen korea, janssen pharmaceutica,
+              janssen sciences ireland, johnson johnson pharmaceutical, johnson johnson consumer,
+              johnson johnson vision care, johnson johnson surgical vision, johnson johnson enterprise innovation,
+              actelion, momenta, abiomed]
+    note: "Janssen is J&J's pharmaceutical arm; Actelion acq. 2017; Momenta acq. 2020; Abiomed acq. 2022"
+  - canonical: "Bristol Myers Squibb"
+    members: [bristol myers squibb, bristol myers, bms, celgene, juno, karuna, mirati, turning point]
+    note: "Celgene acq. 2019 (Juno via Celgene); Karuna acq. 2024; Mirati acq. 2024; Turning Point acq. 2022"
+  - canonical: "Merck & Co. (MSD)"
+    members: [merck sharp dohme, msd, merck co, merck, schering plough, organon, acceleron, arqule, cubist, trius,
+              peloton, immune design, optimer, prometheus, oncoimmune, cidara, afferent, verona, harpoon, idenix,
+              vaxart, velosbio, pandion, imago biosciences]
+    note: "Merck & Co. / MSD — kept DISTINCT from Merck KGaA. Bare 'merck' on CT.gov refers to MSD (Merck KGaA always self-identifies with 'KGaA'/'Darmstadt'). Schering-Plough acq. 2009; Acceleron 2021; Prometheus 2023; Harpoon 2024; Verona 2025"
+  - canonical: "Merck KGaA (EMD Serono)"
+    members: [merck kgaa, merck kgaa darmstadt germany, merck healthcare kgaa, emd serono, merck serono, serono, springworks]
+    note: "Darmstadt Merck; SpringWorks acq. 2025"
+  - canonical: "GSK"
+    members: [glaxosmithkline, gsk, glaxo wellcome, glaxo, smithkline beecham, stiefel, sirtris, human genome sciences,
+              bellus, sierra oncology, tesaro, affinivax, viiv]
+    note: "Tesaro acq. 2019; Sierra 2022; Affinivax 2022; Bellus 2023. ViiV Healthcare is majority-GSK"
+  - canonical: "AstraZeneca"
+    members: [astrazeneca, azn, astra zeneca, medimmune, alexion, acerta, fusion, gracell, icosavax, cincor, amolyt]
+    note: "MedImmune is AZ's biologics arm; Alexion acq. 2021; Acerta 2016; Fusion 2024; Gracell 2024"
+  - canonical: "Roche (Genentech)"
+    members: [roche, hoffmann la roche, f hoffmann la roche, genentech, chugai, spark, foundation medicine, ignyta, flatiron]
+    note: "Genentech wholly owned since 2009; Chugai majority-owned; Spark acq. 2019; Ignyta 2018"
+  - canonical: "Sanofi"
+    members: [sanofi, sanofi aventis, sanofi pasteur, genzyme, aventis, ablynx, bioverativ, principia, kadmon, kymab,
+              synthorx, translate bio, provention bio, inhibrx, amunix, tidal, kiadis]
+    note: "Genzyme acq. 2011; Ablynx 2018; Bioverativ 2018; Principia 2020; Kadmon 2021; Provention 2023; Inhibrx 2024"
+  - canonical: "Pfizer"
+    members: [pfizer, wyeth, hospira, seagen, array biopharma, arena, biohaven, global blood therapeutics, trillium, medivation,
+              anacor, upjohn, pharmacia, warner lambert, parke davis, king]
+    note: "Wyeth acq. 2009; Hospira 2015; Medivation 2016; Anacor 2016; Array 2019; Trillium 2021; Arena 2022; Biohaven 2022; GBT 2022; Seagen 2023"
+  - canonical: "AbbVie"
+    members: [abbvie, allergan, abbott (prior sponsor), naurex, durata, stemcentrx, cerevel, immunogen, landos, forest]
+    note: "Spun out of Abbott 2013 (Abbott Laboratories itself stays distinct); Allergan acq. 2020 (Forest via Allergan); ImmunoGen 2024; Cerevel 2024"
+  - canonical: "Takeda"
+    members: [takeda, shire, baxalta, millennium, nycomed, ariad, tigenix, dyax, nimbus lakshmi]
+    note: "Millennium acq. 2008; Nycomed 2011; Ariad 2017; Shire 2019 (Baxalta/Dyax via Shire)"
+  - canonical: "Eli Lilly"
+    members: [eli lilly, lilly, eli lilly and, loxo oncology, loxo, dice, point biopharma, morphic, versanis, imclone, dermira, prevail]
+    note: "ImClone acq. 2008; Loxo 2019; Dermira 2020; Prevail 2021; DICE 2023; POINT 2023; Morphic 2024"
+  - canonical: "Gilead"
+    members: [gilead, gilead sciences, kite, kite pharma, immunomedics, forty seven, cymabay, myr, arcus]
+    note: "Kite acq. 2017; Forty Seven 2020; Immunomedics 2020; MYR 2021; CymaBay 2024. Arcus is a partner, kept for CT.gov co-listing"
+  - canonical: "Amgen"
+    members: [amgen, horizon, horizon therapeutics, chemocentryx, five prime, teneobio, onyx, micromet, immunex]
+    note: "Immunex acq. 2002; Onyx 2013; Five Prime 2021; Teneobio 2021; ChemoCentryx 2022; Horizon 2023"
+  - canonical: "Novartis"
+    members: [novartis, novartis vaccines, novartis gene therapies, avexis, alcon (pre-2019), medicines, the medicines,
+              endocyte, advanced accelerator applications, chinook, morphosys, mariana]
+    note: "AveXis acq. 2018; Endocyte 2018; AAA 2018; The Medicines Company 2020; Chinook 2023; MorphoSys 2024; Mariana 2024. Sandoz spun out 2023 and Alcon 2019 — both kept DISTINCT"
+  - canonical: "Boehringer Ingelheim"
+    members: [boehringer ingelheim, boehringer]
+  - canonical: "Bayer"
+    members: [bayer, bayer healthcare, bayer schering, schering ag, algeta, blueRock, asklepios, vividion]
+    note: "Schering AG acq. 2006; Algeta 2014; BlueRock 2019; AskBio 2020; Vividion 2021"
+  - canonical: "Astellas"
+    members: [astellas, astellas pharma, astellas institute for regenerative medicine, astellas gene therapies, audentes, iota, xyphos, ganymed, agensys, ocata]
+    note: "Ganymed acq. 2016; Ocata 2016; Agensys 2007; Audentes 2020; Iota 2022; Xyphos 2019"
+  - canonical: "Daiichi Sankyo"
+    members: [daiichi sankyo, daiichi, sankyo, plexxikon, ambit]
+  - canonical: "Biogen"
+    members: [biogen, biogen idec, idec, nightstar, reata, hi bio]
+    note: "Nightstar acq. 2019; Reata 2023; HI-Bio 2024"
+  - canonical: "Regeneron"
+    members: [regeneron, checkmate, 2seventy bio]
+    note: "Checkmate acq. 2022; 2seventy oncology assets 2024"
+  - canonical: "Vertex"
+    members: [vertex, alpine immune sciences, viacyte]
+  - canonical: "UCB"
+    members: [ucb, ucb biopharma, ucb biosciences, ucb japan, zogenix, ra pharmaceuticals, ra pharma]
+    note: "Ra Pharma acq. 2020; Zogenix 2022"
+  - canonical: "Teva"
+    members: [teva, teva branded pharmaceutical products r d, cephalon, actavis, ratiopharm, auspex, ivax]
+  - canonical: "Viatris"
+    members: [viatris, mylan, upjohn (viatris), pfizer s upjohn]
+    note: "Mylan + Upjohn merged 2020. 'Pfizer's Upjohn has merged with Mylan to form Viatris Inc.' on CT.gov"
+  - canonical: "Jazz"
+    members: [jazz, jazz pharmaceuticals, gw pharmaceuticals, gw research, celator, zymeworks (jazz)]
+    note: "GW acq. 2021"
+  - canonical: "Otsuka"
+    members: [otsuka, otsuka america, otsuka pharmaceutical development commercialization, taiho, astex, visterra]
+  - canonical: "Ipsen"
+    members: [ipsen, ipsen biopharmaceuticals, ipsen bioscience, clementia, albireo, epizyme]
+  - canonical: "Servier"
+    members: [servier, institut de recherches internationales servier, les laboratoires servier, agios oncology]
+  - canonical: "Mallinckrodt"
+    members: [mallinckrodt, mallinckrodt hospital products, stratatech, infacare, sucampo, questcor]
+  - canonical: "BridgeBio"
+    members: [bridgebio, bridgebio pharma, eidos, qed, navire, ml bio]

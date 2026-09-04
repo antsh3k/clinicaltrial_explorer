@@ -1,0 +1,645 @@
+# Curated receptor/marker name → HGNC-style gene symbol pairs (spec §6.3). The `targets` table is seeded
+# from ChEMBL component gene symbols at Phase 3a; these aliases let LLM-tier and query-side names such as
+# "PD-1" or "HER2" resolve to the same symbol namespace. Keys are matched after casefolding and removing
+# non-alphanumerics.
+aliases:
+  - {alias: "PD-1", symbol: PDCD1}
+  - {alias: "PD1", symbol: PDCD1}
+  - {alias: "PD-L1", symbol: CD274}
+  - {alias: "PDL1", symbol: CD274}
+  - {alias: "B7-H1", symbol: CD274}
+  - {alias: "PD-L2", symbol: PDCD1LG2}
+  - {alias: "HER2", symbol: ERBB2}
+  - {alias: "HER2/neu", symbol: ERBB2}
+  - {alias: "neu", symbol: ERBB2}
+  - {alias: "HER3", symbol: ERBB3}
+  - {alias: "HER1", symbol: EGFR}
+  - {alias: "ErbB1", symbol: EGFR}
+  - {alias: "VEGF", symbol: VEGFA}
+  - {alias: "VEGF-A", symbol: VEGFA}
+  - {alias: "VEGFR2", symbol: KDR}
+  - {alias: "VEGFR-2", symbol: KDR}
+  - {alias: "VEGFR1", symbol: FLT1}
+  - {alias: "VEGFR3", symbol: FLT4}
+  - {alias: "CTLA-4", symbol: CTLA4}
+  - {alias: "TNF-alpha", symbol: TNF}
+  - {alias: "TNFα", symbol: TNF}
+  - {alias: "TNF", symbol: TNF}
+  - {alias: "IL-6R", symbol: IL6R}
+  - {alias: "IL-6", symbol: IL6}
+  - {alias: "IL-17A", symbol: IL17A}
+  - {alias: "IL-17", symbol: IL17A}
+  - {alias: "IL-23", symbol: IL23A}
+  - {alias: "IL-23p19", symbol: IL23A}
+  - {alias: "IL-4Rα", symbol: IL4R}
+  - {alias: "IL-4R", symbol: IL4R}
+  - {alias: "IL-5", symbol: IL5}
+  - {alias: "IL-13", symbol: IL13}
+  - {alias: "IL-1β", symbol: IL1B}
+  - {alias: "IL-2", symbol: IL2}
+  - {alias: "IL-2R", symbol: IL2RA}
+  - {alias: "CD25", symbol: IL2RA}
+  - {alias: "c-Met", symbol: MET}
+  - {alias: "cMet", symbol: MET}
+  - {alias: "HGFR", symbol: MET}
+  - {alias: "BCMA", symbol: TNFRSF17}
+  - {alias: "CD19", symbol: CD19}
+  - {alias: "CD20", symbol: MS4A1}
+  - {alias: "CD38", symbol: CD38}
+  - {alias: "CD30", symbol: TNFRSF8}
+  - {alias: "CD33", symbol: CD33}
+  - {alias: "CD22", symbol: CD22}
+  - {alias: "CD3", symbol: CD3E}
+  - {alias: "CD47", symbol: CD47}
+  - {alias: "TROP2", symbol: TACSTD2}
+  - {alias: "TROP-2", symbol: TACSTD2}
+  - {alias: "Nectin-4", symbol: NECTIN4}
+  - {alias: "Claudin 18.2", symbol: CLDN18}
+  - {alias: "CLDN18.2", symbol: CLDN18}
+  - {alias: "LAG-3", symbol: LAG3}
+  - {alias: "TIGIT", symbol: TIGIT}
+  - {alias: "TIM-3", symbol: HAVCR2}
+  - {alias: "GLP-1R", symbol: GLP1R}
+  - {alias: "GLP-1 receptor", symbol: GLP1R}
+  - {alias: "GLP-1", symbol: GLP1R}
+  - {alias: "GIP receptor", symbol: GIPR}
+  - {alias: "GIPR", symbol: GIPR}
+  - {alias: "SGLT2", symbol: SLC5A2}
+  - {alias: "SGLT1", symbol: SLC5A1}
+  - {alias: "DPP-4", symbol: DPP4}
+  - {alias: "DPP4", symbol: DPP4}
+  - {alias: "PCSK9", symbol: PCSK9}
+  - {alias: "Factor Xa", symbol: F10}
+  - {alias: "FXa", symbol: F10}
+  - {alias: "Factor XI", symbol: F11}
+  - {alias: "Factor XIa", symbol: F11}
+  - {alias: "thrombin", symbol: F2}
+  - {alias: "Factor IX", symbol: F9}
+  - {alias: "Factor VIII", symbol: F8}
+  - {alias: "P2Y12", symbol: P2RY12}
+  - {alias: "COX-2", symbol: PTGS2}
+  - {alias: "COX-1", symbol: PTGS1}
+  - {alias: "PDE5", symbol: PDE5A}
+  - {alias: "PDE4", symbol: PDE4B}
+  - {alias: "PDE4B", symbol: PDE4B}
+  - {alias: "PDE4D", symbol: PDE4D}
+  - {alias: "LPA1", symbol: LPAR1}
+  - {alias: "LPAR1", symbol: LPAR1}
+  - {alias: "αvβ6 integrin", symbol: ITGB6}
+  - {alias: "alpha-v beta-6", symbol: ITGB6}
+  - {alias: "αvβ6", symbol: ITGB6}
+  - {alias: "integrin beta 6", symbol: ITGB6}
+  - {alias: "αvβ1", symbol: ITGB1}
+  - {alias: "autotaxin", symbol: ENPP2}
+  - {alias: "ATX", symbol: ENPP2}
+  - {alias: "galectin-3", symbol: LGALS3}
+  - {alias: "CTGF", symbol: CCN2}
+  - {alias: "CCN2", symbol: CCN2}
+  - {alias: "TGF-β", symbol: TGFB1}
+  - {alias: "TGF-beta", symbol: TGFB1}
+  - {alias: "TGFβ1", symbol: TGFB1}
+  - {alias: "JAK1", symbol: JAK1}
+  - {alias: "JAK2", symbol: JAK2}
+  - {alias: "JAK3", symbol: JAK3}
+  - {alias: "TYK2", symbol: TYK2}
+  - {alias: "BTK", symbol: BTK}
+  - {alias: "KRAS G12C", symbol: KRAS}
+  - {alias: "KRAS G12D", symbol: KRAS}
+  - {alias: "KRAS", symbol: KRAS}
+  - {alias: "BRAF V600E", symbol: BRAF}
+  - {alias: "BRAF", symbol: BRAF}
+  - {alias: "MEK", symbol: MAP2K1}
+  - {alias: "MEK1", symbol: MAP2K1}
+  - {alias: "MEK2", symbol: MAP2K2}
+  - {alias: "ALK", symbol: ALK}
+  - {alias: "ROS1", symbol: ROS1}
+  - {alias: "RET", symbol: RET}
+  - {alias: "NTRK", symbol: NTRK1}
+  - {alias: "TRK", symbol: NTRK1}
+  - {alias: "FGFR2", symbol: FGFR2}
+  - {alias: "FGFR3", symbol: FGFR3}
+  - {alias: "FGFR1", symbol: FGFR1}
+  - {alias: "IDH1", symbol: IDH1}
+  - {alias: "IDH2", symbol: IDH2}
+  - {alias: "FLT3", symbol: FLT3}
+  - {alias: "PARP", symbol: PARP1}
+  - {alias: "PARP1", symbol: PARP1}
+  - {alias: "CDK4", symbol: CDK4}
+  - {alias: "CDK6", symbol: CDK6}
+  - {alias: "CDK4/6", symbol: CDK4}
+  - {alias: "PI3K", symbol: PIK3CA}
+  - {alias: "PI3Kα", symbol: PIK3CA}
+  - {alias: "PI3Kδ", symbol: PIK3CD}
+  - {alias: "AKT", symbol: AKT1}
+  - {alias: "mTOR", symbol: MTOR}
+  - {alias: "BCL-2", symbol: BCL2}
+  - {alias: "BCL2", symbol: BCL2}
+  - {alias: "BCR-ABL", symbol: ABL1}
+  - {alias: "ABL", symbol: ABL1}
+  - {alias: "KIT", symbol: KIT}
+  - {alias: "c-KIT", symbol: KIT}
+  - {alias: "PDGFRα", symbol: PDGFRA}
+  - {alias: "PDGFRA", symbol: PDGFRA}
+  - {alias: "AR", symbol: AR}
+  - {alias: "androgen receptor", symbol: AR}
+  - {alias: "ER", symbol: ESR1}
+  - {alias: "estrogen receptor", symbol: ESR1}
+  - {alias: "ERα", symbol: ESR1}
+  - {alias: "PR", symbol: PGR}
+  - {alias: "progesterone receptor", symbol: PGR}
+  - {alias: "CGRP", symbol: CALCA}
+  - {alias: "CGRP receptor", symbol: CALCRL}
+  - {alias: "amyloid beta", symbol: APP}
+  - {alias: "Aβ", symbol: APP}
+  - {alias: "amyloid-β", symbol: APP}
+  - {alias: "tau", symbol: MAPT}
+  - {alias: "alpha-synuclein", symbol: SNCA}
+  - {alias: "α-synuclein", symbol: SNCA}
+  - {alias: "SMN2", symbol: SMN2}
+  - {alias: "SMN", symbol: SMN1}
+  - {alias: "complement C5", symbol: C5}
+  - {alias: "C5", symbol: C5}
+  - {alias: "complement C3", symbol: C3}
+  - {alias: "C3", symbol: C3}
+  - {alias: "complement factor B", symbol: CFB}
+  - {alias: "factor B", symbol: CFB}
+  - {alias: "complement factor D", symbol: CFD}
+  - {alias: "FcRn", symbol: FCGRT}
+  - {alias: "IgE", symbol: IGHE}
+  - {alias: "TSLP", symbol: TSLP}
+  - {alias: "IL-33", symbol: IL33}
+  - {alias: "ST2", symbol: IL1RL1}
+  - {alias: "S1P1", symbol: S1PR1}
+  - {alias: "S1P receptor", symbol: S1PR1}
+  - {alias: "α4β7 integrin", symbol: ITGB7}
+  - {alias: "integrin α4β7", symbol: ITGB7}
+  - {alias: "BAFF", symbol: TNFSF13B}
+  - {alias: "BLyS", symbol: TNFSF13B}
+  - {alias: "CD40L", symbol: CD40LG}
+  - {alias: "CD40", symbol: CD40}
+  - {alias: "OX40", symbol: TNFRSF4}
+  - {alias: "4-1BB", symbol: TNFRSF9}
+  - {alias: "CD137", symbol: TNFRSF9}
+  - {alias: "GITR", symbol: TNFRSF18}
+  - {alias: "NKG2A", symbol: KLRC1}
+  - {alias: "CD73", symbol: NT5E}
+  - {alias: "A2A", symbol: ADORA2A}
+  - {alias: "A2A receptor", symbol: ADORA2A}
+  - {alias: "STING", symbol: STING1}
+  - {alias: "TLR7", symbol: TLR7}
+  - {alias: "TLR9", symbol: TLR9}
+  - {alias: "5-HT2A", symbol: HTR2A}
+  - {alias: "5-HT1A", symbol: HTR1A}
+  - {alias: "D2", symbol: DRD2}
+  - {alias: "dopamine D2", symbol: DRD2}
+  - {alias: "D2 receptor", symbol: DRD2}
+  - {alias: "NMDA", symbol: GRIN1}
+  - {alias: "NMDA receptor", symbol: GRIN1}
+  - {alias: "GABA-A", symbol: GABRA1}
+  - {alias: "GABAA", symbol: GABRA1}
+  - {alias: "orexin", symbol: HCRTR2}
+  - {alias: "orexin receptor", symbol: HCRTR2}
+  - {alias: "OX2R", symbol: HCRTR2}
+  - {alias: "mu opioid receptor", symbol: OPRM1}
+  - {alias: "MOR", symbol: OPRM1}
+  - {alias: "μ-opioid", symbol: OPRM1}
+  - {alias: "kappa opioid receptor", symbol: OPRK1}
+  - {alias: "cannabinoid receptor 1", symbol: CNR1}
+  - {alias: "CB1", symbol: CNR1}
+  - {alias: "CB2", symbol: CNR2}
+  - {alias: "TRPV1", symbol: TRPV1}
+  - {alias: "Nav1.8", symbol: SCN10A}
+  - {alias: "Nav1.7", symbol: SCN9A}
+  - {alias: "P2X3", symbol: P2RX3}
+  - {alias: "NK1", symbol: TACR1}
+  - {alias: "NK1 receptor", symbol: TACR1}
+  - {alias: "NK3", symbol: TACR3}
+  - {alias: "NK3 receptor", symbol: TACR3}
+  - {alias: "MC4R", symbol: MC4R}
+  - {alias: "amylin", symbol: IAPP}
+  - {alias: "glucagon receptor", symbol: GCGR}
+  - {alias: "GCGR", symbol: GCGR}
+  - {alias: "FGF21", symbol: FGF21}
+  - {alias: "THR-β", symbol: THRB}
+  - {alias: "THRβ", symbol: THRB}
+  - {alias: "thyroid hormone receptor beta", symbol: THRB}
+  - {alias: "PPARα", symbol: PPARA}
+  - {alias: "PPARγ", symbol: PPARG}
+  - {alias: "PPAR gamma", symbol: PPARG}
+  - {alias: "PPARδ", symbol: PPARD}
+  - {alias: "FXR", symbol: NR1H4}
+  - {alias: "farnesoid X receptor", symbol: NR1H4}
+  - {alias: "ACC", symbol: ACACA}
+  - {alias: "Lp(a)", symbol: LPA}
+  - {alias: "lipoprotein(a)", symbol: LPA}
+  - {alias: "apoC-III", symbol: APOC3}
+  - {alias: "ANGPTL3", symbol: ANGPTL3}
+  - {alias: "CETP", symbol: CETP}
+  - {alias: "HMG-CoA reductase", symbol: HMGCR}
+  - {alias: "ACE", symbol: ACE}
+  - {alias: "angiotensin converting enzyme", symbol: ACE}
+  - {alias: "AT1", symbol: AGTR1}
+  - {alias: "angiotensin II receptor", symbol: AGTR1}
+  - {alias: "neprilysin", symbol: MME}
+  - {alias: "aldosterone synthase", symbol: CYP11B2}
+  - {alias: "mineralocorticoid receptor", symbol: NR3C2}
+  - {alias: "MR", symbol: NR3C2}
+  - {alias: "cardiac myosin", symbol: MYH7}
+  - {alias: "TTR", symbol: TTR}
+  - {alias: "transthyretin", symbol: TTR}
+  - {alias: "sGC", symbol: GUCY1A1}
+  - {alias: "soluble guanylate cyclase", symbol: GUCY1A1}
+  - {alias: "endothelin receptor", symbol: EDNRA}
+  - {alias: "ETA", symbol: EDNRA}
+  - {alias: "ETB", symbol: EDNRB}
+  - {alias: "IL-11", symbol: IL11}
+  - {alias: "HIF-2α", symbol: EPAS1}
+  - {alias: "HIF2A", symbol: EPAS1}
+  - {alias: "HIF-PH", symbol: EGLN1}
+  - {alias: "EPO receptor", symbol: EPOR}
+  - {alias: "erythropoietin receptor", symbol: EPOR}
+  - {alias: "TPO receptor", symbol: MPL}
+  - {alias: "c-Mpl", symbol: MPL}
+  - {alias: "hepcidin", symbol: HAMP}
+  - {alias: "TMPRSS6", symbol: TMPRSS6}
+  - {alias: "hemoglobin S", symbol: HBB}
+  - {alias: "HbS", symbol: HBB}
+  - {alias: "pyruvate kinase", symbol: PKLR}
+  - {alias: "PKR", symbol: PKLR}
+  - {alias: "menin", symbol: MEN1}
+  - {alias: "EZH2", symbol: EZH2}
+  - {alias: "XPO1", symbol: XPO1}
+  - {alias: "exportin 1", symbol: XPO1}
+  - {alias: "proteasome", symbol: PSMB5}
+  - {alias: "20S proteasome", symbol: PSMB5}
+  - {alias: "cereblon", symbol: CRBN}
+  - {alias: "CRBN", symbol: CRBN}
+  - {alias: "GPRC5D", symbol: GPRC5D}
+  - {alias: "FcRH5", symbol: FCRL5}
+  - {alias: "FCRL5", symbol: FCRL5}
+  - {alias: "SLAMF7", symbol: SLAMF7}
+  - {alias: "CS1", symbol: SLAMF7}
+  - {alias: "CD79b", symbol: CD79B}
+  - {alias: "CD79B", symbol: CD79B}
+  - {alias: "CD123", symbol: IL3RA}
+  - {alias: "CLL-1", symbol: CLEC12A}
+  - {alias: "CD70", symbol: CD70}
+  - {alias: "PSMA", symbol: FOLH1}
+  - {alias: "STEAP1", symbol: STEAP1}
+  - {alias: "DLL3", symbol: DLL3}
+  - {alias: "B7-H3", symbol: CD276}
+  - {alias: "CD276", symbol: CD276}
+  - {alias: "B7-H4", symbol: VTCN1}
+  - {alias: "CEACAM5", symbol: CEACAM5}
+  - {alias: "CEA", symbol: CEACAM5}
+  - {alias: "MUC1", symbol: MUC1}
+  - {alias: "MUC16", symbol: MUC16}
+  - {alias: "CA-125", symbol: MUC16}
+  - {alias: "mesothelin", symbol: MSLN}
+  - {alias: "MSLN", symbol: MSLN}
+  - {alias: "GPC3", symbol: GPC3}
+  - {alias: "glypican-3", symbol: GPC3}
+  - {alias: "EpCAM", symbol: EPCAM}
+  - {alias: "FAP", symbol: FAP}
+  - {alias: "fibroblast activation protein", symbol: FAP}
+  - {alias: "SSTR2", symbol: SSTR2}
+  - {alias: "somatostatin receptor 2", symbol: SSTR2}
+  - {alias: "GD2", symbol: B4GALNT1}
+  - {alias: "gp100", symbol: PMEL}
+  - {alias: "NY-ESO-1", symbol: CTAG1B}
+  - {alias: "MAGE-A4", symbol: MAGEA4}
+  - {alias: "WT1", symbol: WT1}
+  - {alias: "survivin", symbol: BIRC5}
+  - {alias: "p53", symbol: TP53}
+  - {alias: "MDM2", symbol: MDM2}
+  - {alias: "WEE1", symbol: WEE1}
+  - {alias: "ATR", symbol: ATR}
+  - {alias: "CHK1", symbol: CHEK1}
+  - {alias: "Aurora A", symbol: AURKA}
+  - {alias: "PLK1", symbol: PLK1}
+  - {alias: "HDAC", symbol: HDAC1}
+  - {alias: "BET", symbol: BRD4}
+  - {alias: "BRD4", symbol: BRD4}
+  - {alias: "DNMT", symbol: DNMT1}
+  - {alias: "LSD1", symbol: KDM1A}
+  - {alias: "PRMT5", symbol: PRMT5}
+  - {alias: "MAT2A", symbol: MAT2A}
+  - {alias: "SHP2", symbol: PTPN11}
+  - {alias: "SOS1", symbol: SOS1}
+  - {alias: "ERK", symbol: MAPK1}
+  - {alias: "ERK1/2", symbol: MAPK1}
+  - {alias: "RAF", symbol: RAF1}
+  - {alias: "pan-RAF", symbol: RAF1}
+  - {alias: "SRC", symbol: SRC}
+  - {alias: "FAK", symbol: PTK2}
+  - {alias: "AXL", symbol: AXL}
+  - {alias: "MERTK", symbol: MERTK}
+  - {alias: "TAM", symbol: AXL}
+  - {alias: "CSF1R", symbol: CSF1R}
+  - {alias: "CCR4", symbol: CCR4}
+  - {alias: "CCR5", symbol: CCR5}
+  - {alias: "CXCR4", symbol: CXCR4}
+  - {alias: "CXCR2", symbol: CXCR2}
+  - {alias: "IDO1", symbol: IDO1}
+  - {alias: "IDO", symbol: IDO1}
+  - {alias: "arginase", symbol: ARG1}
+  - {alias: "IL-15", symbol: IL15}
+  - {alias: "IL-12", symbol: IL12A}
+  - {alias: "IL-10", symbol: IL10}
+  - {alias: "IL-21", symbol: IL21}
+  - {alias: "IL-7", symbol: IL7}
+  - {alias: "IL-18", symbol: IL18}
+  - {alias: "IL-31", symbol: IL31}
+  - {alias: "IL-36R", symbol: IL1RL2}
+  - {alias: "IL-1R", symbol: IL1R1}
+  - {alias: "IL-1", symbol: IL1B}
+  - {alias: "IFN-γ", symbol: IFNG}
+  - {alias: "interferon gamma", symbol: IFNG}
+  - {alias: "IFNAR1", symbol: IFNAR1}
+  - {alias: "type I interferon receptor", symbol: IFNAR1}
+  - {alias: "CD11a", symbol: ITGAL}
+  - {alias: "LFA-1", symbol: ITGAL}
+  - {alias: "CD2", symbol: CD2}
+  - {alias: "CD28", symbol: CD28}
+  - {alias: "CD80", symbol: CD80}
+  - {alias: "CD86", symbol: CD86}
+  - {alias: "ICOS", symbol: ICOS}
+  - {alias: "OX40L", symbol: TNFSF4}
+  - {alias: "CD52", symbol: CD52}
+  - {alias: "CD6", symbol: CD6}
+  - {alias: "RANKL", symbol: TNFSF11}
+  - {alias: "RANK ligand", symbol: TNFSF11}
+  - {alias: "sclerostin", symbol: SOST}
+  - {alias: "cathepsin K", symbol: CTSK}
+  - {alias: "PTH receptor", symbol: PTH1R}
+  - {alias: "PTH1R", symbol: PTH1R}
+  - {alias: "FGF23", symbol: FGF23}
+  - {alias: "FGFR1c", symbol: FGFR1}
+  - {alias: "myostatin", symbol: MSTN}
+  - {alias: "activin receptor", symbol: ACVR2B}
+  - {alias: "ActRIIB", symbol: ACVR2B}
+  - {alias: "ActRIIA", symbol: ACVR2A}
+  - {alias: "dystrophin", symbol: DMD}
+  - {alias: "DMD", symbol: DMD}
+  - {alias: "CFTR", symbol: CFTR}
+  - {alias: "ENaC", symbol: SCNN1A}
+  - {alias: "NRF2", symbol: NFE2L2}
+  - {alias: "Nrf2", symbol: NFE2L2}
+  - {alias: "KEAP1", symbol: KEAP1}
+  - {alias: "PKC", symbol: PRKCA}
+  - {alias: "ROCK", symbol: ROCK1}
+  - {alias: "ROCK2", symbol: ROCK2}
+  - {alias: "LRRK2", symbol: LRRK2}
+  - {alias: "GBA", symbol: GBA1}
+  - {alias: "glucocerebrosidase", symbol: GBA1}
+  - {alias: "huntingtin", symbol: HTT}
+  - {alias: "HTT", symbol: HTT}
+  - {alias: "SOD1", symbol: SOD1}
+  - {alias: "C9orf72", symbol: C9orf72}
+  - {alias: "prion protein", symbol: PRNP}
+  - {alias: "APOE", symbol: APOE}
+  - {alias: "TREM2", symbol: TREM2}
+  - {alias: "BACE1", symbol: BACE1}
+  - {alias: "BACE", symbol: BACE1}
+  - {alias: "gamma secretase", symbol: PSEN1}
+  - {alias: "AChE", symbol: ACHE}
+  - {alias: "acetylcholinesterase", symbol: ACHE}
+  - {alias: "M1", symbol: CHRM1}
+  - {alias: "M4", symbol: CHRM4}
+  - {alias: "M1/M4", symbol: CHRM1}
+  - {alias: "muscarinic M1", symbol: CHRM1}
+  - {alias: "muscarinic M4", symbol: CHRM4}
+  - {alias: "TAAR1", symbol: TAAR1}
+  - {alias: "mGluR5", symbol: GRM5}
+  - {alias: "mGluR2", symbol: GRM2}
+  - {alias: "AMPA", symbol: GRIA1}
+  - {alias: "SV2A", symbol: SV2A}
+  - {alias: "KCNQ2", symbol: KCNQ2}
+  - {alias: "Kv7", symbol: KCNQ2}
+  - {alias: "SERT", symbol: SLC6A4}
+  - {alias: "serotonin transporter", symbol: SLC6A4}
+  - {alias: "NET", symbol: SLC6A2}
+  - {alias: "DAT", symbol: SLC6A3}
+  - {alias: "VMAT2", symbol: SLC18A2}
+  - {alias: "MAO-B", symbol: MAOB}
+  - {alias: "MAO-A", symbol: MAOA}
+  - {alias: "COMT", symbol: COMT}
+  - {alias: "A2a", symbol: ADORA2A}
+  - {alias: "H1", symbol: HRH1}
+  - {alias: "H3", symbol: HRH3}
+  - {alias: "H4", symbol: HRH4}
+  - {alias: "MT1", symbol: MTNR1A}
+  - {alias: "melatonin receptor", symbol: MTNR1A}
+  - {alias: "V2", symbol: AVPR2}
+  - {alias: "vasopressin V2", symbol: AVPR2}
+  - {alias: "V1a", symbol: AVPR1A}
+  - {alias: "oxytocin receptor", symbol: OXTR}
+  - {alias: "GnRH receptor", symbol: GNRHR}
+  - {alias: "GnRH", symbol: GNRHR}
+  - {alias: "LHRH", symbol: GNRHR}
+  - {alias: "CYP17", symbol: CYP17A1}
+  - {alias: "CYP17A1", symbol: CYP17A1}
+  - {alias: "aromatase", symbol: CYP19A1}
+  - {alias: "5-alpha reductase", symbol: SRD5A2}
+  - {alias: "glucokinase", symbol: GCK}
+  - {alias: "11β-HSD1", symbol: HSD11B1}
+  - {alias: "DGAT2", symbol: DGAT2}
+  - {alias: "SCD1", symbol: SCD}
+  - {alias: "FASN", symbol: FASN}
+  - {alias: "ketohexokinase", symbol: KHK}
+  - {alias: "KHK", symbol: KHK}
+  - {alias: "PNPLA3", symbol: PNPLA3}
+  - {alias: "HSD17B13", symbol: HSD17B13}
+  - {alias: "LOXL2", symbol: LOXL2}
+  - {alias: "MMP", symbol: MMP9}
+  - {alias: "MMP-9", symbol: MMP9}
+  - {alias: "neutrophil elastase", symbol: ELANE}
+  - {alias: "DPP1", symbol: CTSC}
+  - {alias: "cathepsin C", symbol: CTSC}
+  - {alias: "alpha-1 antitrypsin", symbol: SERPINA1}
+  - {alias: "AAT", symbol: SERPINA1}
+  - {alias: "C1 esterase inhibitor", symbol: SERPING1}
+  - {alias: "plasma kallikrein", symbol: KLKB1}
+  - {alias: "kallikrein", symbol: KLKB1}
+  - {alias: "bradykinin B2", symbol: BDKRB2}
+  - {alias: "B2 receptor", symbol: BDKRB2}
+  - {alias: "Factor XII", symbol: F12}
+  - {alias: "FXII", symbol: F12}
+  - {alias: "prekallikrein", symbol: KLKB1}
+  - {alias: "tissue factor", symbol: F3}
+  - {alias: "TF", symbol: F3}
+  - {alias: "von Willebrand factor", symbol: VWF}
+  - {alias: "vWF", symbol: VWF}
+  - {alias: "GPIIb/IIIa", symbol: ITGB3}
+  - {alias: "PAR-1", symbol: F2R}
+  - {alias: "PAR1", symbol: F2R}
+  - {alias: "PAR-4", symbol: F2RL3}
+  - {alias: "TXA2", symbol: TBXA2R}
+  - {alias: "thromboxane receptor", symbol: TBXA2R}
+  - {alias: "prostacyclin receptor", symbol: PTGIR}
+  - {alias: "IP receptor", symbol: PTGIR}
+  - {alias: "EP4", symbol: PTGER4}
+  - {alias: "EP2", symbol: PTGER2}
+  - {alias: "FP receptor", symbol: PTGFR}
+  - {alias: "prostaglandin F receptor", symbol: PTGFR}
+  - {alias: "CRTH2", symbol: PTGDR2}
+  - {alias: "DP2", symbol: PTGDR2}
+  - {alias: "CysLT1", symbol: CYSLTR1}
+  - {alias: "leukotriene receptor", symbol: CYSLTR1}
+  - {alias: "5-LO", symbol: ALOX5}
+  - {alias: "5-lipoxygenase", symbol: ALOX5}
+  - {alias: "FLAP", symbol: ALOX5AP}
+  - {alias: "β2 adrenergic", symbol: ADRB2}
+  - {alias: "beta-2 adrenergic receptor", symbol: ADRB2}
+  - {alias: "β2-agonist", symbol: ADRB2}
+  - {alias: "β1 adrenergic", symbol: ADRB1}
+  - {alias: "beta-1 adrenergic receptor", symbol: ADRB1}
+  - {alias: "α2 adrenergic", symbol: ADRA2A}
+  - {alias: "alpha-2 adrenergic", symbol: ADRA2A}
+  - {alias: "α1 adrenergic", symbol: ADRA1A}
+  - {alias: "M3", symbol: CHRM3}
+  - {alias: "muscarinic M3", symbol: CHRM3}
+  - {alias: "LAMA", symbol: CHRM3}
+  - {alias: "nicotinic α7", symbol: CHRNA7}
+  - {alias: "α7 nAChR", symbol: CHRNA7}
+  - {alias: "α4β2 nAChR", symbol: CHRNA4}
+  - {alias: "CRF1", symbol: CRHR1}
+  - {alias: "CRH receptor", symbol: CRHR1}
+  - {alias: "ghrelin receptor", symbol: GHSR}
+  - {alias: "GHSR", symbol: GHSR}
+  - {alias: "GH receptor", symbol: GHR}
+  - {alias: "growth hormone receptor", symbol: GHR}
+  - {alias: "IGF-1R", symbol: IGF1R}
+  - {alias: "IGF-1", symbol: IGF1}
+  - {alias: "insulin receptor", symbol: INSR}
+  - {alias: "leptin receptor", symbol: LEPR}
+  - {alias: "NPY Y2", symbol: NPY2R}
+  - {alias: "NPY5R", symbol: NPY5R}
+  - {alias: "kisspeptin receptor", symbol: KISS1R}
+  - {alias: "TSH receptor", symbol: TSHR}
+  - {alias: "TSHR", symbol: TSHR}
+  - {alias: "IGF-1 receptor", symbol: IGF1R}
+  - {alias: "calcium-sensing receptor", symbol: CASR}
+  - {alias: "CaSR", symbol: CASR}
+  - {alias: "vitamin D receptor", symbol: VDR}
+  - {alias: "VDR", symbol: VDR}
+  - {alias: "RXR", symbol: RXRA}
+  - {alias: "RAR", symbol: RARA}
+  - {alias: "RORγt", symbol: RORC}
+  - {alias: "RORgt", symbol: RORC}
+  - {alias: "AhR", symbol: AHR}
+  - {alias: "aryl hydrocarbon receptor", symbol: AHR}
+  - {alias: "glucocorticoid receptor", symbol: NR3C1}
+  - {alias: "GR", symbol: NR3C1}
+  - {alias: "PXR", symbol: NR1I2}
+  - {alias: "LXR", symbol: NR1H3}
+  - {alias: "ERRα", symbol: ESRRA}
+  - {alias: "Nur77", symbol: NR4A1}
+  - {alias: "HSP90", symbol: HSP90AA1}
+  - {alias: "HSP70", symbol: HSPA1A}
+  - {alias: "TRPA1", symbol: TRPA1}
+  - {alias: "TRPM8", symbol: TRPM8}
+  - {alias: "TRPV4", symbol: TRPV4}
+  - {alias: "TRPC5", symbol: TRPC5}
+  - {alias: "Piezo1", symbol: PIEZO1}
+  - {alias: "HCN", symbol: HCN4}
+  - {alias: "If channel", symbol: HCN4}
+  - {alias: "Kv1.3", symbol: KCNA3}
+  - {alias: "Kv11.1", symbol: KCNH2}
+  - {alias: "hERG", symbol: KCNH2}
+  - {alias: "Nav1.5", symbol: SCN5A}
+  - {alias: "Cav1.2", symbol: CACNA1C}
+  - {alias: "L-type calcium channel", symbol: CACNA1C}
+  - {alias: "Cav2.2", symbol: CACNA1B}
+  - {alias: "N-type calcium channel", symbol: CACNA1B}
+  - {alias: "α2δ", symbol: CACNA2D1}
+  - {alias: "alpha-2-delta", symbol: CACNA2D1}
+  - {alias: "RyR2", symbol: RYR2}
+  - {alias: "SERCA2a", symbol: ATP2A2}
+  - {alias: "Na/K ATPase", symbol: ATP1A1}
+  - {alias: "NHE3", symbol: SLC9A3}
+  - {alias: "NKCC2", symbol: SLC12A1}
+  - {alias: "NCC", symbol: SLC12A3}
+  - {alias: "URAT1", symbol: SLC22A12}
+  - {alias: "xanthine oxidase", symbol: XDH}
+  - {alias: "uricase", symbol: UOX}
+  - {alias: "IL-1α", symbol: IL1A}
+  - {alias: "NLRP3", symbol: NLRP3}
+  - {alias: "caspase-1", symbol: CASP1}
+  - {alias: "RIPK1", symbol: RIPK1}
+  - {alias: "RIP1", symbol: RIPK1}
+  - {alias: "IRAK4", symbol: IRAK4}
+  - {alias: "MyD88", symbol: MYD88}
+  - {alias: "SYK", symbol: SYK}
+  - {alias: "ZAP-70", symbol: ZAP70}
+  - {alias: "ITK", symbol: ITK}
+  - {alias: "LCK", symbol: LCK}
+  - {alias: "PI3Kγ", symbol: PIK3CG}
+  - {alias: "SIK", symbol: SIK3}
+  - {alias: "p38", symbol: MAPK14}
+  - {alias: "p38 MAPK", symbol: MAPK14}
+  - {alias: "JNK", symbol: MAPK8}
+  - {alias: "IKK", symbol: IKBKB}
+  - {alias: "NF-κB", symbol: NFKB1}
+  - {alias: "STAT3", symbol: STAT3}
+  - {alias: "STAT6", symbol: STAT6}
+  - {alias: "TYK2/JAK1", symbol: TYK2}
+  - {alias: "Gal-3", symbol: LGALS3}
+  - {alias: "galectin 9", symbol: LGALS9}
+  - {alias: "Siglec-8", symbol: SIGLEC8}
+  - {alias: "KIT ligand", symbol: KITLG}
+  - {alias: "SCF", symbol: KITLG}
+  - {alias: "MRGPRX2", symbol: MRGPRX2}
+  - {alias: "OSMR", symbol: OSMR}
+  - {alias: "OSM", symbol: OSM}
+  - {alias: "IL-31RA", symbol: IL31RA}
+  - {alias: "TSLPR", symbol: CRLF2}
+  - {alias: "IL-5Rα", symbol: IL5RA}
+  - {alias: "IL-5R", symbol: IL5RA}
+  - {alias: "CCR3", symbol: CCR3}
+  - {alias: "eotaxin", symbol: CCL11}
+  - {alias: "IL-25", symbol: IL25}
+  - {alias: "IL-17RA", symbol: IL17RA}
+  - {alias: "IL-17F", symbol: IL17F}
+  - {alias: "IL-17A/F", symbol: IL17A}
+  - {alias: "IL-22", symbol: IL22}
+  - {alias: "IL-12/23", symbol: IL12B}
+  - {alias: "IL-12/23 p40", symbol: IL12B}
+  - {alias: "p40", symbol: IL12B}
+  - {alias: "IL-12p40", symbol: IL12B}
+  - {alias: "IL-2Rβ", symbol: IL2RB}
+  - {alias: "IL-15Rα", symbol: IL15RA}
+  - {alias: "IL-7R", symbol: IL7R}
+  - {alias: "CD127", symbol: IL7R}
+  - {alias: "IL-21R", symbol: IL21R}
+  - {alias: "IL-9", symbol: IL9}
+  - {alias: "IL-3", symbol: IL3}
+  - {alias: "GM-CSF", symbol: CSF2}
+  - {alias: "GM-CSFR", symbol: CSF2RA}
+  - {alias: "GM-CSF receptor", symbol: CSF2RA}
+  - {alias: "G-CSF", symbol: CSF3}
+  - {alias: "G-CSFR", symbol: CSF3R}
+  - {alias: "M-CSF", symbol: CSF1}
+  - {alias: "EPO", symbol: EPO}
+  - {alias: "erythropoietin", symbol: EPO}
+  - {alias: "TPO", symbol: THPO}
+  - {alias: "thrombopoietin", symbol: THPO}
+  - {alias: "complement C5a", symbol: C5}
+  - {alias: "C5aR", symbol: C5AR1}
+  - {alias: "C5a receptor", symbol: C5AR1}
+  - {alias: "C1s", symbol: C1S}
+  - {alias: "C1q", symbol: C1QA}
+  - {alias: "MASP-2", symbol: MASP2}
+  - {alias: "properdin", symbol: CFP}
+  - {alias: "CD55", symbol: CD55}
+  - {alias: "CD59", symbol: CD59}
+  - {alias: "IgG", symbol: IGHG1}
+  - {alias: "IgA", symbol: IGHA1}
+  - {alias: "APRIL", symbol: TNFSF13}
+  - {alias: "TACI", symbol: TNFRSF13B}
+  - {alias: "BCR", symbol: CD79A}
+  - {alias: "CD19/CD22", symbol: CD19}
+  - {alias: "CD3/CD20", symbol: MS4A1}
+  - {alias: "CD3xCD20", symbol: MS4A1}
+  - {alias: "CD3xBCMA", symbol: TNFRSF17}
+  - {alias: "CD3xGPRC5D", symbol: GPRC5D}

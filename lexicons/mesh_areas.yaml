@@ -1,0 +1,33 @@
+# Top-level MeSH disease headings → therapeutic areas (spec App. B.5). Keyed on the EXACT ancestor term as
+# it appears in conditionBrowseModule.ancestors[].term (verified against the 2026-09-04 snapshot).
+# Priority = row order; the first heading present on a trial's condition wins `is_primary`, all present
+# headings are kept. Organ-system headings first, Infections after, cross-cutting headings last.
+areas:
+  - {heading: "Neoplasms", area: "Oncology"}
+  - {heading: "Cardiovascular Diseases", area: "Cardiovascular"}
+  - {heading: "Nervous System Diseases", area: "Neurology"}
+  - {heading: "Mental Disorders", area: "Psychiatry"}
+  - {heading: "Respiratory Tract Diseases", area: "Respiratory"}
+  - {heading: "Digestive System Diseases", area: "Gastroenterology & Hepatology"}
+  - {heading: "Immune System Diseases", area: "Immunology"}
+  - {heading: "Musculoskeletal Diseases", area: "Musculoskeletal & Rheumatology"}
+  - {heading: "Skin and Connective Tissue Diseases", area: "Dermatology"}
+  - {heading: "Endocrine System Diseases", area: "Endocrinology"}
+  - {heading: "Nutritional and Metabolic Diseases", area: "Metabolic"}
+  - {heading: "Hemic and Lymphatic Diseases", area: "Hematology"}
+  - {heading: "Eye Diseases", area: "Ophthalmology"}
+  - {heading: "Urogenital Diseases", area: "Urology, Nephrology & Women's Health"}
+  - {heading: "Male Urogenital Diseases", area: "Urology, Nephrology & Women's Health"}
+  - {heading: "Female Urogenital Diseases and Pregnancy Complications", area: "Urology, Nephrology & Women's Health"}
+  - {heading: "Congenital, Hereditary, and Neonatal Diseases and Abnormalities", area: "Genetic & Congenital"}
+  - {heading: "Otorhinolaryngologic Diseases", area: "ENT"}
+  - {heading: "Stomatognathic Diseases", area: "Dental & Oral"}
+  - {heading: "Infections", area: "Infectious Disease"}
+  - {heading: "Wounds and Injuries", area: "Trauma"}
+  - {heading: "Chemically-Induced Disorders", area: "Toxicology"}
+  - {heading: "Occupational Diseases", area: "Environmental & Occupational"}
+  - {heading: "Disorders of Environmental Origin", area: "Environmental & Occupational"}
+  - {heading: "Pathological Conditions, Signs and Symptoms", area: "Signs & Symptoms (cross-cutting)"}
+excluded_headings:
+  - "Animal Diseases"
+unclassified_area: "Unclassified"   # listed-only conditions (no MeSH) — a real bucket, never NULL

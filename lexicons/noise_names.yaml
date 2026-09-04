@@ -1,0 +1,141 @@
+# Intervention-name noise gates (spec App. B.3). WHOLE-LABEL semantics: a name is rejected only when the
+# entire cleaned, lowercased label matches a rule — never by substring ("pembrolizumab immunotherapy" survives).
+# Every rejection is counted by gate name in the build census.
+
+# exact whole-label matches
+exact:
+  - n/a
+  - none
+  - nil
+  - not applicable
+  - saline
+  - normal saline
+  - 0.9% saline
+  - 0.9% sodium chloride
+  - sodium chloride 0.9%
+  - observation
+  - observation only
+  - no intervention
+  - no treatment
+  - no drug
+  - control
+  - controls
+  - control group
+  - control arm
+  - active comparator
+  - comparator
+  - conventional therapy
+  - conventional treatment
+  - standard of care
+  - standard care
+  - standard therapy
+  - standard treatment
+  - standard chemotherapy
+  - best supportive care
+  - usual care
+  - supportive care
+  - soc
+  - bsc
+  - background
+  - background therapy
+  - blank control
+  - untreated control
+  - chemotherapy
+  - radiotherapy
+  - radiation
+  - surgery
+  - sugar pill
+  - water
+  - sterile water
+  - vehicle
+  - vehicle control
+  - dummy
+  - study drug
+  - study medication
+  - investigational product
+  - investigational drug
+  - experimental drug
+  - test drug
+  - test product
+  - reference product
+  - reference drug
+  - active drug
+  - open label
+  - treatment
+  - treatments
+  - therapy
+  - therapies
+  - regimen
+  - intervention
+  - chemo
+  - sbrt
+  - ici
+  - icis
+  - io
+  - tki
+  - tkis
+  - car-t
+  - cart
+  - car t
+  - cell therapy
+  - cells
+  - drug
+  - drugs
+  - medication
+  - medications
+  - vaccine
+  - antibiotic
+  - antibiotics
+  - anesthesia
+  - general anesthesia
+  - local anesthesia
+
+# whole label STARTS WITH one of these (word-boundary)
+starts_with:
+  - placebo
+  - placebos
+  - matching placebo
+  - matched placebo
+  - sham
+  - vehicle
+  - dummy
+  - saline placebo
+  - oral placebo
+  - iv placebo
+  - intravenous placebo
+  - subcutaneous placebo
+  - topical placebo
+  - inactive
+
+# whole label CONTAINS one of these phrases (metadata / procedure cues, not molecules)
+contains:
+  - regimen
+  - dose escalation
+  - dose expansion
+  - questionnaire
+  - blood sample
+  - blood draw
+  - biopsy
+  - primary outcome
+  - secondary outcome
+  - frequency of
+  - evaluation of
+  - assessment of
+  - "group:"
+  - " arm "
+  - " cohort "
+  - listed out below
+  - see below
+  - as described
+
+# regex rules (whole label must FULLY match)
+regex:
+  - '(placebo|sham|vehicle|dummy)( (for|to|of|matching|matched)?\s*.*)?'   # "placebo for pembrolizumab": the WHOLE label dies
+  - '.*\b(placebo|sham)\b.*(comparator|control|arm|group|tablet|capsule|injection|pill|cream|gel|solution|infusion|patch|inhaler)s?\b.*'
+  - '(taper(ing)?|tapered)( .*)?'
+  - '(treatment|arm|group|cohort|drug|dose|regimen) ?[a-d0-9]'                # "Treatment C", "Arm 1"
+  - '(low|high|medium|mid|standard) dose'
+  - '.*\((placebo|sham)\).*'                                                    # "Nitrogen (placebo)"
+  - 'anti[- ][a-z0-9\-]+( (antibody|antibodies|monoclonal antibody|therapy|agent|inhibitor|blocker))?'   # class shape: needs a separator so "antipyrine" survives
+  - '[a-z0-9]+[- ]based( .*)?'
+  - '.* (inhibitors?|antagonists?|agonists?|therapy|therapies|agents?|analogs?|analogues?|blockers?|modulators?)'   # bare class suffix w/o molecule; molecules are single-token names before this

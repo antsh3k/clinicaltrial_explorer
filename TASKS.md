@@ -21,16 +21,16 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] Measured full-corpus ingest: 69 s with 13 worker processes (~8.5k studies/s), 0 parse failures
 
 ## Phase 2 — normalize/ + views.sql (§5.1–5.5, §4.2–4.3, App. B)
-- [ ] Lexicon YAMLs under `lexicons/`: `noise_names`, `non_molecule`, `salt_dose_suffixes`, `populations`, `mesh_areas`, `company_suffixes`, `company_aliases`, `target_aliases`
-- [ ] `normalize/drug_names.py`: cleaning, whole-label noise gates (per-gate census), dedup-key router (combo / biologic-shape / fixed-point + electrolyte guard), code-shape detection, canonical name choice
-- [ ] `normalize/build.py` asset assembly: group by dedup_key, otherNames alias merge (path-compressed parent dict) with contested-alias veto, global alias uniqueness; tests `test_placebo_never_an_asset`, `test_mk3475_is_pembrolizumab`, contested veto
-- [ ] `normalize/arms.py`: roles subject-first three-valued, `in_all_arms` NULL unless ≥2 arms, arm-level + name-level combos; `test_comparator_not_in_development`
-- [ ] `normalize/conditions.py`: fold (order-preserving), denoise with reason census + disease-noun KEEP, dual surface (mesh_leaf / listed), area rollup with priority (`Unclassified` bucket); `test_juvenile_condition_not_rewritten`, `test_trial_counted_once_across_condition_surfaces`
-- [ ] `normalize/companies.py`: suffix-pop loop + curated alias groups; never substring equality
-- [ ] `normalize/populations.py`: typed lexicon regex over title/conditions/eligibility, `evidence_line`
-- [ ] `normalize/mechanism_key.py` (App. B.7)
-- [ ] `views.sql`: `v_trials`, `v_trial_conditions_primary`, `v_programs` (arg_max tie-break by latest_activity), `v_asset_max_phase`, `v_sponsor_activity`, `v_asset_sponsors`, `v_moa`, `v_moa_trials`, `v_combos`, `v_population_landscape`, `v_trial_card`; build fails on any empty view
-- [ ] Census funnel (§8.5) printed by `ctl build`
+- [x] Lexicon YAMLs under `lexicons/`: `noise_names`, `non_molecule`, `salt_dose_suffixes`, `qualifiers`, `populations` (~250 typed entries), `mesh_areas`, `company_suffixes`, `company_aliases`, `target_aliases`
+- [x] `normalize/drug_names.py`: cleaning, whole-label noise gates (per-gate census), dedup-key router (combo / biologic-shape / fixed-point + electrolyte guard + edge-qualifier strip + known-token regimen split), code-shape detection
+- [x] `normalize/assets.py` + `build.py`: group by dedup_key, otherNames alias merge (union-find, root-level contested-alias veto), global alias uniqueness, canonical name + brand display; tests `test_placebo_never_an_asset`, `test_mk3475_is_pembrolizumab`, contested veto
+- [x] `normalize/arms.py`: roles subject-first three-valued, `in_all_arms` NULL unless ≥2 arms; arm-level + name-level combos in `v_combos`; `test_comparator_not_in_development`
+- [x] `normalize/conditions.py`: fold (order-preserving), denoise with reason census + disease-noun KEEP, dual surface (mesh_leaf / listed), area rollup with priority (`Unclassified` bucket); `test_juvenile_condition_not_rewritten`, `test_trial_counted_once_across_condition_surfaces`
+- [x] `normalize/companies.py`: suffix-pop loop + curated alias groups (~30 groups, dated acquisitions) + self-declared parent parsing ("X, a Sanofi Company"); never substring equality
+- [x] `normalize/populations.py`: typed lexicon regex over title/conditions/eligibility, `evidence_line`; literal-trigger prefilter (~4 ms/study)
+- [x] `normalize/mechanism_key.py` (App. B.7); `moa_key` stored as a column on every MoA tier table (no SQL UDF)
+- [x] `views.sql`: `v_trials`, `v_trial_conditions_primary`, `v_conditions`, `v_programs` (row_number tie-break by latest_activity), `v_asset_max_phase`, `v_assets`, `v_sponsor_activity`, `v_asset_sponsors`, `v_moa` + `v_moa_best`, `v_moa_trials`, `v_combos` + `v_combo_partners`, `v_population_landscape`, `v_trial_card`; build fails on any empty view
+- [x] Census funnel (§8.5) printed by `ctl build` (`funnel.py`), stored in `build_meta.funnel`
 - [ ] Q1/Q2/Q3/Q7 answerable via `ctl sql` with zero LLM spend (smoke-check on demo build)
 
 ## Phase 3 — enrich/ (§6)
@@ -61,6 +61,8 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [ ] 5-minute reviewer path, full build, funnel numbers, example Q&As with evidence, tradeoffs (§9), limitations (§10.3), choices the brief left open (§10.1), works-without-key vs needs-key, AI-usage section (from `PROMPTS.md`)
 
 ## Deviations from the spec
+- Phase 2 additions beyond the spec text (all deterministic, all counted): edge-qualifier stripping (`lexicons/qualifiers.yaml`) before keying; known-token regimen split (a space-joined name whose every token is a standalone asset with ≥2 trials routes as a combination); self-declared sponsor parents parsed from the registry string; `trial_assets.via` ('name' | 'combo_component') so combo components are counted in `v_programs`; NLM pharmacologic classes attached only when the intervention MeSH leaf keys to one of the asset's aliases and the trial has a single matched leaf.
+- `asset_id` = the dedup key of the canonical (non-code) surface (e.g. `pembrolizumab`), not an opaque counter — readable in answers and stable across rebuilds unless the canonical surface changes.
 - Dump is 2.74 GB / 601,694 studies (spec's 703 MB / 601,158 was measured on an older snapshot); §2.3 counts reproduce within ~0.2%.
 - Fixture zips are *pruned* copies (resultsSection, documentSection, contacts/locations, references, outcomes, detailedDescription, secondaryIdInfos dropped) so demo.zip stays < 50 MB; ingest never reads those modules.
 - Raw layer has two extras beyond §4.1: `study_keywords` (conditionsModule.keywords) and `arm_interventions.via` ('label' | 'name') so the arm-join path is auditable per row. Fresh-snapshot finding: every arm link came via `armGroupLabels`; the `interventionNames` fallback was never needed (0 rows).

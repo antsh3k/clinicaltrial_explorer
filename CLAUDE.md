@@ -18,9 +18,16 @@ uv run pytest                    # full offline test suite (never hits network o
 uv run pytest tests/test_x.py -k name   # one test
 uv run ruff check . && uv run ruff format .
 uv run ctl --help                # ops CLI: build / enrich / serve / eval / sql
-uv run ctl build --demo          # build ctg.duckdb from the shipped demo slice (Phase 1+)
+uv run ctl build --demo          # ~1 min: data/fixtures/demo.zip → data/ctg_demo.duckdb (raw + entities + views + funnel)
+uv run ctl build                 # full corpus from data/raw/ctg-studies.json.zip → data/ctg.duckdb (~8 min)
+uv run ctl build --skip-ingest   # re-run normalize + views only (lexicon / views.sql edits) on an ingested DB
+uv run ctl sql "SELECT ..." [--db data/ctg_demo.duckdb] [--csv]   # sandboxed read-only console
 uv run ctl serve                 # FastAPI + chat UI on :8000 (Phase 5+; needs ANTHROPIC_API_KEY in .env)
 ```
+
+Iterating on normalization: edit a YAML under `lexicons/` or a `normalize/*.py`, run the unit tests, then `ctl build --demo`
+and read the census lines + funnel; `contested_aliases`, `condition_denoised`, and `build_meta.normalize_census`
+(per-gate counts) are the diagnostic tables. DuckDB gotcha: `~` is a FULL-string regex match; use `regexp_matches()`.
 
 `ctl` is ops-only; the product interface is the web chat UI served by FastAPI.
 
@@ -52,4 +59,4 @@ Evals (`evals/`): gold YAML with human-adjudicated expected sets; metrics carry 
 ## Notes on the environment
 
 - Installed `pydantic-ai` is 2.x, much newer than the version the spec's snippets assumed. The names the spec relies on (`Agent`, `ModelRetry`, `RunContext`, `ToolOutput`, `UsageLimits`, `ModelSettings`, `TestModel`, `FunctionModel`, `run_stream_events`, `output_validator`) all exist; check signatures against the installed package rather than the spec snippets.
-- The full dump (`data/raw/ctg-studies.json.zip`, ~0.7 GB) and `*.duckdb` are gitignored. `data/fixtures/*.zip` and `data/enrichment/*.jsonl` are shipped in-repo.
+- The full dump (`data/raw/ctg-studies.json.zip`, ~2.7 GB, 601,694 studies on the 2026-09-04 snapshot) and `*.duckdb` are gitignored. `data/fixtures/*.zip` and `data/enrichment/*.jsonl` are shipped in-repo.

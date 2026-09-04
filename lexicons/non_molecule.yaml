@@ -1,0 +1,146 @@
+# Class labels and non-molecule categories that must never become assets (spec App. B.3, "class labels").
+# Whole-label matches only.
+class_labels:
+  - corticosteroids
+  - corticosteroid
+  - steroids
+  - steroid
+  - glucocorticoids
+  - statins
+  - statin
+  - nsaids
+  - nsaid
+  - antibiotics
+  - antibiotic
+  - antivirals
+  - antiviral
+  - antifungals
+  - antifungal
+  - opioids
+  - opioid
+  - analgesics
+  - analgesic
+  - anticoagulants
+  - anticoagulant
+  - antiplatelets
+  - antiplatelet
+  - antidepressants
+  - antidepressant
+  - antipsychotics
+  - antipsychotic
+  - antihypertensives
+  - antihypertensive
+  - antiemetics
+  - antiemetic
+  - antihistamines
+  - antihistamine
+  - anesthetics
+  - anesthetic
+  - anaesthetics
+  - local anesthetics
+  - local anaesthetic
+  - sedatives
+  - sedative
+  - sedation
+  - bronchodilators
+  - bronchodilator
+  - diuretics
+  - diuretic
+  - beta blockers
+  - beta-blockers
+  - ace inhibitors
+  - arbs
+  - tkis
+  - tki
+  - tyrosine kinase inhibitors
+  - immunotherapy
+  - immunotherapies
+  - checkpoint inhibitors
+  - immune checkpoint inhibitors
+  - immune checkpoint inhibitor
+  - biologics
+  - biologic
+  - biologic therapy
+  - biological therapy
+  - chemotherapy
+  - chemotherapies
+  - cytotoxic chemotherapy
+  - platinum-based chemotherapy
+  - platinum based chemotherapy
+  - platinum doublet
+  - hormone therapy
+  - hormonal therapy
+  - endocrine therapy
+  - targeted therapy
+  - targeted therapies
+  - cell therapy
+  - gene therapy
+  - stem cell transplant
+  - stem cell transplantation
+  - bone marrow transplant
+  - vaccines
+  - vaccination
+  - probiotics
+  - probiotic
+  - vitamins
+  - vitamin
+  - supplements
+  - supplement
+  - dietary supplement
+  - nutritional supplement
+  - herbal medicine
+  - traditional chinese medicine
+  - tcm
+  - chinese herbal medicine
+  - antioxidants
+  - antioxidant
+  - immunosuppressants
+  - immunosuppressant
+  - immunosuppression
+  - antiretroviral therapy
+  - antiretrovirals
+  - art
+  - haart
+  - insulin therapy
+  - oral hypoglycemic agents
+  - proton pump inhibitors
+  - ppi
+  - ppis
+  - contrast agent
+  - contrast agents
+  - contrast media
+  - radiocontrast
+  - fluids
+  - iv fluids
+  - crystalloid
+  - crystalloids
+  - colloid
+  - colloids
+  - oxygen
+  - hyperbaric oxygen
+  - nitrous oxide
+  - epidural
+  - epidural analgesia
+  - spinal anesthesia
+  - nerve block
+  - regional anesthesia
+  - total parenteral nutrition
+  - parenteral nutrition
+  - enteral nutrition
+  - blood transfusion
+  - transfusion
+  - plasma
+  - fresh frozen plasma
+  - platelets
+  - red blood cells
+  - packed red blood cells
+  - albumin
+  - immunoglobulin
+  - intravenous immunoglobulin
+  - ivig
+  - nutrition
+  - diet
+  - exercise
+  - physiotherapy
+  - counseling
+  - education

@@ -1,0 +1,126 @@
+# Sponsor → company normalization (spec App. B.6): suffix-pop loop tokens. Names are lowercased, [.,&-]
+# replaced by spaces, whitespace collapsed, then trailing tokens matching these are popped in a loop
+# (multi-word entries first). Never substring containment as equality.
+legal_forms:
+  - inc
+  - incorporated
+  - corp
+  - corporation
+  - co
+  - company
+  - ltd
+  - limited
+  - llc
+  - l l c
+  - plc
+  - gmbh
+  - ag
+  - sa
+  - s a
+  - sas
+  - spa
+  - s p a
+  - srl
+  - bv
+  - b v
+  - nv
+  - n v
+  - a/s
+  - as
+  - ab
+  - oy
+  - oyj
+  - kk
+  - k k
+  - pty
+  - pte
+  - lp
+  - l p
+  - llp
+  - holdings
+  - holding
+  - group
+  - se
+  - kgaa
+  - ltda
+  - s de rl de cv
+  - sa de cv
+  - uc
+  - bvba
+  - aps
+  - asa
+  - ohg
+  - kg
+  - eeig
+  - spol s r o
+  - s r o
+  - sp z o o
+  - zrt
+  - dd
+  - d o o
+  - pvt
+  - private
+  - public
+
+industry_words:
+  - pharmaceuticals
+  - pharmaceutical
+  - pharma
+  - biopharmaceuticals
+  - biopharmaceutical
+  - biopharma
+  - biosciences
+  - bioscience
+  - biotech
+  - biotechnology
+  - biotechnologies
+  - therapeutics
+  - life sciences
+  - sciences
+  - laboratories
+  - laboratory
+  - labs
+  - lab
+  - research
+  - development
+  - research and development
+  - r d
+  - r&d
+  - medical
+  - medicines
+  - healthcare
+  - health
+  - oncology
+  - vaccines
+  - biologics
+  - international
+  - global
+  - worldwide
+  - usa
+  - us
+  - u s
+  - uk
+  - europe
+  - eu
+  - japan
+  - china
+  - korea
+  - canada
+  - australia
+  - india
+  - america
+  - north america
+  - asia
+  - pacific
+
+# Regexes for a sponsor string that DECLARES its own parent ("X, a Y company", "X, a subsidiary of Y",
+# "X now a wholly owned subsidiary of Y"). The declared parent is taken as the company — this is the
+# registry asserting the relationship, not a fuzzy match. Group 1 = subsidiary, group 2 = parent.
+declared_parent_patterns:
+  - '^(.+?),?\s+(?:is\s+)?now\s+(?:a\s+)?(?:wholly[- ]owned\s+)?(?:subsidiary|part|division|member|affiliate)\s+of\s+(.+)$'
+  - '^(.+?),\s+(?:an?\s+)?(?:wholly[- ]owned\s+)?(?:subsidiary|affiliate|division|unit|member|part)\s+of\s+(.+)$'
+  - '^(.+?)\s+\((?:an?\s+)?(?:wholly[- ]owned\s+)?(?:subsidiary|affiliate|division)\s+of\s+(.+)\)$'
+  - '^(.+?),\s+an?\s+(.+?)\s+(?:company|group|subsidiary|affiliate|division)$'
+  - '^(.+?)\s+-\s+an?\s+(.+?)\s+(?:company|group)$'
+  - '^(.+?),\s+an?\s+(?:healthcare|pharmaceutical|biotech)\s+(?:company|business)\s+of\s+(.+)$'
+  - '^(.+?),\s+(?:formerly|previously)\s+(?:known\s+as\s+)?(.+)$'

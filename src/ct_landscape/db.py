@@ -44,6 +44,62 @@ CREATE TABLE IF NOT EXISTS ingest_failures         (member TEXT, error TEXT);
 CREATE TABLE IF NOT EXISTS build_meta              (key TEXT PRIMARY KEY, value TEXT);
 """
 
+ENTITY_DDL = """
+CREATE TABLE IF NOT EXISTS assets            (asset_id TEXT PRIMARY KEY, canonical_name TEXT, dedup_key TEXT UNIQUE, is_combo BOOLEAN);
+CREATE TABLE IF NOT EXISTS asset_components  (combo_asset_id TEXT, component_asset_id TEXT);
+CREATE TABLE IF NOT EXISTS asset_aliases     (alias_key TEXT PRIMARY KEY, asset_id TEXT, alias_raw TEXT,
+                                              source TEXT CHECK (source IN ('name','other_name')));
+CREATE TABLE IF NOT EXISTS contested_aliases (alias_key TEXT, asset_ids TEXT[], n_trials INT);
+CREATE TABLE IF NOT EXISTS trial_assets      (nct_id TEXT, intervention_no INT, asset_id TEXT,
+                                              via TEXT CHECK (via IN ('name','combo_component')),
+                                              role TEXT CHECK (role IN ('subject','comparator','unknown')),
+                                              in_all_arms BOOLEAN);
+CREATE TABLE IF NOT EXISTS companies         (company_id TEXT PRIMARY KEY, canonical_name TEXT);
+CREATE TABLE IF NOT EXISTS company_aliases   (alias_key TEXT PRIMARY KEY, company_id TEXT, alias_raw TEXT);
+CREATE TABLE IF NOT EXISTS trial_sponsors_norm (nct_id TEXT, role TEXT CHECK (role IN ('lead','collaborator')),
+                                              company_id TEXT, agency_class TEXT);
+CREATE TABLE IF NOT EXISTS trial_conditions_norm (nct_id TEXT, condition_key TEXT, display_name TEXT,
+                                              source TEXT CHECK (source IN ('listed','mesh_leaf')));
+CREATE TABLE IF NOT EXISTS condition_denoised (nct_id TEXT, name_raw TEXT, folded TEXT, reason TEXT);
+CREATE TABLE IF NOT EXISTS condition_areas   (condition_key TEXT, area TEXT, is_primary BOOLEAN);
+CREATE TABLE IF NOT EXISTS population_mentions (nct_id TEXT, term_id TEXT,
+                                              kind TEXT CHECK (kind IN ('biomarker','demographic','disease_severity',
+                                                                        'prior_therapy','line_of_therapy','disease_stage')),
+                                              surface TEXT CHECK (surface IN ('title','condition','eligibility')),
+                                              evidence_line TEXT);
+CREATE TABLE IF NOT EXISTS population_terms  (term_id TEXT PRIMARY KEY, kind TEXT, label TEXT);
+CREATE TABLE IF NOT EXISTS asset_nlm_classes (asset_id TEXT, class_term TEXT, mesh_id TEXT, n_trials INT, moa_key TEXT);
+CREATE TABLE IF NOT EXISTS asset_chembl      (asset_id TEXT PRIMARY KEY, chembl_id TEXT, chembl_pref_name TEXT,
+                                              matched_alias TEXT, match_via TEXT CHECK (match_via IN ('pref_name','synonym')));
+CREATE TABLE IF NOT EXISTS chembl_moa        (asset_id TEXT, mechanism_of_action TEXT, action_type TEXT,
+                                              target_symbols TEXT[], chembl_target_ids TEXT[], edge_key TEXT UNIQUE,
+                                              moa_key TEXT);
+CREATE TABLE IF NOT EXISTS targets           (symbol TEXT PRIMARY KEY, pref_name TEXT, source TEXT);
+CREATE TABLE IF NOT EXISTS target_aliases    (alias_key TEXT PRIMARY KEY, symbol TEXT, alias_raw TEXT, source TEXT);
+CREATE TABLE IF NOT EXISTS asset_enrichment  (asset_id TEXT PRIMARY KEY, modality TEXT,
+                                              targets_raw TEXT[], targets_canonical TEXT[],
+                                              action TEXT, moa_class TEXT, confidence TEXT, abstained BOOLEAN, basis TEXT,
+                                              model TEXT, raw_json TEXT, moa_key TEXT);
+"""
+
+ENTITY_TABLES = [
+    "assets",
+    "asset_components",
+    "asset_aliases",
+    "contested_aliases",
+    "trial_assets",
+    "companies",
+    "company_aliases",
+    "trial_sponsors_norm",
+    "trial_conditions_norm",
+    "condition_denoised",
+    "condition_areas",
+    "population_mentions",
+    "population_terms",
+    "asset_nlm_classes",
+]
+ENRICH_TABLES = ["asset_chembl", "chembl_moa", "targets", "target_aliases", "asset_enrichment"]
+
 RAW_TABLES = [
     "studies",
     "study_conditions",
@@ -83,6 +139,42 @@ def create_raw_schema(con: duckdb.DuckDBPyConnection, drop: bool = False) -> Non
         for t in RAW_TABLES + ["build_meta"]:
             con.execute(f"DROP TABLE IF EXISTS {t}")
     con.execute(RAW_DDL)
+
+
+def create_entity_schema(con: duckdb.DuckDBPyConnection, drop: bool = False) -> None:
+    if drop:
+        for t in ENTITY_TABLES:
+            con.execute(f"DROP TABLE IF EXISTS {t}")
+    con.execute(ENTITY_DDL)
+
+
+def create_enrich_schema(con: duckdb.DuckDBPyConnection, drop: bool = False) -> None:
+    if drop:
+        for t in ENRICH_TABLES:
+            con.execute(f"DROP TABLE IF EXISTS {t}")
+    con.execute(ENTITY_DDL)
+
+
+VIEWS_SQL = Path(__file__).resolve().parent / "views.sql"
+
+
+def apply_views(con: duckdb.DuckDBPyConnection, fail_on_empty: bool = True) -> dict[str, int]:
+    """Apply views.sql; return {view: row_count}. Fails if any view returns 0 rows (spec §4.3)."""
+    sql = VIEWS_SQL.read_text(encoding="utf-8")
+    con.execute(sql)
+    counts: dict[str, int] = {}
+    views = [
+        r[0]
+        for r in con.execute(
+            "SELECT view_name FROM duckdb_views() WHERE NOT internal AND schema_name='main'"
+        ).fetchall()
+    ]
+    for v in views:
+        counts[v] = con.execute(f"SELECT count(*) FROM {v}").fetchone()[0]
+    empty = [v for v, n in counts.items() if n == 0]
+    if empty and fail_on_empty:
+        raise RuntimeError(f"empty views (a silently-empty definition is the likeliest real bug): {empty}")
+    return counts
 
 
 def write_meta(con: duckdb.DuckDBPyConnection, items: dict[str, Any]) -> None:

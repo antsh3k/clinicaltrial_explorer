@@ -1,0 +1,276 @@
+# Qualifier tokens stripped from the LEADING and TRAILING edges of a cleaned intervention name before keying
+# (never from the middle, never fuzzy). "neoadjuvant nivolumab" → "nivolumab"; "pembrolizumab immunotherapy" →
+# "pembrolizumab"; "high dose melphalan" → "melphalan". A name that is ONLY qualifiers is gated (e.g. "chemotherapy").
+# Multi-word entries are matched first. Words here must never be part of a molecule name.
+leading:
+  - oral
+  - intravenous
+  - iv
+  - topical
+  - subcutaneous
+  - sc
+  - intramuscular
+  - im
+  - inhaled
+  - nasal
+  - intranasal
+  - intrathecal
+  - intravesical
+  - intravitreal
+  - ophthalmic
+  - rectal
+  - vaginal
+  - transdermal
+  - sublingual
+  - buccal
+  - nebulized
+  - nebulised
+  - low dose
+  - low-dose
+  - high dose
+  - high-dose
+  - standard dose
+  - standard-dose
+  - reduced dose
+  - single dose
+  - single-dose
+  - multiple dose
+  - multiple-dose
+  - fixed dose
+  - fixed-dose
+  - escalating dose
+  - dose escalation
+  - single low dose
+  - single high dose
+  - weekly
+  - daily
+  - biweekly
+  - monthly
+  - neoadjuvant
+  - adjuvant
+  - maintenance
+  - concurrent
+  - concomitant
+  - sequential
+  - induction
+  - consolidation
+  - salvage
+  - upfront
+  - continuous
+  - intermittent
+  - extended
+  - prolonged
+  - short course
+  - short-course
+  - long course
+  - long-course
+  - metronomic
+  - lymphodepleting
+  - conditioning
+  - preoperative
+  - pre-operative
+  - postoperative
+  - post-operative
+  - perioperative
+  - intraoperative
+  - prophylactic
+  - prophylaxis
+  - therapeutic
+  - empiric
+  - empirical
+  - early
+  - late
+  - delayed
+  - immediate
+  - deferred
+  - first line
+  - first-line
+  - second line
+  - second-line
+  - third line
+  - third-line
+  - frontline
+  - front-line
+  - generic
+  - branded
+  - biosimilar
+  - reference
+  - investigational
+  - experimental
+  - study
+  - test
+  - active
+  - open label
+  - open-label
+  - blinded
+  - double blind
+  - double-blind
+  - single
+  - double
+  - triple
+  - combination
+  - combined
+  - standard
+  - conventional
+  - usual
+  - optimal
+  - optimized
+  - optimised
+  - modified
+  - intensified
+  - de-escalated
+  - deescalated
+  - dose-dense
+  - dose dense
+  - dose-adjusted
+  - dose adjusted
+  - weight-based
+  - weight based
+  - adjusted
+  - titrated
+  - liposomal
+  - nano
+  - nanoparticle
+  - recombinant
+  - human
+  - humanized
+  - synthetic
+  - autologous
+  - allogeneic
+  - drug
+  - agent
+  - compound
+  - product
+  - medication
+  - regimen
+  - therapy
+  - treatment
+  - arm
+  - group
+  - cohort
+  - part
+  - phase
+  - stage
+  - dose
+  - doses
+  - level
+  - the
+  - a
+  - an
+  - with
+  - without
+  - plus
+  - and
+  - "or"
+  - of
+  - in
+  - "on"
+  - for
+  - to
+  - by
+  - via
+  - vs
+  - versus
+  - only
+  - alone
+  - monotherapy
+  - mono
+  - immunotherapy
+  - chemotherapy
+  - chemo
+  - radiotherapy
+  - chemoradiotherapy
+  - chemoimmunotherapy
+  - targeted
+  - biologic
+  - biological
+  - antibody
+  - antibodies
+  - monoclonal antibody
+  - injection
+  - injections
+  - infusion
+  - infusions
+  - tablet
+  - tablets
+  - capsule
+  - capsules
+  - pill
+  - pills
+  - solution
+  - suspension
+  - formulation
+  - preparation
+  - administration
+  - administered
+  - given
+  - delivered
+  - post resection
+  - post-resection
+  - pre resection
+  - pre-resection
+  - after protocol amendment
+  - before protocol amendment
+  - protocol amendment
+  - at progression
+  - after progression
+  - upon progression
+  - until progression
+  - as needed
+  - prn
+  - auc
+  - based
+  - containing
+  - alone or in combination
+  - in combination
+  - immunotherapy drug
+  - antineoplastic
+  - anticancer
+  - antitumor
+  - antitumour
+  - cytotoxic
+  - systemic
+  - local
+  - locoregional
+  - regional
+  - arm a
+  - arm b
+  - arm c
+  - arm d
+  - arm 1
+  - arm 2
+  - arm 3
+  - group a
+  - group b
+  - group c
+  - group 1
+  - group 2
+  - group 3
+  - cycle 1
+  - cycle 2
+  - cycles
+  - cycle
+  - day 1
+  - days
+  - day
+  - week
+  - weeks
+  - month
+  - months
+  - year
+  - years
+  - hour
+  - hours
+  - prior to
+  - followed by
+  - then
+  - background
+  - backbone
+  - soc
+  - sc injection
+  - iv infusion
+  - iv injection
+  - oral tablet
+  - oral capsule
+  - oral solution
+trailing_same_as_leading: true

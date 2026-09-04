@@ -228,3 +228,5 @@ runs/answers/*
 runs/conversations/*
 !runs/**/.keep
 .DS_Store
+data/enrichment/chembl_raw.json
+data/enrichment/*.log
