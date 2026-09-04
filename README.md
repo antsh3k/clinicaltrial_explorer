@@ -1,4 +1,4 @@
-# ct-landscape
+# Clinical Trials Landscape Explorer
 
 A ClinicalTrials.gov landscape-question agent: **one DuckDB index**, a **small tool-using agent** (Pydantic AI, three read-only tools), and a **chat UI whose every answer is machine-verified and traceable** to the trials that support it.
 
