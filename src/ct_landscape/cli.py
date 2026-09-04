@@ -109,11 +109,11 @@ def cmd_enrich(args: argparse.Namespace) -> int:
 
 def cmd_serve(args: argparse.Namespace) -> int:
     import uvicorn
-    from dotenv import load_dotenv
+    from dotenv import find_dotenv, load_dotenv
 
     from ct_landscape.api.app import create_app
 
-    load_dotenv()
+    load_dotenv(find_dotenv(usecwd=True))
     db_path = Path(args.db) if args.db else (DEMO_DB if args.demo else DEFAULT_DB)
     if not db_path.exists():
         print(
@@ -132,11 +132,11 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 
 def cmd_eval(args: argparse.Namespace) -> int:
-    from dotenv import load_dotenv
+    from dotenv import find_dotenv, load_dotenv
 
     from ct_landscape.evals.harness import run_eval
 
-    load_dotenv()
+    load_dotenv(find_dotenv(usecwd=True))
     db_path = Path(args.db) if args.db else (DEMO_DB if args.demo else DEFAULT_DB)
     if not db_path.exists():
         print(f"no index at {db_path}; run `ctl build` first", file=sys.stderr)

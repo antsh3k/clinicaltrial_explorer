@@ -53,6 +53,10 @@ def test_resolve_condition_prefers_mesh_key(con):
     r = tools.resolve(con, "Carcinoma, Non-Small-Cell Lung", "condition")
     assert r.candidates[0].id == "D002289"
     assert tools.resolve(con, "D002289", "condition").candidates[0].id == "D002289"
+    tok = tools.resolve(
+        con, "non-small-cell lung carcinoma", "condition"
+    )  # word order differs from the MeSH term
+    assert tok.candidates[0].id == "D002289" and tok.candidates[0].match == "tokens"
     r2 = tools.resolve(con, "non-small", "condition")
     assert any(c.id == "D002289" for c in r2.candidates) and r2.candidates[0].match in ("prefix", "contains")
 

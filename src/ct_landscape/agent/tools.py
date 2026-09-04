@@ -49,7 +49,7 @@ class Candidate(BaseModel):
     canonical_name: str
     n_trials: int
     matched_alias: str
-    match: Literal["exact", "alias", "prefix", "contains"]
+    match: Literal["exact", "alias", "tokens", "prefix", "contains"]
 
 
 class ResolveResult(BaseModel):
@@ -77,6 +77,9 @@ _RESOLVERS: dict[str, dict[str, str]] = {
     "condition": {
         "exact": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
                     WHERE condition_key = ? OR lower(display_name) = ? ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
+        "tokens": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
+                     WHERE list_sort(regexp_split_to_array(trim(regexp_replace(lower(display_name), '[^a-z0-9]+', ' ', 'g')), ' ')) = ?
+                     ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
         "prefix": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
                      WHERE lower(display_name) LIKE ? || '%' ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
         "contains": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
@@ -127,7 +130,13 @@ def _keys_for(kind: str, query: str) -> dict[str, tuple]:
     if kind == "condition":
         f = fold(q)
         key = q.upper() if MESH_ID.match(q) else f
-        return {"exact": (key, q.lower()), "prefix": (q.lower(),), "contains": (q.lower(),)}
+        toks = sorted(t for t in re.sub(r"[^a-z0-9]+", " ", q.lower()).split(" ") if t)
+        return {
+            "exact": (key, q.lower()),
+            "tokens": (toks,),
+            "prefix": (q.lower(),),
+            "contains": (q.lower(),),
+        }
     if kind == "company":
         ck = company_key(q)
         return {"exact": (_basic_norm(q), ck), "prefix": (ck, q.lower()), "contains": (ck,)}
@@ -144,10 +153,12 @@ def resolve(con: duckdb.DuckDBPyConnection, query: str, kind: Kind = "auto") -> 
     found: list[Candidate] = []
     for k in kinds:
         params = _keys_for(k, query)
-        for rung in ("exact", "alias", "prefix", "contains"):
+        for rung in ("exact", "alias", "tokens", "prefix", "contains"):
             sql_rung = "exact" if rung == "alias" else rung
             if rung == "alias" and k != "drug":
                 continue  # 'alias' is the exact rung reached through a non-canonical surface (drugs only)
+            if rung == "tokens" and k != "condition":
+                continue  # order-insensitive token match: "renal cell carcinoma" ↔ "Carcinoma, Renal Cell" (conditions only)
             if not params[sql_rung][0]:
                 continue
             rows = con.execute(_RESOLVERS[k][sql_rung], list(params[sql_rung])).fetchall()
@@ -168,7 +179,7 @@ def resolve(con: duckdb.DuckDBPyConnection, query: str, kind: Kind = "auto") -> 
                             match=match,
                         )
                     )
-            if found and rung in ("exact", "alias"):
+            if found and rung in ("exact", "alias", "tokens"):
                 break
         if found and kind != "auto":
             break
