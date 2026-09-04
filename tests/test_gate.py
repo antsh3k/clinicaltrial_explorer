@@ -104,3 +104,10 @@ def test_existing_in_index_is_not_enough():
 def test_answer_forbids_extra_fields():
     with pytest.raises(Exception):  # noqa: B017 — pydantic ValidationError
         Answer(answer_md="x", bogus=1)
+
+
+def test_entity_match_is_case_insensitive_but_still_grounded():
+    a = _seed()
+    a.entities.append(EntityRef(kind="moa", id="pdcd1"))
+    assert gate(a, RETRIEVED, SEEN | {"PDCD1"}) == []
+    assert gate(a, RETRIEVED, SEEN) == ["entity never in a tool result: moa:pdcd1"]

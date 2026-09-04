@@ -36,3 +36,8 @@ The specification `ct-landscape-agent-design.md` was produced agentically: explo
 
 ### Session 1 (cont.) — Phase 7 README
 **Actions:** wrote the README from the real funnel in `build_meta` and the smoke-query outputs (no numbers typed from memory); the eval section reports exactly what is verified offline (mutation suite, scripted-agent runs, replay gate) and what is pending the human (gold adjudication, live runs). A live browser check of the UI was skipped because it needed the user to pick a Chrome instance; the front-end was exercised through curl/TestClient instead.
+
+### Session 2 — live runs with the user's API key
+**Prompt:** "So I added an anthropic api key to the newly created .env file please continue with the test."
+
+**Actions:** one live §7.7 question first (worked: 8 tool calls, gate 16/16), then the gold-set harness. The first live run failed most cases on *agent-behaviour* defects that no offline test could have caught: a shared DuckDB connection under Pydantic AI's threaded parallel tool calls (phantom "not found"), misses raised as retries, a 24-tool-call cap that Sonnet 5's `get_trial` fan-out hit in one turn, a 16-turn cap exhausted by exhaustive exploration, a 4k output cap truncating a large answer, and an index gap (the demo index predated the ChEMBL artifact). Each was fixed with a regression test or a schema-card rule and re-run; run 2 completed 13/14 with zero grounding violations and a clean offline replay. Two index defects surfaced through answers rather than tests ("Cancer Research UK" → "cancer"; Q3 needing sponsor × condition) and got their own fixes. The LLM tier was dry-run only: spend needs the user's go-ahead.

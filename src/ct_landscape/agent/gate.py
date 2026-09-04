@@ -83,7 +83,10 @@ def gate(answer: Answer, retrieved: set[str], seen_entities: set[str]) -> list[s
     for c in answer.citations:
         if c.nct_id not in retrieved:
             errs.append(f"fabricated citation: {c.nct_id}")
-    for e in answer.entities:  # GROUNDED, not merely existing
-        if e.id not in seen_entities:
+    seen_fold = {
+        s.casefold() for s in seen_entities
+    }  # ids are unique regardless of case (asset ids lowercase,
+    for e in answer.entities:  # GROUNDED, not merely existing        MeSH ids / gene symbols uppercase)
+        if e.id.casefold() not in seen_fold:
             errs.append(f"entity never in a tool result: {e.kind}:{e.id}")
     return errs

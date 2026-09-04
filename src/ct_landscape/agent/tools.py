@@ -289,6 +289,16 @@ _ID_COLUMNS = {
     "lead_company_of_most_advanced",
     "moa_key",
     "term_id",
+    # target symbols and asset lists come back under these names in the views / worked SQL
+    "symbol",
+    "target",
+    "targets",
+    "target_symbol",
+    "target_symbols",
+    "targets_canonical",
+    "targets_raw",
+    "assets",
+    "asset_ids",
 }
 
 

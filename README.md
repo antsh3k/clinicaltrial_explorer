@@ -193,9 +193,31 @@ Caveat the agent must state: a Phase 4 trial is not evidence of approval; trial-
 - **Scripted-agent runs** through the real tools and the real output validator: a clean happy path, a fabricated citation rejected then corrected on the one retry, a never-grounded answer ending in an error (never a clean answer), prose that cannot end a run.
 - **Replay**: recorded transcripts replayed through the real agent with no model → `replay_mismatch_count = 0`.
 
-**Status of the gold set.** `src/ct_landscape/evals/gold.yaml` holds 12 core cases across the seven archetypes plus 2 borderline variants. The five negative/messiness probes (honest-empty, refuse-to-infer-approval, subject-vs-comparator split, combo/program reconciliation, condition-rollup statement) are self-describing and marked adjudicated. The seven set/containment cases carry expectations drawn from the design spec's case table (public knowledge, not this system's output) and are marked **`adjudicated: false`**: their set-based metrics are reported as DIAG, never gated, until the human oracle pass (search URL, capture date, raw UI count, frozen set) fills them in. Live runs and the resulting failure-mode table will be added once an API key is configured; the recorded transcripts then become the CI replay fixtures.
+**Live results (Sonnet 5, demo index, 2026-09-04).** Two full live runs were needed; the first surfaced agent-behaviour defects that were fixed and are listed under failure modes below. Run 2 (`runs/evals/live-demo-2`, 14 cases, ~1.66M input tokens ≈ $4 with prompt caching):
 
-**Failure modes observed so far (index level)** — logged as they were found:
+| | value |
+|---|---|
+| cases completed | 13 / 14 (G04 hit the 30-turn cap — see below) |
+| **ungrounded citations / entities / malformed NCTs** (FLOOR) | **0 / 0 / 0** across all completed answers |
+| dishonest-empty (G08) · zero-result path · replay mismatch (FLOOR) | 0 · 0 · **0 (13 transcripts replayed offline through the real agent, tools and validator)** |
+| objective (per-case checks, borderline excluded) | 0.90 (G06 0.8: one subgroup phrase missing; G04 failed) |
+| gate verdicts | every completed answer verified N/N (e.g. G01 22/22, G07 17/17) |
+| mean latency · answers touching ≥2 views | 41 s · 57% |
+
+Per case: G01 Erdheim-Chester programs ✓ (cobimetinib/trametinib/dabrafenib/vemurafenib) · G02 geographic atrophy top-k contains pegcetacoplan and avacincaptad pegol + the phase≠approval caveat ✓ · G03 multiple-myeloma sponsors with J&J/Celgene→BMS folded and scope stated ✓ · G05 KRAS G12C trials in NSCLC ✓ (set metrics DIAG until adjudicated) · G06 NSCLC biomarkers/subgroups 0.8 · G07 MK-3475 partners in RCC ✓ · G08 honest empty ✓ · G09 refuses to infer approval ✓ · G10 docetaxel subject vs comparator split ✓ · G11 combo/program counts reconcile ✓ · G12 rollup behaviour stated ✓ · borderline G03b/G05b completed.
+
+**G04 (IPF mechanisms) is the informative failure.** The index has 224 IPF programs; 80 carry a ChEMBL mechanism, 26 an NLM class, and 153 are unlabeled — including nerandomilast (PDE4B), admilparant/BMS-986278 (LPA1) and bexotegrast/PLN-74809 (αvβ6): new code-named assets that no curated source labels. This is precisely the tail the LLM tier (§6.4, built, not yet run) exists for; the agent's honest per-answer labeled fraction reports it, and on a later re-run the grounding gate correctly rejected an answer that named target symbols the queries had not returned (fixed by harvesting `symbol` columns and matching entity ids case-insensitively).
+
+**Status of the gold set.** `src/ct_landscape/evals/gold.yaml` holds 12 core cases across the seven archetypes plus 2 borderline variants. The five negative/messiness probes (honest-empty, refuse-to-infer-approval, subject-vs-comparator split, combo/program reconciliation, condition-rollup statement) are self-describing and marked adjudicated. The seven set/containment cases carry expectations drawn from the design spec's case table (public knowledge, not this system's output) and are marked **`adjudicated: false`**: their set-based metrics are reported as DIAG, never gated, until the human oracle pass (search URL, capture date, raw UI count, frozen set) fills them in. The recorded run-2 transcripts are the CI replay fixtures (`ctl eval --demo --mode replay --replay-dir runs/evals/live-demo-2`).
+
+**Agent-level failure modes found by the live runs (all fixed, all now covered by offline tests or schema-card rules):**
+- Parallel tool calls sharing one DuckDB connection interleaved result sets → phantom "not found" trial cards → one cursor per tool call (regression test with six parallel `get_trial` calls).
+- "Not found" raised as a retry exhausted the per-tool budget after two misses → misses are now tool *results*.
+- Sonnet 5 fans out `get_trial` across every trial and explores raw tables when a view is empty → tool-call cap 80, turn cap 30, an explicit empty-result rule, a mechanism stop rule, and worked SQL for the target rollup; G03 dropped from 29 tool calls to 7 once `v_sponsor_condition` existed.
+- A 4k output cap truncated a large `submit_answer` payload mid-JSON → 16k cap + "tables ≤ 25 rows" rule.
+- Company normalizer popped "research"/"UK" and turned "Cancer Research UK" into "cancer" → generic words are no longer popped; curated groups still catch "Janssen Research & Development" through a second-chance lookup.
+
+**Failure modes observed at index level** — logged as they were found:
 - Brand aliases "contested" by typos and regimen acronyms → dominance rule; the residual 5,772 vetoes are the honest tail.
 - Space-joined regimens ("lenalidomide dexamethasone") keyed as one asset → known-token regimen split.
 - Route words eaten by the dose-form tail strip ("Intravenous infusion of ketamine" → "intravenous") → strip order fixed; qualifier-only names gated.

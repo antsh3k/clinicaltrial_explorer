@@ -55,15 +55,16 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] `evals/checks.py` (CheckResult/Role/roll_up/set_prf/Pooled + pinned edge cases), `evals/gold.py` loader (`extra="forbid"`, `borderline`, `adjudicated`), `evals/gold.yaml`
 - [ ] Gold set: 12 core + 2 borderline cases DRAFTED from the spec's case table (`adjudicated: false` except the 5 negative/messiness probes); **expected sets still to be adjudicated by the user by hand** (oracle URL, capture date, raw UI count, `ncts` for G05) — set-based metrics stay DIAG until then
 - [x] `evals/harness.py` driving `answer_question()` (no HTTP); FLOOR/OBJ/DIAG report with id lists (`report.json` + `report.md`); per-case records double as replay fixtures; `--mode replay` replays recorded transcripts through the real agent (replay_mismatch_count FLOOR); `evals/mutate.py`; `ctl eval [--demo] [--mode live|replay] [--case ID]`
-- [ ] Live runs (Sonnet 5, ~$5) → results + failure modes into README — **needs ANTHROPIC_API_KEY in .env (not present yet)**
+- [x] Live runs (Sonnet 5): two full runs on the demo index (~$4 each); run 2 = 13/14 completed, 0 grounding violations, objective 0.90, replay gate 0 mismatches; results + agent-level failure modes in README; G04 (IPF mechanisms) is the documented coverage failure (unlabeled code-named assets → LLM tier)
 
 ## Phase 7 — README polish (§11.1 row 7)
 - [x] README: 5-minute reviewer path, full build, funnel (real numbers), example Q&As from the views, choices-the-brief-left-open table, where it performs well/poorly, tradeoff dials, evaluation (three layers, FLOOR/OBJ/DIAG, mutation + replay status), observed failure modes, AI-usage section, layout
-- [ ] README: live eval results + failure-mode table from `ctl eval --mode live` (needs ANTHROPIC_API_KEY); UI screenshots of the §7.7 example (needs a browser session)
+- [x] README: live eval results + agent-level failure-mode table
+- [ ] README: UI screenshots of the §7.7 example (needs a browser session)
 
 ## Needs the user (blocked)
-- [ ] Put `ANTHROPIC_API_KEY` in `.env` → `ctl serve --demo` and try the §7.7 question; `ctl eval --demo --mode live` → paste results into README
-- [ ] Phase 3b pilot: `ctl enrich llm --dry-run` (plan + cost), then `ctl enrich llm --limit 300` (~$0.30) → hand-check 30 rows → bulk (~$27 estimated, $35 ceiling)
+- [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
+- [ ] Phase 3b pilot — **dry-run done**: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
 - [ ] Gold adjudication: fill `oracle_url` / `capture_date` / `raw_ui_count` / frozen `entities` or `ncts` for G01–G07 and set `adjudicated: true` (set metrics stay DIAG until then)
 - [ ] Optional: pick a Chrome instance so the agent can screenshot the UI and check the console
 
