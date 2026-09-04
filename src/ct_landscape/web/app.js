@@ -23,7 +23,7 @@
   const PHASE_LABEL = { EARLY_PHASE1: "Early Ph1", PHASE1: "Phase 1", PHASE2: "Phase 2", PHASE3: "Phase 3", PHASE4: "Phase 4", NA: "N/A" };
   const PHASE_ORDER = ["Phase 4", "Phase 3", "Phase 2", "Phase 1", "Early Ph1", "N/A", "unknown"];
   const STATUS_ORDER = ["RECRUITING", "NOT_YET_RECRUITING", "ENROLLING_BY_INVITATION", "ACTIVE_NOT_RECRUITING", "COMPLETED", "TERMINATED", "WITHDRAWN", "SUSPENDED", "UNKNOWN", "unknown"];
-  const TIER_ORDER = ["chembl", "nlm_class", "llm", "none"];
+  const TIER_ORDER = ["chembl", "curated", "nlm_class", "llm", "none"];
   const KIND_SHORT = { disease_stage: "stage", disease_severity: "severity", demographic: "demo", biomarker: "biomarker", prior_therapy: "prior tx", line_of_therapy: "line" };
   async function api(path, opts) {
     const r = await fetch(path, opts);
@@ -350,7 +350,7 @@
     html += chart("phase", "Phase", PHASE_ORDER, { note: "trial phase, combined rounds up; Phase 4 ≠ approval" });
     html += chart("status", "Status", STATUS_ORDER);
     html += chart("sponsor", "Lead sponsor", null, { top: 8 });
-    html += chart("tier", "MoA label tier of assets in these trials", TIER_ORDER, { note: "per trial: tiers of its named assets (chembl > nlm_class > llm); 'none' = an asset with no mechanism label" });
+    html += chart("tier", "MoA label tier of assets in these trials", TIER_ORDER, { note: "per trial: tiers of its named assets (chembl > curated > nlm_class > llm); 'none' = an asset with no mechanism label" });
     html += chart("population", "Biomarkers & subgroups mentioned", null, { top: 10, note: "lexicon mentions in eligibility text (recall-limited); inclusion vs exclusion is NOT parsed — verify via the trial card" });
     html += `</div>`;
     html += chart("year", "Start year", null, { columns: true });

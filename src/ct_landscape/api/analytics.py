@@ -200,9 +200,9 @@ def _condition_landscape(con: duckdb.DuckDBPyConnection, key: str) -> dict[str, 
             """WITH a AS (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = $1)
                SELECT coalesce(m.provenance, 'none') AS tier, count(*) AS n
                FROM a LEFT JOIN v_moa_best m USING (asset_id)
-               GROUP BY 1 ORDER BY min(CASE m.provenance WHEN 'chembl' THEN 1 WHEN 'nlm_class' THEN 2 WHEN 'llm' THEN 3 ELSE 4 END)""",
+               GROUP BY 1 ORDER BY min(coalesce(m.tier, 99))""",
             [key],
-            "completeness of MoA answers for this indication: chembl (curated) > nlm_class > llm; 'none' is unlabeled",
+            "completeness of MoA answers for this indication: chembl > curated > nlm_class > llm (tier order from v_moa); 'none' is unlabeled",
         ),
         _chart(
             con,
