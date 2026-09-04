@@ -209,6 +209,7 @@ async def answer_question(
                     yield {
                         "event": "answer",
                         "answer": answer.model_dump(),
+                        "gate": deps.gate_result,
                         "trace": list(deps.trace),
                         "retrieved": sorted(deps.retrieved),
                         "usage": {

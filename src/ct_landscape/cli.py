@@ -7,6 +7,7 @@ Subcommands are registered here and implemented phase by phase (see TASKS.md).
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -106,6 +107,30 @@ def cmd_enrich(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace) -> int:
+    import uvicorn
+    from dotenv import load_dotenv
+
+    from ct_landscape.api.app import create_app
+
+    load_dotenv()
+    db_path = Path(args.db) if args.db else (DEMO_DB if args.demo else DEFAULT_DB)
+    if not db_path.exists():
+        print(
+            f"no index at {db_path}; run `ctl build{' --demo' if args.demo else ''}` first", file=sys.stderr
+        )
+        return 1
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print(
+            "warning: ANTHROPIC_API_KEY not set — SQL console, trial cards and permalinks work; live chat will error",
+            file=sys.stderr,
+        )
+    app = create_app(str(db_path))
+    print(f"serving {db_path} at http://{args.host}:{args.port}", file=sys.stderr)
+    uvicorn.run(app, host=args.host, port=args.port, log_level="info")
+    return 0
+
+
 def cmd_sql(args: argparse.Namespace) -> int:
     from ct_landscape.db import connect_sandboxed
 
@@ -166,10 +191,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     e.set_defaults(func=cmd_enrich)
 
-    s = sub.add_parser("serve", help="FastAPI + chat UI")
-    s.add_argument("--db", default=None)
+    s = sub.add_parser("serve", help="FastAPI + chat UI (needs ANTHROPIC_API_KEY in .env for live chat)")
+    s.add_argument(
+        "--db", default=None, help=f"index to serve (default {DEFAULT_DB}, or {DEMO_DB} with --demo)"
+    )
+    s.add_argument("--demo", action="store_true", help=f"serve {DEMO_DB}")
+    s.add_argument("--host", default="127.0.0.1")
     s.add_argument("--port", type=int, default=8000)
-    s.set_defaults(func=_not_implemented("Phase 5"))
+    s.set_defaults(func=cmd_serve)
 
     ev = sub.add_parser("eval", help="run the gold-set harness")
     ev.add_argument("--db", default=None)

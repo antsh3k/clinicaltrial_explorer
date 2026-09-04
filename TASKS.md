@@ -40,16 +40,16 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [ ] 3b bulk on un-joined in-scope assets → ship `data/enrichment/assets.jsonl`; load with target validation → `asset_enrichment`; `targets_unvalidated_rate`
 
 ## Phase 4 — agent/ (§7.1–7.4)
-- [ ] `agent/schema_card.py` (system prompt: view catalog, house rules, worked SQL examples)
-- [ ] `agent/tools.py`: `resolve_entity` ladder (exact/alias/prefix/contains; moa fold server-side; condition → MeSH key), sandboxed `run_sql` (four layers, row cap 200, list truncation, ALL ids into `retrieved`), `get_trial`
-- [ ] `agent/gate.py`: `nct_refs_from_text`, `gate()` pure function; `Answer` model with `table_text()`
-- [ ] `agent/agent.py`: Pydantic AI Agent, `Deps`, `ToolOutput(Answer, name="submit_answer")`, output validator, `UsageLimits`, history compaction; `answer_question()` event generator
-- [ ] Tests: `TestModel` smoke, `FunctionModel` replay of recorded transcripts, mutation mini-suite (§8.4) red/green
+- [x] `agent/schema_card.py` (system prompt: view catalog, house rules, worked SQL examples; snapshot line from build_meta)
+- [x] `agent/tools.py`: `resolve_entity` ladder (exact/alias/prefix/contains; moa fold server-side; condition → MeSH key), sandboxed `run_sql` (four layers, row cap 200, list truncation, ALL ids into `retrieved`), `get_trial`
+- [x] `agent/gate.py`: `nct_refs_from_text`, `gate()` pure function; `Answer` model with `table_text()`
+- [x] `agent/agent.py`: Pydantic AI 2.x Agent, `Deps`, `ToolOutput(Answer, name="submit_answer")`, output validator, `UsageLimits(request_limit=16, tool_calls_limit=24)`, nonce-fenced tool results; `answer_question()` event generator (history compaction lives in `api/store.py`)
+- [x] Tests: `TestModel` smoke, scripted `FunctionModel` (streaming adapter in `evals/replay.py`) driving the real tools + validator, gate retry + exhaustion paths, mutation suite (§8.4) red/green
 
 ## Phase 5 — api/ + web/ (§7.5–7.7)
-- [ ] `api/app.py`, `routes.py`, `events.py`: conversations, `ask` SSE, answers permalink, trials, entities resolve, sql console, meta; filesystem answer/conversation store
-- [ ] `web/index.html`, `app.js`, `styles.css`: live timeline, structured table, citations table with both links, gate badge, NCT auto-link, trace panel + coverage footer, permalink, SQL tab
-- [ ] `TestClient` tests with `agent.override(model=TestModel())`; §7.7 example renders end-to-end
+- [x] `api/app.py` + `api/store.py`: conversations, `ask` SSE (tool_call/tool_result/note/gate/answer/error/done), answers permalink, trials, entities resolve, sql console (same sandbox as the agent tool), meta; filesystem answer/conversation store; conversation-scoped gate sets; history compaction (tool payloads digested, 20-turn cap); one in-flight run per conversation; `ctl serve [--demo]`
+- [x] `web/index.html`, `app.js`, `styles.css`: live timeline, structured sortable table, citations table with phase/status/sponsor pulled live + both links, gate badge, NCT auto-link (gate's scanner), trace panel (SQL copy / open-in-console) + coverage footer, permalink `#/answers/{id}`, trial-card drawer, SQL tab with the schema card; no build step (marked + DOMPurify pinned from cdnjs)
+- [x] `TestClient` tests with a scripted model (no network): SSE event order, gate badge, permalink round-trip, follow-up turn citing a turn-1 NCT, sandbox rejections; `ctl serve --demo` smoke-tested with curl
 
 ## Phase 6 — evals/ (§8)
 - [ ] `evals/checks.py` (CheckResult/Role/roll_up/set_prf + pinned edge cases), `gold.yaml` loader (`extra="forbid"`, `borderline`)
@@ -61,6 +61,8 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [ ] 5-minute reviewer path, full build, funnel numbers, example Q&As with evidence, tradeoffs (§9), limitations (§10.3), choices the brief left open (§10.1), works-without-key vs needs-key, AI-usage section (from `PROMPTS.md`)
 
 ## Deviations from the spec
+- `UsageLimits.cost_limit` is not set: Pydantic AI's price table did not resolve a cost for `claude-sonnet-5` at build time, so the per-question ceiling is enforced by `request_limit`/`tool_calls_limit` (the spec's stated fallback). Revisit when the price table catches up.
+- Pydantic AI 2.x: `run_stream_events` is an async context manager; `FunctionModel` needs a `stream_function` for the streamed path, hence `evals/replay.py`.
 - ChEMBL join veto (§6.2) is applied to **mechanism** ambiguity, not synonym sharing: when one ChEMBL molecule names several of our assets (its brands / typos we never merged: progesterone, Prometrium, Endometrin…) each is labeled — a lookup, never a merge; when one alias names several ChEMBL molecules, it is labeled only if their mechanism signatures are identical, else skipped and logged. Counts for both cases are in the join census.
 - Route-word / dose-form order: qualifier words are peeled BEFORE the dose-form suffix strip so "Intravenous infusion of ketamine" keys to `ketamine` (the spec's tail-eating dose-form regex alone reduced it to "intravenous"). Names that are only qualifier words are gated (`qualifiers_only`).
 - Phase 2 additions beyond the spec text (all deterministic, all counted): edge-qualifier stripping (`lexicons/qualifiers.yaml`) before keying; known-token regimen split (a space-joined name whose every token is a standalone asset with ≥2 trials routes as a combination); self-declared sponsor parents parsed from the registry string; `trial_assets.via` ('name' | 'combo_component') so combo components are counted in `v_programs`; NLM pharmacologic classes attached only when the intervention MeSH leaf keys to one of the asset's aliases and the trial has a single matched leaf.

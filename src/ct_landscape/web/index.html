@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ct-landscape</title>
+<link rel="stylesheet" href="/static/styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand">ct-landscape</div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="chat">Chat</button>
+    <button class="tab" data-tab="sql">SQL console</button>
+  </nav>
+  <div id="meta" class="meta">loading index…</div>
+</header>
+
+<main id="tab-chat" class="tabpane">
+  <section class="chat">
+    <div id="timeline" class="timeline"></div>
+    <form id="ask" class="ask">
+      <input id="question" type="text" placeholder="e.g. What combination partners are being studied with MK-3475 in renal cell carcinoma?" autocomplete="off" required>
+      <button id="send" type="submit">send</button>
+    </form>
+    <div class="hint">Every answer is checked by the grounding gate: an NCT or entity the agent never retrieved fails the answer. Click any NCT for the trial card and the ClinicalTrials.gov source.</div>
+  </section>
+  <aside id="evidence" class="evidence">
+    <div class="evidence-empty">Evidence for the selected answer appears here: verified citations with live phase/status, the derivation trace, and a permalink.</div>
+  </aside>
+</main>
+
+<main id="tab-sql" class="tabpane" hidden>
+  <section class="sqlpane">
+    <textarea id="sqltext" spellcheck="false">SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.n_active_trials, p.n_trials
+FROM v_programs p JOIN assets a USING (asset_id)
+WHERE p.condition_key = 'D002292' AND NOT a.is_combo
+ORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC LIMIT 25</textarea>
+    <div class="sqlbar"><button id="runsql">run (read-only)</button><span id="sqlstatus"></span></div>
+    <div id="sqlresult" class="sqlresult"></div>
+  </section>
+  <aside class="schemacard"><h3>Schema card (what the agent sees)</h3><pre id="schemacard"></pre></aside>
+</main>
+
+<div id="drawer" class="drawer" hidden>
+  <div class="drawer-inner">
+    <button id="drawer-close" class="close">×</button>
+    <div id="drawer-body"></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
