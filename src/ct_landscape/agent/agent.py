@@ -67,7 +67,7 @@ agent: Agent[Deps, Answer] = Agent(
     # identical instructions + tool definitions every run → provider prompt caching (§7.3); Sonnet 5 rejects
     # sampling parameters, so no temperature is set (the model is deterministic enough under the gate + retry)
     model_settings=AnthropicModelSettings(
-        max_tokens=4000, anthropic_cache_instructions=True, anthropic_cache_tool_definitions=True
+        max_tokens=16000, anthropic_cache_instructions=True, anthropic_cache_tool_definitions=True
     ),
     retries=1,
     defer_model_check=True,

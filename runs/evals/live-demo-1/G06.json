@@ -1,0 +1,904 @@
+{
+ "case_id": "G06",
+ "question": "Which biomarkers and patient subgroups are commonly targeted in non-small cell lung cancer trials?",
+ "answer": null,
+ "gate": null,
+ "trace": [
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "non-small cell lung cancer",
+    "kind": "condition"
+   },
+   "n_candidates": 10,
+   "elapsed_ms": 157
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "Carcinoma, Non-Small-Cell Lung",
+    "kind": "condition"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 49
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT kind, term_id, n_trials, n_active_trials, example_ncts\nFROM v_population_landscape\nWHERE condition_key = 'D002289'\nORDER BY n_trials DESC\nLIMIT 40"
+   },
+   "rows": 40,
+   "elapsed_ms": 44,
+   "ncts_seen": 236,
+   "elapsed_total_ms": 44
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT kind, count(*) AS n_terms, sum(n_trials) AS total_mentions\nFROM v_population_landscape\nWHERE condition_key = 'D002289'\nGROUP BY 1 ORDER BY 2 DESC"
+   },
+   "rows": 6,
+   "elapsed_ms": 34,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 35
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, n_trials, n_active_trials, example_ncts\nFROM v_population_landscape\nWHERE condition_key = 'D002289' AND kind='biomarker'\nORDER BY n_trials DESC\nLIMIT 15"
+   },
+   "rows": 15,
+   "elapsed_ms": 23,
+   "ncts_seen": 127,
+   "elapsed_total_ms": 23
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT kind, term_id, n_trials, n_active_trials, example_ncts\nFROM v_population_landscape\nWHERE condition_key = 'D002289' AND kind IN ('line_of_therapy','prior_therapy','demographic')\nORDER BY n_trials DESC\nLIMIT 20"
+   },
+   "rows": 20,
+   "elapsed_ms": 24,
+   "ncts_seen": 164,
+   "elapsed_total_ms": 24
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT01788332"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT04302025"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, n_trials, n_active_trials\nFROM v_population_landscape\nWHERE condition_key = 'D002289' AND kind='biomarker'\nORDER BY n_trials DESC\nOFFSET 15 LIMIT 20"
+   },
+   "rows": 20,
+   "elapsed_ms": 29,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 29
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT sum(n_trials) FROM v_population_landscape WHERE condition_key='D002289' AND kind='biomarker' AND term_id NOT IN (\n'EGFR','PDL1','LVEF','ROS1','ALK','HBV_DNA','BRAF','KRAS','EGFR_T790M','TNBC','BRAF_V600','NTRK','KRAS_G12C','EGFR_EXON20','HER2_NEG',\n'CTDNA','CD4_COUNT','MET_EXON14','RET','MSI_H','HER2_POS','EGFR_RENAL','HIV_VIRAL_LOAD','MET_AMP','HER2_MUT','HR_POS','MSS','HBA1C','SEROPOSITIVE','TROP2','NRAS','KRAS_G12D','TP53','BRCA','STK11')"
+   },
+   "rows": 1,
+   "elapsed_ms": 23,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 23
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, n_trials FROM v_population_landscape WHERE condition_key='D002289' AND kind='biomarker' AND n_trials < 19 ORDER BY n_trials DESC"
+   },
+   "rows": 31,
+   "elapsed_ms": 26,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 26
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT count(*) FROM v_trials WHERE nct_id IN (SELECT nct_id FROM trial_conditions_norm WHERE condition_key='D002289')"
+   },
+   "rows": 1,
+   "elapsed_ms": 12,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 12
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT00522145"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02974725"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02250326"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02034097"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='disease_stage'\nORDER BY n_trials DESC LIMIT 22"
+   },
+   "rows": 22,
+   "elapsed_ms": 28,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 28
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='disease_severity'\nORDER BY n_trials DESC LIMIT 12"
+   },
+   "rows": 12,
+   "elapsed_ms": 29,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 30
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='demographic'\nORDER BY n_trials DESC LIMIT 13"
+   },
+   "rows": 13,
+   "elapsed_ms": 27,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 28
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='prior_therapy'\nORDER BY n_trials DESC LIMIT 18"
+   },
+   "rows": 18,
+   "elapsed_ms": 32,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 33
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='line_of_therapy'\nORDER BY n_trials DESC LIMIT 12"
+   },
+   "rows": 12,
+   "elapsed_ms": 28,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 28
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT01324258"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT sum(n_trials) FROM v_population_landscape WHERE condition_key='D002289'"
+   },
+   "rows": 1,
+   "elapsed_ms": 39,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 39
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02330367"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT term_id, n_trials, n_active_trials FROM v_population_landscape WHERE condition_key='D002289' AND term_id IN ('HBV_DNA','CD4_COUNT','HIV_VIRAL_LOAD','EGFR_RENAL','HBA1C','SEROPOSITIVE','LVEF','NTPROBNP')"
+   },
+   "rows": 8,
+   "elapsed_ms": 25,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 25
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT00397384"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT01446276"
+   },
+   "found": false
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT00932451"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02007070"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02974725"
+   },
+   "found": true
+  }
+ ],
+ "error": "UsageLimitExceeded: The next request would exceed the request_limit of 30. Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+ "usage": null,
+ "events": [
+  {
+   "event": "tool_call",
+   "step": 1,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_014zV6WrkPt4v5m4N12SHXPw",
+   "input": {
+    "query": "non-small cell lung cancer",
+    "kind": "condition"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 1,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_014zV6WrkPt4v5m4N12SHXPw",
+   "rows": null,
+   "n_candidates": 10,
+   "elapsed_ms": 157,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 2,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01HS6x4WiaTVKLATRNdMEaxz",
+   "input": {
+    "query": "Carcinoma, Non-Small-Cell Lung",
+    "kind": "condition"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 2,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01HS6x4WiaTVKLATRNdMEaxz",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 49,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 3,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_017uqpGnFTizt1JTFsyC3PzL",
+   "input": {
+    "sql": "SELECT kind, term_id, n_trials, n_active_trials, example_ncts\nFROM v_population_landscape\nWHERE condition_key = 'D002289'\nORDER BY n_trials DESC\nLIMIT 40"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_017uqpGnFTizt1JTFsyC3PzL",
+   "rows": 40,
+   "n_candidates": null,
+   "elapsed_ms": 44,
+   "ncts_seen": 236,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 4,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01232jF3Lue5mz3zkghF5PL3",
+   "input": {
+    "sql": "SELECT kind, count(*) AS n_terms, sum(n_trials) AS total_mentions\nFROM v_population_landscape\nWHERE condition_key = 'D002289'\nGROUP BY 1 ORDER BY 2 DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 4,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01232jF3Lue5mz3zkghF5PL3",
+   "rows": 6,
+   "n_candidates": null,
+   "elapsed_ms": 34,
+   "ncts_seen": 236,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015GQydJUDWnqtF1qrpNn4vc",
+   "input": {
+    "sql": "SELECT term_id, n_trials, n_active_trials, example_ncts\nFROM v_population_landscape\nWHERE condition_key = 'D002289' AND kind='biomarker'\nORDER BY n_trials DESC\nLIMIT 15"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_015GQydJUDWnqtF1qrpNn4vc",
+   "rows": 15,
+   "n_candidates": null,
+   "elapsed_ms": 23,
+   "ncts_seen": 279,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_018TnVrHFZUyQd3rz28SoGbL",
+   "input": {
+    "sql": "SELECT kind, term_id, n_trials, n_active_trials, example_ncts\nFROM v_population_landscape\nWHERE condition_key = 'D002289' AND kind IN ('line_of_therapy','prior_therapy','demographic')\nORDER BY n_trials DESC\nLIMIT 20"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_018TnVrHFZUyQd3rz28SoGbL",
+   "rows": 20,
+   "n_candidates": null,
+   "elapsed_ms": 24,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 7,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Xm9mr8NQfjRMZ3P4LQXsic",
+   "input": {
+    "nct_id": "NCT01788332"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 7,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Xm9mr8NQfjRMZ3P4LQXsic",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 8,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XvXuQf5UGJg2PSWKYXoZgU",
+   "input": {
+    "nct_id": "NCT04302025"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 8,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XvXuQf5UGJg2PSWKYXoZgU",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_016bz39rVYum46fM5k6AtXn7",
+   "input": {
+    "sql": "SELECT term_id, n_trials, n_active_trials\nFROM v_population_landscape\nWHERE condition_key = 'D002289' AND kind='biomarker'\nORDER BY n_trials DESC\nOFFSET 15 LIMIT 20"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_016bz39rVYum46fM5k6AtXn7",
+   "rows": 20,
+   "n_candidates": null,
+   "elapsed_ms": 29,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01QaraP9d12mk1J5bNQvTWaq",
+   "input": {
+    "sql": "SELECT sum(n_trials) FROM v_population_landscape WHERE condition_key='D002289' AND kind='biomarker' AND term_id NOT IN (\n'EGFR','PDL1','LVEF','ROS1','ALK','HBV_DNA','BRAF','KRAS','EGFR_T790M','TNBC','BRAF_V600','NTRK','KRAS_G12C','EGFR_EXON20','HER2_NEG',\n'CTDNA','CD4_COUNT','MET_EXON14','RET','MSI_H','HER2_POS','EGFR_RENAL','HIV_VIRAL_LOAD','MET_AMP','HER2_MUT','HR_POS','MSS','HBA1C','SEROPOSITIVE','TROP2','NRAS','KRAS_G12D','TP53','BRCA','STK11')"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01QaraP9d12mk1J5bNQvTWaq",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 23,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_0117nBoY9A47rF6ZrHPo5512",
+   "input": {
+    "sql": "SELECT term_id, n_trials FROM v_population_landscape WHERE condition_key='D002289' AND kind='biomarker' AND n_trials < 19 ORDER BY n_trials DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_0117nBoY9A47rF6ZrHPo5512",
+   "rows": 31,
+   "n_candidates": null,
+   "elapsed_ms": 26,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_016nUbUeMBQZwQB5VKMuwKUa",
+   "input": {
+    "sql": "SELECT count(*) FROM v_trials WHERE nct_id IN (SELECT nct_id FROM trial_conditions_norm WHERE condition_key='D002289')"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_016nUbUeMBQZwQB5VKMuwKUa",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 12,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 13,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XSif8KtAnW8dmEQRhekfNU",
+   "input": {
+    "nct_id": "NCT00522145"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 13,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XSif8KtAnW8dmEQRhekfNU",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 14,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01QVAqC6akTZpZXuifgUXhLM",
+   "input": {
+    "nct_id": "NCT02974725"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 14,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01QVAqC6akTZpZXuifgUXhLM",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 15,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_012eF29YqZ5V5vTxj4omdNAN",
+   "input": {
+    "nct_id": "NCT02250326"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 15,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_012eF29YqZ5V5vTxj4omdNAN",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 16,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01KTQqz22YKXs69jGBTQHHuK",
+   "input": {
+    "nct_id": "NCT02034097"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 16,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01KTQqz22YKXs69jGBTQHHuK",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Rtotgo1hNkfbjG9A3Y8tPp",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='disease_stage'\nORDER BY n_trials DESC LIMIT 22"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Rtotgo1hNkfbjG9A3Y8tPp",
+   "rows": 22,
+   "n_candidates": null,
+   "elapsed_ms": 28,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UNQh84FDtbNHioCbkG6HdF",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='disease_severity'\nORDER BY n_trials DESC LIMIT 12"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UNQh84FDtbNHioCbkG6HdF",
+   "rows": 12,
+   "n_candidates": null,
+   "elapsed_ms": 29,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 19,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HzgvkgEr3EDfMJTAA8UF7x",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='demographic'\nORDER BY n_trials DESC LIMIT 13"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 19,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HzgvkgEr3EDfMJTAA8UF7x",
+   "rows": 13,
+   "n_candidates": null,
+   "elapsed_ms": 27,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 20,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01QggezwgAZNL7UgHM3KT6bA",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='prior_therapy'\nORDER BY n_trials DESC LIMIT 18"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 20,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01QggezwgAZNL7UgHM3KT6bA",
+   "rows": 18,
+   "n_candidates": null,
+   "elapsed_ms": 32,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 21,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_012gLnGpoWBeWGdV28WRuSCf",
+   "input": {
+    "sql": "SELECT term_id, kind, n_trials FROM v_population_landscape\nWHERE condition_key='D002289' AND kind='line_of_therapy'\nORDER BY n_trials DESC LIMIT 12"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 21,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_012gLnGpoWBeWGdV28WRuSCf",
+   "rows": 12,
+   "n_candidates": null,
+   "elapsed_ms": 28,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 22,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Ba59ZQsithEGUFDVGdERUo",
+   "input": {
+    "nct_id": "NCT01324258"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 22,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Ba59ZQsithEGUFDVGdERUo",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 23,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_016Vznh68cc69exxaXQmkg4Q",
+   "input": {
+    "sql": "SELECT sum(n_trials) FROM v_population_landscape WHERE condition_key='D002289'"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 23,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_016Vznh68cc69exxaXQmkg4Q",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 39,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 24,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01WzGmUYCXE5AvQyfJ9s6tsb",
+   "input": {
+    "nct_id": "NCT02330367"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 24,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01WzGmUYCXE5AvQyfJ9s6tsb",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 25,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PfYek6y6btyLwrWDM13cWV",
+   "input": {
+    "sql": "SELECT term_id, n_trials, n_active_trials FROM v_population_landscape WHERE condition_key='D002289' AND term_id IN ('HBV_DNA','CD4_COUNT','HIV_VIRAL_LOAD','EGFR_RENAL','HBA1C','SEROPOSITIVE','LVEF','NTPROBNP')"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 25,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PfYek6y6btyLwrWDM13cWV",
+   "rows": 8,
+   "n_candidates": null,
+   "elapsed_ms": 25,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 26,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Bi9iQBBgSkXfT9ZwgkUNbY",
+   "input": {
+    "nct_id": "NCT00397384"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 26,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Bi9iQBBgSkXfT9ZwgkUNbY",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 27,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01HoKjprFVAwfGGNehPbYYap",
+   "input": {
+    "nct_id": "NCT01446276"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 27,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01HoKjprFVAwfGGNehPbYYap",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 28,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01GBgzdwiH8uhsidYYjzSdwh",
+   "input": {
+    "nct_id": "NCT00932451"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 28,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01GBgzdwiH8uhsidYYjzSdwh",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 29,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01AnUL2U88U3oBjxaJgdmgwc",
+   "input": {
+    "nct_id": "NCT02007070"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 29,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01AnUL2U88U3oBjxaJgdmgwc",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 30,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01MHYiPXcVqw6KAJoKXvWCsE",
+   "input": {
+    "nct_id": "NCT02974725"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 30,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01MHYiPXcVqw6KAJoKXvWCsE",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 338,
+   "error": null,
+   "input": null
+  }
+ ],
+ "elapsed_ms": 51293
+}

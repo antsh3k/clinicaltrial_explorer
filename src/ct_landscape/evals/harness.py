@@ -185,9 +185,17 @@ def score_case(case: GoldCase, outcome: dict[str, Any], con: duckdb.DuckDBPyConn
                 {_norm(e["id"]) for e in answer.get("entities", [])} if not answer["table"]["rows"] else set()
             )
         hits = [e for e in exp.entities if _entity_hit(e, surface)]
-        misses = [e for e in exp.entities if e not in hits]
-        score = len(hits) / len(exp.entities) if exp.entities else 1.0
-        detail.append({"case": cid, "hits": hits, "misses": misses})
+        prose_hits: list[str] = []
+        if (
+            case.check == "contains_all"
+        ):  # targets/mechanisms may legitimately live in prose; recorded, not hidden
+            prose = _norm(answer.get("answer_md", ""))
+            prose_hits = [
+                e for e in exp.entities if e not in hits and len(_norm(e)) >= 4 and _norm(e) in prose
+            ]
+        misses = [e for e in exp.entities if e not in hits and e not in prose_hits]
+        score = (len(hits) + len(prose_hits)) / len(exp.entities) if exp.entities else 1.0
+        detail.append({"case": cid, "hits": hits, "prose_hits": prose_hits, "misses": misses})
     if case.check == "refuse_approval":
         bad = [m for m in exp.must_not_mention if _mentions(answer, m)]
         score = 0.0 if bad else 1.0

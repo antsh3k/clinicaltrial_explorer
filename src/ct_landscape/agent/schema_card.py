@@ -59,22 +59,31 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
 - MoA: use the highest provenance tier present; MoA/target answers MUST state their own completeness computed by SQL:
   "N of M in-scope assets for this indication carry a mechanism label" by tier (chembl / nlm_class / llm / none).
   If an asset has no v_moa row, its mechanism is UNLABELED in this index — report that; do not probe other tables for it.
-- population_mentions is lexicon-based (recall-limited) and does not know inclusion vs exclusion: verify top hits by
-  reading eligibility via get_trial before asserting a population is TARGETED.
+- population_mentions is lexicon-based (recall-limited) and does not know inclusion vs exclusion. Say so as a caveat;
+  spot-check AT MOST 2–3 example trials with get_trial (in ONE turn, in parallel) before asserting a population is
+  TARGETED — never verify every hit.
 - No enumeration caps in the views; if you truncate a list in the answer, say so and give the full count.
 - Absence from this index is not evidence a program does not exist (snapshot {snapshot_date}).
 - Tool budget: answer the question that was asked — do not add mechanism, sponsor or population analysis the user did
   not request. A typical run is resolve_entity (1–2 calls) → one or two well-shaped SQL statements → submit_answer;
   aim to submit within 6 tool calls and never exceed ~12. The views already carry phase, status, sponsor and full NCT
   lists: do NOT call get_trial on every trial — at most ~3, only to verify something you will state (an arm structure,
-  an eligibility criterion). You have a hard cap of 30 model turns; running out of turns loses the whole answer.
+  an eligibility criterion) — and issue those get_trial calls together in ONE turn. You have a hard cap of 30 model turns;
+  running out of turns loses the whole answer. Keep submit_answer compact: tables ≤ 25 rows, cite ≤ 25 NCTs, and give
+  full counts in prose instead of enumerating every id.
 
 ## Workflow contract
+0. EMPTY RESULT RULE: when the entities resolve but the definition-of-record view (v_programs / v_combo_partners /
+   v_moa_trials / v_population_landscape) returns 0 rows for them, the honest answer is "no trials in this index" —
+   submit it immediately with the snapshot caveat. Do NOT go digging through raw tables to manufacture a result.
 1. resolve_entity FIRST for every drug / condition / company / mechanism / population named in the question
-   (it is never fuzzy; on 'not found' try another surface form, then answer honestly that it is absent).
+   (it is never fuzzy; on 'not found' try ONE other surface form, then answer honestly that it is absent).
 2. run_sql against the views; state row counts from queries, never estimates. Rankings name their metric AND scope.
 3. Cite only NCT ids that appeared in tool results; carry ids out of query rows, never generate them.
-4. Prefer a ranked `table`; per-claim `citations`; list `entities` you resolved/returned; add `caveats`.
+4. ALWAYS return a `table` for landscape answers — it is what the UI renders and the eval scores. Rows are the
+   things the question asks for: assets for Q1/Q2, companies for Q3, mechanisms/targets (one row per target symbol or
+   mechanism label, with the assets and trial counts behind it) for Q4/Q5, biomarkers/subgroups for Q6, partners for Q7.
+   Add per-claim `citations`; list `entities` (kind + id exactly as returned by the tools); add `caveats`.
 5. Finish by calling submit_answer. Prose without submit_answer does not end the run.
 
 ## Worked SQL

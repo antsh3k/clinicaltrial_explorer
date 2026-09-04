@@ -1,0 +1,1659 @@
+{
+ "case_id": "G05b",
+ "question": "Which trials are studying pan-KRAS or KRAS G12D inhibitors in non-small cell lung cancer?",
+ "answer": null,
+ "gate": null,
+ "trace": [
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "KRAS G12D inhibitor",
+    "kind": "moa"
+   },
+   "n_candidates": 0,
+   "elapsed_ms": 9
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "pan-KRAS inhibitor",
+    "kind": "moa"
+   },
+   "n_candidates": 0,
+   "elapsed_ms": 8
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "non-small cell lung cancer",
+    "kind": "condition"
+   },
+   "n_candidates": 10,
+   "elapsed_ms": 158
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "KRAS",
+    "kind": "moa"
+   },
+   "n_candidates": 2,
+   "elapsed_ms": 6
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "lung cancer",
+    "kind": "condition"
+   },
+   "n_candidates": 10,
+   "elapsed_ms": 154
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT moa_key, provenance, moa_label, count(distinct asset_id) n_assets FROM v_moa WHERE moa_label ILIKE '%KRAS%' GROUP BY 1,2,3 ORDER BY n_assets DESC"
+   },
+   "rows": 1,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 2
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT condition_key, display_name, count(*) n FROM trial_conditions_norm WHERE display_name ILIKE '%non-small cell lung%' OR display_name ILIKE '%non small cell lung%' OR display_name ILIKE '%NSCLC%' GROUP BY 1,2 ORDER BY n DESC LIMIT 20"
+   },
+   "rows": 20,
+   "elapsed_ms": 12,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 13
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT m.asset_id, a.canonical_name, m.moa_label, m.targets, m.tier\nFROM v_moa m JOIN assets a ON a.asset_id=m.asset_id\nWHERE m.moa_key='gtpase|kras'"
+   },
+   "rows": 2,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 2
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, canonical_name FROM assets\nWHERE canonical_name ILIKE '%kras%' \nORDER BY canonical_name"
+   },
+   "rows": 6,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 2
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT a.asset_id, a.canonical_name FROM assets a\nWHERE a.canonical_name ILIKE '%RMC-6236%' OR a.canonical_name ILIKE '%RMC-6291%' OR a.canonical_name ILIKE '%RMC-9805%'\n   OR a.canonical_name ILIKE '%daraxonrasib%' OR a.canonical_name ILIKE '%zoldonrasib%' OR a.canonical_name ILIKE '%elironrasib%'\n   OR a.canonical_name ILIKE '%MRTX1133%' OR a.canonical_name ILIKE '%olomorasib%' OR a.canonical_name ILIKE '%glecirasib%'\n   OR a.canonical_name ILIKE '%BI 1701963%' OR a.canonical_name ILIKE '%BI-3706674%' OR a.canonical_name ILIKE '%JAB-21822%'\n   OR a.canonical_name ILIKE '%D-1553%' OR a.canonical_name ILIKE '%pan-KRAS%' OR a.canonical_name ILIKE '%panKRAS%'"
+   },
+   "rows": 11,
+   "elapsed_ms": 17,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 17
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.condition_key, p.max_phase_ever, p.max_phase_active, p.n_trials, p.nct_ids\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.asset_id IN ('sotorasib','adagrasib','azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d')\n  AND p.condition_key IN ('non small cell lung cancer','nsclc','non small cell lung cancer nsclc','non squamous non small cell lung cancer','stage iv non small cell lung cancer','non small cell lung cancer metastatic','metastatic non small cell lung cancer','advanced non small cell lung cancer')\nORDER BY a.canonical_name"
+   },
+   "rows": 1,
+   "elapsed_ms": 43,
+   "ncts_seen": 1,
+   "elapsed_total_ms": 43
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.condition_key, p.max_phase_ever, p.max_phase_active, p.n_trials, p.nct_ids\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133')\n  AND (p.condition_key ILIKE '%non small cell lung%' OR p.condition_key ILIKE '%nsclc%' OR p.condition_key ILIKE '%non squamous%')\nORDER BY a.canonical_name"
+   },
+   "rows": 0,
+   "elapsed_ms": 41,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 41
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.condition_key\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133')\nORDER BY a.canonical_name, p.condition_key"
+   },
+   "rows": 61,
+   "elapsed_ms": 52,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 52
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT condition_key, display_name FROM v_conditions WHERE condition_key IN ('D002289')"
+   },
+   "rows": 1,
+   "elapsed_ms": 27,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 27
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_ever, p.max_phase_active, p.n_trials, p.n_active_trials, p.nct_ids\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.condition_key = 'D002289'\n  AND p.asset_id IN ('sotorasib','adagrasib','daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133',\n                      'azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d',\n                      'glecirasib','olomorasib','bi1701963','d1553')\nORDER BY p.max_phase_ever DESC, a.canonical_name"
+   },
+   "rows": 13,
+   "elapsed_ms": 28,
+   "ncts_seen": 64,
+   "elapsed_total_ms": 28
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, p.nct_ids\nFROM v_programs p\nWHERE p.condition_key='D002289' AND p.asset_id IN ('sotorasib','adagrasib','d1553','daraxonrasib','olomorasib','zoldonrasib','elironrasib','glecirasib','rmc9805','azd0240autologousengineeredtcellstargetingkrasg12d','bi1701963','mrtx1133','nt112autologousengineeredtcellstargetingkrasg12d')"
+   },
+   "rows": 13,
+   "elapsed_ms": 29,
+   "ncts_seen": 64,
+   "elapsed_total_ms": 29
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='sotorasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='adagrasib'"
+   },
+   "rows": 40,
+   "elapsed_ms": 26,
+   "ncts_seen": 40,
+   "elapsed_total_ms": 27
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, canonical_name FROM assets WHERE asset_id IN ('sotorasib','adagrasib','d1553','daraxonrasib','olomorasib','zoldonrasib','elironrasib','glecirasib','rmc9805','azd0240autologousengineeredtcellstargetingkrasg12d','bi1701963','mrtx1133','nt112autologousengineeredtcellstargetingkrasg12d')"
+   },
+   "rows": 13,
+   "elapsed_ms": 1,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 1
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT provenance, moa_label, action, targets FROM v_moa WHERE asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133','glecirasib','olomorasib','d1553','bi1701963')"
+   },
+   "rows": 0,
+   "elapsed_ms": 3,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 3
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, provenance, moa_label FROM v_moa WHERE asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133','glecirasib','olomorasib','d1553','bi1701963','sotorasib','adagrasib','azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d')"
+   },
+   "rows": 5,
+   "elapsed_ms": 3,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 3
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06162221"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05737706"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='glecirasib'"
+   },
+   "rows": 7,
+   "elapsed_ms": 19,
+   "ncts_seen": 7,
+   "elapsed_total_ms": 19
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05002270"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='daraxonrasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='elironrasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='rmc9805'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='olomorasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='zoldonrasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='d1553'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='bi1701963'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id IN ('azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d')"
+   },
+   "rows": 24,
+   "elapsed_ms": 41,
+   "ncts_seen": 17,
+   "elapsed_total_ms": 41
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06218914"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06040541"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT04956640"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07397338"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07777822"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07639242"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT04975256"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06119581"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06128551"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05379985"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06881784"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07349537"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06890598"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05462717"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07174908"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07227025"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05002270"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT nct_id FROM v_trials WHERE nct_id IN ('NCT05009329','NCT05276726','NCT05288205','NCT06563999','NCT07339839')"
+   },
+   "rows": 5,
+   "elapsed_ms": 12,
+   "ncts_seen": 5,
+   "elapsed_total_ms": 12
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05288205"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07339839"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05276726"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05009329"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06563999"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT07164170"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06024174"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, canonical_name FROM assets WHERE asset_id='bbp398'"
+   },
+   "rows": 1,
+   "elapsed_ms": 0,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 0
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='adagrasib'"
+   },
+   "rows": 17,
+   "elapsed_ms": 23,
+   "ncts_seen": 17,
+   "elapsed_total_ms": 23
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='sotorasib'"
+   },
+   "rows": 23,
+   "elapsed_ms": 24,
+   "ncts_seen": 23,
+   "elapsed_total_ms": 24
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06563999"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT04625647"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT04613596"
+   },
+   "found": true
+  }
+ ],
+ "error": "UsageLimitExceeded: The next request would exceed the request_limit of 30. Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+ "usage": null,
+ "events": [
+  {
+   "event": "tool_call",
+   "step": 1,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01CXMwkTaH1pMMEAxbr6VBht",
+   "input": {
+    "query": "KRAS G12D inhibitor",
+    "kind": "moa"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 2,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_018PeF6H6GPcGCDNmmRkUnuH",
+   "input": {
+    "query": "pan-KRAS inhibitor",
+    "kind": "moa"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_014LGDvQKy175awBB1y8BCoa",
+   "input": {
+    "query": "non-small cell lung cancer",
+    "kind": "condition"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01CXMwkTaH1pMMEAxbr6VBht",
+   "rows": null,
+   "n_candidates": 0,
+   "elapsed_ms": 9,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_018PeF6H6GPcGCDNmmRkUnuH",
+   "rows": null,
+   "n_candidates": 0,
+   "elapsed_ms": 8,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_014LGDvQKy175awBB1y8BCoa",
+   "rows": null,
+   "n_candidates": 10,
+   "elapsed_ms": 158,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 4,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_016KJjRXnWHvSLjRbh5HF7KV",
+   "input": {
+    "query": "KRAS",
+    "kind": "moa"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 5,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01QPgLEUVsKzhXLHmkrGPoQu",
+   "input": {
+    "query": "lung cancer",
+    "kind": "condition"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 5,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_016KJjRXnWHvSLjRbh5HF7KV",
+   "rows": null,
+   "n_candidates": 2,
+   "elapsed_ms": 6,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 5,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01QPgLEUVsKzhXLHmkrGPoQu",
+   "rows": null,
+   "n_candidates": 10,
+   "elapsed_ms": 154,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01DoC2gwfk5KMYg3UdgVyjbB",
+   "input": {
+    "sql": "SELECT condition_key, display_name, count(*) n FROM trial_conditions_norm WHERE display_name ILIKE '%non-small cell lung%' OR display_name ILIKE '%non small cell lung%' OR display_name ILIKE '%NSCLC%' GROUP BY 1,2 ORDER BY n DESC LIMIT 20"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01G7g5f2XPoTUQ49wjy6HPJ9",
+   "input": {
+    "sql": "SELECT moa_key, provenance, moa_label, count(distinct asset_id) n_assets FROM v_moa WHERE moa_label ILIKE '%KRAS%' GROUP BY 1,2,3 ORDER BY n_assets DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01G7g5f2XPoTUQ49wjy6HPJ9",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01DoC2gwfk5KMYg3UdgVyjbB",
+   "rows": 20,
+   "n_candidates": null,
+   "elapsed_ms": 12,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 8,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01FCpvsZetR7sBbssqxtoz8d",
+   "input": {
+    "sql": "\nSELECT m.asset_id, a.canonical_name, m.moa_label, m.targets, m.tier\nFROM v_moa m JOIN assets a ON a.asset_id=m.asset_id\nWHERE m.moa_key='gtpase|kras'\n"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U8w1Y1qCuXocqCfFoMqWjy",
+   "input": {
+    "sql": "\nSELECT asset_id, canonical_name FROM assets\nWHERE canonical_name ILIKE '%kras%' \nORDER BY canonical_name\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01FCpvsZetR7sBbssqxtoz8d",
+   "rows": 6,
+   "n_candidates": null,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U8w1Y1qCuXocqCfFoMqWjy",
+   "rows": 6,
+   "n_candidates": null,
+   "elapsed_ms": 2,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_012sYcxDhwYX48Ab5gyZUMvq",
+   "input": {
+    "sql": "\nSELECT a.asset_id, a.canonical_name FROM assets a\nWHERE a.canonical_name ILIKE '%RMC-6236%' OR a.canonical_name ILIKE '%RMC-6291%' OR a.canonical_name ILIKE '%RMC-9805%'\n   OR a.canonical_name ILIKE '%daraxonrasib%' OR a.canonical_name ILIKE '%zoldonrasib%' OR a.canonical_name ILIKE '%elironrasib%'\n   OR a.canonical_name ILIKE '%MRTX1133%' OR a.canonical_name ILIKE '%olomorasib%' OR a.canonical_name ILIKE '%glecirasib%'\n   OR a.canonical_name ILIKE '%BI 1701963%' OR a.canonical_name ILIKE '%BI-3706674%' OR a.canonical_name ILIKE '%JAB-21822%'\n   OR a.canonical_name ILIKE '%D-1553%' OR a.canonical_name ILIKE '%pan-KRAS%' OR a.canonical_name ILIKE '%panKRAS%'\n"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PodfBUa3Cr8ywmUoABAFPU",
+   "input": {
+    "sql": "\nSELECT p.asset_id, a.canonical_name, p.condition_key, p.max_phase_ever, p.max_phase_active, p.n_trials, p.nct_ids\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.asset_id IN ('sotorasib','adagrasib','azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d')\n  AND p.condition_key IN ('non small cell lung cancer','nsclc','non small cell lung cancer nsclc','non squamous non small cell lung cancer','stage iv non small cell lung cancer','non small cell lung cancer metastatic','metastatic non small cell lung cancer','advanced non small cell lung cancer')\nORDER BY a.canonical_name\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_012sYcxDhwYX48Ab5gyZUMvq",
+   "rows": 11,
+   "n_candidates": null,
+   "elapsed_ms": 17,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PodfBUa3Cr8ywmUoABAFPU",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 43,
+   "ncts_seen": 1,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HxjFbQaLb3UsSswPgqHQyU",
+   "input": {
+    "sql": "\nSELECT p.asset_id, a.canonical_name, p.condition_key, p.max_phase_ever, p.max_phase_active, p.n_trials, p.nct_ids\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133')\n  AND (p.condition_key ILIKE '%non small cell lung%' OR p.condition_key ILIKE '%nsclc%' OR p.condition_key ILIKE '%non squamous%')\nORDER BY a.canonical_name\n"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NAvkcoSpirznRzxqpEqp9k",
+   "input": {
+    "sql": "\nSELECT p.asset_id, a.canonical_name, p.condition_key\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133')\nORDER BY a.canonical_name, p.condition_key\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HxjFbQaLb3UsSswPgqHQyU",
+   "rows": 0,
+   "n_candidates": null,
+   "elapsed_ms": 41,
+   "ncts_seen": 1,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NAvkcoSpirznRzxqpEqp9k",
+   "rows": 61,
+   "n_candidates": null,
+   "elapsed_ms": 52,
+   "ncts_seen": 1,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01KuLmGNJwYnss99i2Jq5wAD",
+   "input": {
+    "sql": "SELECT condition_key, display_name FROM v_conditions WHERE condition_key IN ('D002289')"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01KuLmGNJwYnss99i2Jq5wAD",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 27,
+   "ncts_seen": 1,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01SzsNg5hh6XUFotCUSskfez",
+   "input": {
+    "sql": "\nSELECT p.asset_id, a.canonical_name, p.max_phase_ever, p.max_phase_active, p.n_trials, p.n_active_trials, p.nct_ids\nFROM v_programs p JOIN assets a ON a.asset_id=p.asset_id\nWHERE p.condition_key = 'D002289'\n  AND p.asset_id IN ('sotorasib','adagrasib','daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133',\n                      'azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d',\n                      'glecirasib','olomorasib','bi1701963','d1553')\nORDER BY p.max_phase_ever DESC, a.canonical_name\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01SzsNg5hh6XUFotCUSskfez",
+   "rows": 13,
+   "n_candidates": null,
+   "elapsed_ms": 28,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 16,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_019S8CCJ5sY6QRNbXwssabaV",
+   "input": {
+    "sql": "\nSELECT p.asset_id, p.nct_ids\nFROM v_programs p\nWHERE p.condition_key='D002289' AND p.asset_id IN ('sotorasib','adagrasib','d1553','daraxonrasib','olomorasib','zoldonrasib','elironrasib','glecirasib','rmc9805','azd0240autologousengineeredtcellstargetingkrasg12d','bi1701963','mrtx1133','nt112autologousengineeredtcellstargetingkrasg12d')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 16,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_019S8CCJ5sY6QRNbXwssabaV",
+   "rows": 13,
+   "n_candidates": null,
+   "elapsed_ms": 29,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U6kf4fnJYAmgoJMPwhkHCh",
+   "input": {
+    "sql": "\nSELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='sotorasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='adagrasib'\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U6kf4fnJYAmgoJMPwhkHCh",
+   "rows": 40,
+   "n_candidates": null,
+   "elapsed_ms": 26,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U3zxmMhEdkjxUq2Dq1H1EX",
+   "input": {
+    "sql": "\nSELECT asset_id, canonical_name FROM assets WHERE asset_id IN ('sotorasib','adagrasib','d1553','daraxonrasib','olomorasib','zoldonrasib','elironrasib','glecirasib','rmc9805','azd0240autologousengineeredtcellstargetingkrasg12d','bi1701963','mrtx1133','nt112autologousengineeredtcellstargetingkrasg12d')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01U3zxmMhEdkjxUq2Dq1H1EX",
+   "rows": 13,
+   "n_candidates": null,
+   "elapsed_ms": 1,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 19,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01TH1kocJjd33AqMmMwtvCon",
+   "input": {
+    "sql": "\nSELECT provenance, moa_label, action, targets FROM v_moa WHERE asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133','glecirasib','olomorasib','d1553','bi1701963')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 19,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01TH1kocJjd33AqMmMwtvCon",
+   "rows": 0,
+   "n_candidates": null,
+   "elapsed_ms": 3,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 20,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01CTCgoQdVv2sAiyBHnRGQjt",
+   "input": {
+    "sql": "\nSELECT asset_id, provenance, moa_label FROM v_moa WHERE asset_id IN ('daraxonrasib','zoldonrasib','elironrasib','rmc9805','mrtx1133','glecirasib','olomorasib','d1553','bi1701963','sotorasib','adagrasib','azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 20,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01CTCgoQdVv2sAiyBHnRGQjt",
+   "rows": 5,
+   "n_candidates": null,
+   "elapsed_ms": 3,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 21,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_014uWA5KNtXxeAsKdaQD1uZD",
+   "input": {
+    "nct_id": "NCT06162221"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 22,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01DkSZrwooHmGwwv4HsZjW8s",
+   "input": {
+    "nct_id": "NCT05737706"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 22,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_014uWA5KNtXxeAsKdaQD1uZD",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 22,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01DkSZrwooHmGwwv4HsZjW8s",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 23,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MotQSsf9sTzAUahTb93RbB",
+   "input": {
+    "sql": "\nSELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='glecirasib'\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 23,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MotQSsf9sTzAUahTb93RbB",
+   "rows": 7,
+   "n_candidates": null,
+   "elapsed_ms": 19,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 24,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01L4PoBRVJBX2o8vd8o94WEj",
+   "input": {
+    "nct_id": "NCT05002270"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 24,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01L4PoBRVJBX2o8vd8o94WEj",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 25,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UKxvi6SePGEJGJXaMxFoa5",
+   "input": {
+    "sql": "\nSELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='daraxonrasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='elironrasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='rmc9805'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='olomorasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='zoldonrasib'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='d1553'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id='bi1701963'\nUNION ALL\nSELECT unnest(nct_ids) FROM v_programs WHERE condition_key='D002289' AND asset_id IN ('azd0240autologousengineeredtcellstargetingkrasg12d','nt112autologousengineeredtcellstargetingkrasg12d')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 25,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UKxvi6SePGEJGJXaMxFoa5",
+   "rows": 24,
+   "n_candidates": null,
+   "elapsed_ms": 41,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 26,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_013srLi2foNDYRLaXidbie7N",
+   "input": {
+    "nct_id": "NCT06218914"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 27,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01VUdnV8S32p9nnKretcP2ux",
+   "input": {
+    "nct_id": "NCT06040541"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 27,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_013srLi2foNDYRLaXidbie7N",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 27,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01VUdnV8S32p9nnKretcP2ux",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 28,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01QYeUzmVvzWRzQszmC9mBte",
+   "input": {
+    "nct_id": "NCT04956640"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 29,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01KzTWdTRPsp1pW82nqHm5zr",
+   "input": {
+    "nct_id": "NCT07397338"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 29,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01QYeUzmVvzWRzQszmC9mBte",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 29,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01KzTWdTRPsp1pW82nqHm5zr",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 30,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01PC8Y5YC6gtc2DRYQUr8ZqB",
+   "input": {
+    "nct_id": "NCT06128551"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 31,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XJ67P8jgKX2ZKMUfjiiBd6",
+   "input": {
+    "nct_id": "NCT07777822"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 32,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_016jDnZUR6YHwt2xqKJ98ucY",
+   "input": {
+    "nct_id": "NCT06119581"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 33,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01ReLGc2k5sQfazLoWeW8zWj",
+   "input": {
+    "nct_id": "NCT06890598"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 34,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01JpkTFjDLFQNMh4Z3gLUq7E",
+   "input": {
+    "nct_id": "NCT07227025"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 35,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01EuxUusib1ttpPtHkAwjE1T",
+   "input": {
+    "nct_id": "NCT07639242"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 36,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01PZpZiwsLwgbgTzYJNpv4cc",
+   "input": {
+    "nct_id": "NCT05379985"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 37,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_018KkTsJRwzTBgq3ZG5sjB2u",
+   "input": {
+    "nct_id": "NCT06881784"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 38,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_015DTyW9WqHm73s5QPPx6pXM",
+   "input": {
+    "nct_id": "NCT07349537"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 39,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_0114oLhKjMKutu3YJiXyYnYX",
+   "input": {
+    "nct_id": "NCT05462717"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 40,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01LaXRSaPQXcq6TjzCNv2Lpj",
+   "input": {
+    "nct_id": "NCT07174908"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XNS855hFLdCmXuiaF1jdbw",
+   "input": {
+    "nct_id": "NCT04975256"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XJ67P8jgKX2ZKMUfjiiBd6",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01EuxUusib1ttpPtHkAwjE1T",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01XNS855hFLdCmXuiaF1jdbw",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_016jDnZUR6YHwt2xqKJ98ucY",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01PC8Y5YC6gtc2DRYQUr8ZqB",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01PZpZiwsLwgbgTzYJNpv4cc",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_018KkTsJRwzTBgq3ZG5sjB2u",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_015DTyW9WqHm73s5QPPx6pXM",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01ReLGc2k5sQfazLoWeW8zWj",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_0114oLhKjMKutu3YJiXyYnYX",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01LaXRSaPQXcq6TjzCNv2Lpj",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 41,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01JpkTFjDLFQNMh4Z3gLUq7E",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 42,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_0132xW6BhbD9uj6wUF88pQbV",
+   "input": {
+    "nct_id": "NCT05002270"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 42,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_0132xW6BhbD9uj6wUF88pQbV",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 43,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01ALj2B9LYrQSmmej2R4Ek6E",
+   "input": {
+    "sql": "\nSELECT nct_id FROM v_trials WHERE nct_id IN ('NCT05009329','NCT05276726','NCT05288205','NCT06563999','NCT07339839')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 43,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01ALj2B9LYrQSmmej2R4Ek6E",
+   "rows": 5,
+   "n_candidates": null,
+   "elapsed_ms": 12,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 44,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01BZWvqU9BW1nMzqCjFt9bc6",
+   "input": {
+    "nct_id": "NCT05288205"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 44,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01BZWvqU9BW1nMzqCjFt9bc6",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 45,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01T12gYcj32jNhxvGJ7xJbdq",
+   "input": {
+    "nct_id": "NCT06563999"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 46,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01D264bcMCr1FTFRGfeG6xJm",
+   "input": {
+    "nct_id": "NCT07339839"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 47,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01L7RWUWQUfZ4WxWwmNFGJFU",
+   "input": {
+    "nct_id": "NCT05009329"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 48,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_016nWxwwDR7L45RhK8RPKDMF",
+   "input": {
+    "nct_id": "NCT05276726"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 48,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01D264bcMCr1FTFRGfeG6xJm",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 48,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_016nWxwwDR7L45RhK8RPKDMF",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 48,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01L7RWUWQUfZ4WxWwmNFGJFU",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 48,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01T12gYcj32jNhxvGJ7xJbdq",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 49,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_013kfejdoGdtBub1CzaEdD35",
+   "input": {
+    "nct_id": "NCT07164170"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 49,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_013kfejdoGdtBub1CzaEdD35",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 50,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_013R1jrvVzYZtbc38weqwbT3",
+   "input": {
+    "nct_id": "NCT06024174"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 50,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_013R1jrvVzYZtbc38weqwbT3",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 51,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_0167GAzW52kbnwStpiXcL6fh",
+   "input": {
+    "sql": "SELECT asset_id, canonical_name FROM assets WHERE asset_id='bbp398'"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 51,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_0167GAzW52kbnwStpiXcL6fh",
+   "rows": 1,
+   "n_candidates": null,
+   "elapsed_ms": 0,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 52,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PuiUDGEJfRcKbjhTsocxH4",
+   "input": {
+    "sql": "\nSELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='sotorasib'\n"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 53,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HeTPoPaxrVPmWs3fFFDsqG",
+   "input": {
+    "sql": "\nSELECT unnest(nct_ids) as nct_id FROM v_programs WHERE condition_key='D002289' AND asset_id='adagrasib'\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 53,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HeTPoPaxrVPmWs3fFFDsqG",
+   "rows": 23,
+   "n_candidates": null,
+   "elapsed_ms": 24,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 53,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01PuiUDGEJfRcKbjhTsocxH4",
+   "rows": 23,
+   "n_candidates": null,
+   "elapsed_ms": 24,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 54,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Y8MDrahdtHSPszmJ1Bt2ZN",
+   "input": {
+    "nct_id": "NCT06563999"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 54,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01Y8MDrahdtHSPszmJ1Bt2ZN",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 55,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01TJQq8s3AJQdkJpgv3cFjAs",
+   "input": {
+    "nct_id": "NCT04625647"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 56,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_016oR424QkjLbCWDs5KbroPE",
+   "input": {
+    "nct_id": "NCT04613596"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 56,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01TJQq8s3AJQdkJpgv3cFjAs",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 56,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_016oR424QkjLbCWDs5KbroPE",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 65,
+   "error": null,
+   "input": null
+  }
+ ],
+ "elapsed_ms": 72605
+}
