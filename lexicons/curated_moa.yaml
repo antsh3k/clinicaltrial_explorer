@@ -1,0 +1,255 @@
+# Curated mechanism tier (provenance 'curated', tier 2: below ChEMBL, above NLM classes and the LLM tier).
+# Hand-written, gene-level mechanisms for pipeline assets that ChEMBL/NLM do not carry yet, each with its source.
+# Entries resolve by name/alias through asset_aliases at load time, so one file serves every index. Symbols are HGNC.
+# Modality vocabulary matches enrich/models.py. Never overwrites a higher tier; readers see the provenance.
+entries:
+  - name: nerandomilast
+    aliases: [BI 1015550]
+    moa: PDE4B inhibitor
+    action: inhibitor
+    targets: [PDE4B]
+    modality: small_molecule
+    source: "Preferential PDE4B inhibitor; FIBRONEER-IPF/-ILD Phase 3 (NEJM 2025); FDA label 2025 (Jascayd)"
+  - name: bexotegrast
+    aliases: [PLN-74809]
+    moa: αvβ6/αvβ1 integrin inhibitor
+    action: inhibitor
+    targets: [ITGAV, ITGB6, ITGB1]
+    modality: small_molecule
+    source: "Dual-selective αvβ6/αvβ1 integrin inhibitor; INTEGRIS-IPF Phase 2 (Lancet Respir Med 2024)"
+  - name: admilparant
+    aliases: [BMS-986278]
+    moa: LPA1 receptor antagonist
+    action: antagonist
+    targets: [LPAR1]
+    modality: small_molecule
+    source: "Lysophosphatidic acid receptor 1 antagonist; ALOFT-IPF Phase 3; Phase 2 in IPF (Lancet Respir Med 2024)"
+  - name: calderasib
+    aliases: [MK-1084]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "Oral KRAS G12C inhibitor; MK-1084 Phase 3 program with pembrolizumab (KANDLELIT)"
+  - name: olomorasib
+    aliases: [LY3537982]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "Second-generation KRAS G12C inhibitor; SUNRAY-01 Phase 3"
+  - name: divarasib
+    aliases: [GDC-6036]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "Covalent KRAS G12C inhibitor (NEJM 2023); Krascendo Phase 3 program"
+  - name: glecirasib
+    aliases: [JAB-21822]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "KRAS G12C inhibitor approved in China 2025 (NSCLC)"
+  - name: garsorasib
+    aliases: [D-1553]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "KRAS G12C inhibitor; Phase 2 NSCLC (Lancet Respir Med 2024); approved in China 2025"
+  - name: fulzerasib
+    aliases: [GFH925, IBI351]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "KRAS G12C inhibitor approved in China 2024 (Dupert)"
+  - name: opnurasib
+    aliases: [JDQ443]
+    moa: KRAS G12C inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "KRAS G12C inhibitor; KontRASt program (Novartis)"
+  - name: elironrasib
+    aliases: [RMC-6291]
+    moa: KRAS G12C(ON) inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "Tri-complex RAS(ON) G12C-selective inhibitor (Revolution Medicines)"
+  - name: daraxonrasib
+    aliases: [RMC-6236]
+    moa: pan-RAS(ON) multi-selective inhibitor
+    action: inhibitor
+    targets: [KRAS, NRAS, HRAS]
+    modality: small_molecule
+    source: "Tri-complex RAS(ON) multi-selective inhibitor; RASolute Phase 3 program"
+  - name: zoldonrasib
+    aliases: [RMC-9805]
+    moa: KRAS G12D(ON) inhibitor
+    action: inhibitor
+    targets: [KRAS]
+    modality: small_molecule
+    source: "Tri-complex RAS(ON) G12D-selective inhibitor (Revolution Medicines)"
+  - name: vonaprument
+    aliases: [ANX007]
+    moa: complement C1q inhibitor
+    action: inhibitor
+    targets: [C1QA, C1QB, C1QC]
+    modality: mab
+    source: "Anti-C1q antibody Fab; ARCHER Phase 2 in GA, ARCHER II Phase 3 (Annexon)"
+  - name: avacincaptad pegol
+    aliases: [Izervay, Zimura]
+    moa: complement C5 inhibitor
+    action: inhibitor
+    targets: [C5]
+    modality: other
+    source: "Pegylated anti-C5 RNA aptamer; FDA label 2023 (Izervay)"
+  - name: pegcetacoplan
+    aliases: [APL-2, Syfovre]
+    moa: complement C3 inhibitor
+    action: inhibitor
+    targets: [C3]
+    modality: peptide
+    source: "Pegylated C3-binding cyclic peptide; FDA labels 2021 (Empaveli) and 2023 (Syfovre)"
+  - name: tinlarebant
+    aliases: [LBS-008]
+    moa: RBP4 antagonist
+    action: antagonist
+    targets: [RBP4]
+    modality: small_molecule
+    source: "Oral retinol-binding protein 4 antagonist; PHOENIX Phase 3 in GA (Belite Bio)"
+  - name: pozelimab
+    aliases: [REGN3918]
+    moa: complement C5 inhibitor
+    action: inhibitor
+    targets: [C5]
+    modality: mab
+    source: "Anti-C5 antibody; FDA label 2023 (Veopoz)"
+  - name: cemdisiran
+    aliases: [ALN-CC5]
+    moa: complement C5 synthesis inhibitor (siRNA)
+    action: inhibitor
+    targets: [C5]
+    modality: rna
+    source: "GalNAc-siRNA against C5 (Alnylam/Regeneron)"
+  - name: iptacopan
+    aliases: [LNP023]
+    moa: complement factor B inhibitor
+    action: inhibitor
+    targets: [CFB]
+    modality: small_molecule
+    source: "Oral factor B inhibitor; FDA label 2023 (Fabhalta)"
+  - name: danicopan
+    aliases: [ALXN2040]
+    moa: complement factor D inhibitor
+    action: inhibitor
+    targets: [CFD]
+    modality: small_molecule
+    source: "Oral factor D inhibitor; FDA label 2024 (Voydeya)"
+  - name: lampalizumab
+    aliases: [RO5490249]
+    moa: complement factor D inhibitor
+    action: inhibitor
+    targets: [CFD]
+    modality: mab
+    source: "Anti-factor D antibody Fab; Chroma/Spectri Phase 3 in GA (JAMA Ophthalmol 2018)"
+  - name: teclistamab
+    aliases: [Tecvayli]
+    moa: BCMA × CD3 bispecific T-cell engager
+    action: other
+    targets: [TNFRSF17, CD3E]
+    modality: mab
+    source: "FDA label 2022 (Tecvayli)"
+  - name: talquetamab
+    aliases: [Talvey]
+    moa: GPRC5D × CD3 bispecific T-cell engager
+    action: other
+    targets: [GPRC5D, CD3E]
+    modality: mab
+    source: "FDA label 2023 (Talvey)"
+  - name: elranatamab
+    aliases: [Elrexfio]
+    moa: BCMA × CD3 bispecific T-cell engager
+    action: other
+    targets: [TNFRSF17, CD3E]
+    modality: mab
+    source: "FDA label 2023 (Elrexfio)"
+  - name: ciltacabtagene autoleucel
+    aliases: [cilta-cel, Carvykti]
+    moa: BCMA-directed CAR-T cell therapy
+    action: other
+    targets: [TNFRSF17]
+    modality: cell_therapy
+    source: "FDA label 2022 (Carvykti)"
+  - name: idecabtagene vicleucel
+    aliases: [ide-cel, Abecma]
+    moa: BCMA-directed CAR-T cell therapy
+    action: other
+    targets: [TNFRSF17]
+    modality: cell_therapy
+    source: "FDA label 2021 (Abecma)"
+  - name: belzutifan
+    aliases: [MK-6482, Welireg]
+    moa: HIF-2α inhibitor
+    action: inhibitor
+    targets: [EPAS1]
+    modality: small_molecule
+    source: "FDA label 2021 (Welireg)"
+  - name: quavonlimab
+    aliases: [MK-1308]
+    moa: CTLA-4 antagonist
+    action: antagonist
+    targets: [CTLA4]
+    modality: mab
+    source: "Anti-CTLA-4 antibody co-formulated with pembrolizumab (MK-1308A), LITESPARK-012"
+  - name: pembrolizumab
+    aliases: [MK-3475, Keytruda]
+    moa: PD-1 antagonist
+    action: antagonist
+    targets: [PDCD1]
+    modality: mab
+    source: "FDA label (Keytruda); duplicated here only so small fixtures without the ChEMBL artifact carry the label"
+  - name: nivolumab
+    aliases: [Opdivo]
+    moa: PD-1 antagonist
+    action: antagonist
+    targets: [PDCD1]
+    modality: mab
+    source: "FDA label (Opdivo); see pembrolizumab note"
+  - name: umeclidinium
+    aliases: [GSK573719]
+    moa: muscarinic M3 receptor antagonist (LAMA)
+    action: antagonist
+    targets: [CHRM3]
+    modality: small_molecule
+    source: "FDA label 2014 (Incruse Ellipta)"
+  - name: laquinimod
+    aliases: [TV-5600]
+    moa: aryl hydrocarbon receptor agonist
+    action: agonist
+    targets: [AHR]
+    modality: small_molecule
+    source: "AhR-dependent immunomodulator (Kaye et al., PNAS 2016)"
+  - name: cenvacibart
+    aliases: [REGN7508]
+    moa: Factor XI antagonist
+    action: antagonist
+    targets: [F11]
+    modality: mab
+    source: "Anti-FXI catalytic-domain antibody; Regeneron Phase 3 program"
+  - name: HLX208
+    moa: BRAF V600E inhibitor
+    action: inhibitor
+    targets: [BRAF]
+    modality: small_molecule
+    source: "BRAF V600E inhibitor (Henlius); NCT05092815 registry record"
+  - name: Q702
+    moa: AXL/MER/CSF1R inhibitor
+    action: inhibitor
+    targets: [AXL, MERTK, CSF1R]
+    modality: small_molecule
+    source: "Registry record NCT06712810 (Qurient); Axl/Mer/CSF1R selective TKI"

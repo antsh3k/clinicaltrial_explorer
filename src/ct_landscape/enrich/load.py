@@ -242,6 +242,72 @@ def load_llm(con: duckdb.DuckDBPyConnection, path: Path, log=sys.stderr) -> Coun
     return c
 
 
+def load_curated(con: duckdb.DuckDBPyConnection, log=sys.stderr) -> Counter:
+    """Curated tier (lexicons/curated_moa.yaml): hand-written, cited, gene-level mechanisms for pipeline assets that
+    ChEMBL/NLM do not carry yet. Entries name the asset by INN/code/brand and resolve through asset_aliases, so the
+    same file serves every index; symbols are added to the targets vocabulary."""
+    c: Counter = Counter()
+    alias_to_asset = dict(con.execute("SELECT alias_key, asset_id FROM asset_aliases").fetchall())
+    con.execute("DELETE FROM asset_curated_moa")
+    rows = []
+    seen: set[str] = set()
+    for e in load("curated_moa")["entries"]:
+        c["n_entries"] += 1
+        names = [e["name"], *e.get("aliases", [])]
+        hit = next(
+            ((n, alias_to_asset[_alias_key(n)]) for n in names if _alias_key(n) in alias_to_asset), None
+        )
+        if hit is None:
+            c["n_unresolved"] += 1
+            continue
+        matched, aid = hit
+        if aid in seen:
+            c["n_duplicate_asset"] += 1
+            continue
+        seen.add(aid)
+        syms = list(e.get("targets", []))
+        rows.append(
+            (
+                aid,
+                e["moa"],
+                e.get("action", "unknown"),
+                syms,
+                e.get("modality", "unknown"),
+                matched,
+                e.get("source", ""),
+                mechanism_key(e["moa"] + " " + " ".join(syms)),
+            )
+        )
+        for sym in syms:
+            con.execute(
+                "INSERT INTO targets SELECT ?, ?, 'curated' WHERE NOT EXISTS (SELECT 1 FROM targets WHERE symbol = ?)",
+                [sym, sym, sym],
+            )
+            con.execute(
+                "INSERT INTO target_aliases SELECT ?, ?, ?, 'curated' WHERE NOT EXISTS (SELECT 1 FROM target_aliases WHERE alias_key = ?)",
+                [_alias_key(sym), sym, sym, _alias_key(sym)],
+            )
+    _insert(
+        con,
+        "asset_curated_moa",
+        rows,
+        pa.schema(
+            [
+                ("asset_id", pa.string()),
+                ("moa_label", pa.string()),
+                ("action", pa.string()),
+                ("target_symbols", pa.list_(pa.string())),
+                ("modality", pa.string()),
+                ("matched_name", pa.string()),
+                ("source_note", pa.string()),
+                ("moa_key", pa.string()),
+            ]
+        ),
+    )
+    c["n_loaded"] = len(rows)
+    return c
+
+
 def load_shipped_enrichment(
     con: duckdb.DuckDBPyConnection, directory: Path = ENRICHMENT_DIR, log=sys.stderr
 ) -> dict:
@@ -257,6 +323,8 @@ def load_shipped_enrichment(
             "enrichment: no chembl_moa.jsonl shipped yet (Phase 3a) — targets seeded from curated aliases only",
             file=log,
         )
+    census["curated"] = dict(load_curated(con, log))
+    print(f"enrichment: curated tier loaded {census['curated']}", file=log)
     if llm.exists():
         census["llm"] = dict(load_llm(con, llm, log))
         print(f"enrichment: llm tier loaded {census['llm']}", file=log)

@@ -265,3 +265,63 @@ def test_gate_names_every_reason():
     assert gate("dose escalation cohort") == "metadata_cue"
     assert gate("anti-cd38 antibody") == "regex_noise"
     assert gate("pembrolizumab") is None
+
+
+# ---------------------------------------------------------------- junk found in the unlabeled head (2026-09-04 review)
+
+
+@pytest.mark.parametrize(
+    "raw, key",
+    [
+        ("HRS-5635 Injection", "hrs5635"),  # a number glued to a code is not a dose
+        ("SHR-2173 injection", "shr2173"),
+        ("PUL-042 Inhalation Solution", "pul042"),
+        ("Vamorolone 6.0 mg/day/day", "vamorolone"),  # every per-unit tail goes with the dose
+        ("Decitabine 20 mg/m²/day for 5 days", "decitabine"),
+        ("Leuprolide Acetate 3.75 MG/ML", "leuprolide"),
+        ("SHR-1701、", "shr1701"),  # CJK punctuation is trailing junk
+    ],
+)
+def test_code_names_survive_dose_and_form_stripping(raw, key):
+    k = route(raw)
+    assert k.key == key and not k.is_combo, k
+
+
+@pytest.mark.parametrize(
+    "raw, key",
+    [
+        ("Abiraterone Acetate", "abiraterone"),  # one drug, never the regimen "abiraterone + acetate"
+        ("Nicotine gum", "nicotine"),
+        ("Morphine PCA", "morphine"),
+        ("Tobramycin inhalation solution", "tobramycin"),
+    ],
+)
+def test_salt_and_form_words_are_never_regimen_members(raw, key):
+    known = frozenset(
+        {"abiraterone", "acetate", "nicotine", "gum", "morphine", "pca", "tobramycin", "inhalation"}
+    )
+    k = route(raw, known)
+    assert k.key == key and not k.is_combo, k
+    assert route(
+        "lenalidomide dexamethasone", frozenset({"lenalidomide", "dexamethasone"})
+    ).is_combo  # regimens still split
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "Rescue medication",
+        "Blood sampling",
+        "Gene expression analysis",
+        "DNA sequencing",
+        "Standard medical treatment",
+        "Standard of Care Chemotherapy",
+        "therapeutic allogeneic lymphocytes",
+        "PET",
+        "ADT",
+        "adjuvant",
+        "Fluid bolus",
+    ],
+)
+def test_procedures_specimens_and_class_words_are_gated(raw):
+    assert route(raw).key is None, route(raw)

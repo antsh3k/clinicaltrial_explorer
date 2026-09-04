@@ -1,0 +1,97 @@
+# Curated asset synonym groups: INN ⟷ development code ⟷ brand. Each group is a human assertion that these names are
+# ONE molecule, applied before the otherNames pass and exempt from the ≥2-trial merge-support rule (which exists to
+# stop single-trial otherNames enumerations from merging strangers). Members go through the same cleaner/router as
+# registry names; a member absent from the corpus still becomes an alias (source 'curated') so resolve_entity finds it.
+# Scope: assets that matter to the eval indications where a code name and an INN both appear in the registry but a
+# small fixture cannot supply two asserting trials. Every entry is public knowledge (INN lists, labels, sponsor PRs).
+groups:
+  - canonical: nerandomilast
+    members: [nerandomilast, BI 1015550, BI1015550, Jascayd]
+  - canonical: bexotegrast
+    members: [bexotegrast, PLN-74809]
+  - canonical: admilparant
+    members: [admilparant, BMS-986278]
+  - canonical: calderasib
+    members: [calderasib, MK-1084]
+  - canonical: olomorasib
+    members: [olomorasib, LY3537982]
+  - canonical: divarasib
+    members: [divarasib, GDC-6036, RO7435846]
+  - canonical: glecirasib
+    members: [glecirasib, JAB-21822]
+  - canonical: garsorasib
+    members: [garsorasib, D-1553]
+  - canonical: fulzerasib
+    members: [fulzerasib, GFH925, IBI351]
+  - canonical: opnurasib
+    members: [opnurasib, JDQ443]
+  - canonical: elironrasib
+    members: [elironrasib, RMC-6291]
+  - canonical: daraxonrasib
+    members: [daraxonrasib, RMC-6236]
+  - canonical: zoldonrasib
+    members: [zoldonrasib, RMC-9805]
+  - canonical: sotorasib
+    members: [sotorasib, AMG 510, AMG510, Lumakras, Lumykras]
+  - canonical: adagrasib
+    members: [adagrasib, MRTX849, Krazati]
+  - canonical: pembrolizumab
+    members: [pembrolizumab, MK-3475, SCH 900475, Keytruda]
+  - canonical: nivolumab
+    members: [nivolumab, BMS-936558, ONO-4538, Opdivo]
+  - canonical: belzutifan
+    members: [belzutifan, MK-6482, PT2977, Welireg]
+  - canonical: quavonlimab
+    members: [quavonlimab, MK-1308]
+  - canonical: vonaprument
+    members: [vonaprument, ANX007]
+  - canonical: avacincaptad pegol
+    members: [avacincaptad pegol, Zimura, Izervay, ARC1905]
+  - canonical: pegcetacoplan
+    members: [pegcetacoplan, APL-2, Syfovre, Empaveli]
+  - canonical: tinlarebant
+    members: [tinlarebant, LBS-008]
+  - canonical: pozelimab
+    members: [pozelimab, REGN3918]
+  - canonical: cemdisiran
+    members: [cemdisiran, ALN-CC5]
+  - canonical: iptacopan
+    members: [iptacopan, LNP023, Fabhalta]
+  - canonical: danicopan
+    members: [danicopan, ALXN2040, ACH-4471, Voydeya]
+  - canonical: lampalizumab
+    members: [lampalizumab, RO5490249, FCFD4514S]
+  - canonical: teclistamab
+    members: [teclistamab, JNJ-64007957, Tecvayli]
+  - canonical: talquetamab
+    members: [talquetamab, JNJ-64407564, Talvey]
+  - canonical: elranatamab
+    members: [elranatamab, PF-06863135, Elrexfio]
+  - canonical: ciltacabtagene autoleucel
+    members: [ciltacabtagene autoleucel, cilta-cel, JNJ-68284528, LCAR-B38M, Carvykti]
+  - canonical: idecabtagene vicleucel
+    members: [idecabtagene vicleucel, ide-cel, bb2121, Abecma]
+  - canonical: cobimetinib
+    members: [cobimetinib, GDC-0973, RO5514041, Cotellic]
+  - canonical: vemurafenib
+    members: [vemurafenib, PLX4032, RO5185426, Zelboraf]
+  - canonical: dabrafenib
+    members: [dabrafenib, GSK2118436, Tafinlar]
+  - canonical: trametinib
+    members: [trametinib, GSK1120212, Mekinist]
+  - canonical: lenvatinib
+    members: [lenvatinib, E7080, Lenvima]
+  - canonical: axitinib
+    members: [axitinib, AG-013736, Inlyta]
+  - canonical: cabozantinib
+    members: [cabozantinib, XL184, Cabometyx, Cometriq]
+  - canonical: nintedanib
+    members: [nintedanib, BIBF 1120, Ofev]
+  - canonical: pirfenidone
+    members: [pirfenidone, Esbriet, Pirespa]
+  - canonical: umeclidinium
+    members: [umeclidinium, GSK573719, Incruse]
+  - canonical: laquinimod
+    members: [laquinimod, TV-5600, ABR-215062]
+  - canonical: cenvacibart
+    members: [cenvacibart, REGN7508]

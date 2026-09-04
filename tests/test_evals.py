@@ -113,7 +113,7 @@ MINI_GOLD = {
             "archetype": "Q7",
             "question": "partners of MK-3475?",
             "check": "contains_all",
-            "expected": {"entities": ["carboplatin"], "asset_id": "pembrolizumab"},
+            "expected": {"entities": ["lenvatinib"], "asset_id": "pembrolizumab"},
             "adjudicated": True,
         },
         {
@@ -215,7 +215,7 @@ def test_harness_scores_floors_obj_diag_and_writes_report(db_path, tmp_path):
     assert report["case_scores"]["M02"] == 1.0  # honest empty
     assert (
         report["case_scores"]["M01"] == 1.0
-    )  # carboplatin is an arm-level partner of pembrolizumab in KEYNOTE-024
+    )  # lenvatinib is an arm-level partner of pembrolizumab in NCT02811861 (KEYNOTE-581/CLEAR)
     assert (out / "M01.json").exists() and (out / "report.md").exists()
     rec = json.loads((out / "M01.json").read_text())
     assert rec["messages"] and rec["answer"]["table"]["rows"]

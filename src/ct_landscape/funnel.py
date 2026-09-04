@@ -83,6 +83,7 @@ def compute_funnel(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     p = nz.get("populations", {})
     f["pct_trials_with_population_mention_by_kind"] = p.get("pct_trials_with_mention_by_kind", {})
     f["moa_assets_chembl"] = q("SELECT count(DISTINCT asset_id) FROM chembl_moa")
+    f["moa_assets_curated"] = q("SELECT count(DISTINCT asset_id) FROM asset_curated_moa")
     f["moa_assets_nlm_class"] = q("SELECT count(DISTINCT asset_id) FROM asset_nlm_classes")
     f["moa_assets_llm"] = q("SELECT count(*) FROM asset_enrichment WHERE NOT abstained")
     f["moa_assets_llm_abstained"] = q("SELECT count(*) FROM asset_enrichment WHERE abstained")
@@ -106,7 +107,7 @@ def print_funnel(f: dict[str, Any], log=sys.stderr) -> None:
         f"    → {n('interventional')} interventional → {n('interventional_drug_bio')} drug/bio interventional → {n('industry_lead')} industry-lead → {n('in_scope_industry_interventional_drug')} in scope (industry ∩ interventional ∩ drug/bio)",
         f"  interventions: {n('interventions_drug_bio')} drug/bio names → −{n('interventions_gated')} gated {f.get('gates')}",
         f"    → {n('interventions_keyed')} keyed ({f.get('pct_drug_interventions_to_assets')}%) → {n('assets')} assets + {n('combo_assets')} combos; {n('merged_via_other_names')} merged via otherNames; {n('alias_dominance_resolutions')} aliases assigned by dominance; {n('contested_aliases')} contested (vetoed)",
-        f"    → {n('in_scope_assets')} in-scope assets → MoA labeled: chembl {n('moa_assets_chembl')} · nlm_class {n('moa_assets_nlm_class')} · llm {n('moa_assets_llm')} (abstained {n('moa_assets_llm_abstained')}) → {f.get('pct_in_scope_assets_moa_labeled')}% of in-scope assets carry ≥1 mechanism label ({f.get('pct_in_scope_trial_asset_rows_moa_labeled')}% of in-scope trial×asset rows)",
+        f"    → {n('in_scope_assets')} in-scope assets → MoA labeled: chembl {n('moa_assets_chembl')} · curated {n('moa_assets_curated')} · nlm_class {n('moa_assets_nlm_class')} · llm {n('moa_assets_llm')} (abstained {n('moa_assets_llm_abstained')}) → {f.get('pct_in_scope_assets_moa_labeled')}% of in-scope assets carry ≥1 mechanism label ({f.get('pct_in_scope_trial_asset_rows_moa_labeled')}% of in-scope trial×asset rows)",
         f"  conditions: {f.get('pct_trials_with_mesh_leaf')}% of trials carry ≥1 MeSH leaf; {n('trials_listed_only')} listed-only; denoise drops {f.get('condition_denoise_drops')}",
         f"  arms: {f.get('pct_drug_trials_with_arms')}% of drug trials have arms; {f.get('pct_trial_asset_role_decidable')}% of (trial, asset) roles decidable {f.get('roles')}",
         f"  populations: % trials with ≥1 typed mention by kind: {f.get('pct_trials_with_population_mention_by_kind')}",

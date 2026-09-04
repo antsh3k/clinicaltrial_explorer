@@ -213,3 +213,35 @@ def test_trial_card_has_one_row_per_trial_with_ctgov_url(con):
     url, arms = q(con, "SELECT ctgov_url, arms FROM v_trial_card WHERE nct_id='NCT02142738'")[0]
     assert url == "https://clinicaltrials.gov/study/NCT02142738"
     assert arms and any(a["type"] == "EXPERIMENTAL" for a in arms)
+
+
+def test_combo_partners_exclude_backbone_pairs_and_flag_same_mechanism(con):
+    """Two agents present in EVERY arm are the trial's backbone (or an investigator's-choice list), not a studied
+    combination; the view drops those pairs and exposes same_mechanism for the rest."""
+    cols = {r[0] for r in con.execute("DESCRIBE v_combo_partners").fetchall()}
+    assert {"same_mechanism", "has_background", "source"} <= cols
+    leaked = con.execute(
+        """SELECT count(*) FROM v_combo_partners cp
+           JOIN trial_assets t1 ON t1.nct_id = cp.nct_id AND t1.asset_id = cp.asset_id AND t1.via = 'name'
+           JOIN trial_assets t2 ON t2.nct_id = cp.nct_id AND t2.asset_id = cp.partner_asset_id AND t2.via = 'name'
+           WHERE cp.source = 'arm' AND t1.in_all_arms AND t2.in_all_arms"""
+    ).fetchone()[0]
+    assert leaked == 0
+    assert con.execute("SELECT count(*) FROM v_combo_partners").fetchone()[0] > 0
+
+
+def test_curated_mechanism_tier_loads_and_sits_below_chembl(con):
+    from ct_landscape.enrich.load import load_shipped_enrichment
+
+    load_shipped_enrichment(con, Path("/nonexistent"), log=open("/dev/null", "w"))
+    apply_views(con, fail_on_empty=False)
+    n = con.execute("SELECT count(*) FROM asset_curated_moa").fetchone()[0]
+    assert n >= 1  # pembrolizumab is in the mini fixture and in lexicons/curated_moa.yaml
+    tiers = dict(con.execute("SELECT provenance, min(tier) FROM v_moa GROUP BY 1").fetchall())
+    assert tiers.get("curated") == 2
+    assert all(tiers[p] < tiers["curated"] for p in tiers if p == "chembl")
+    assert all(tiers[p] > tiers["curated"] for p in tiers if p in ("nlm_class", "llm"))
+    assert (
+        "pdcd1"
+        in con.execute("SELECT moa_key FROM asset_curated_moa WHERE asset_id = 'pembrolizumab'").fetchone()[0]
+    )

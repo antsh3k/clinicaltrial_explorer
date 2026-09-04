@@ -48,7 +48,7 @@ ENTITY_DDL = """
 CREATE TABLE IF NOT EXISTS assets            (asset_id TEXT PRIMARY KEY, canonical_name TEXT, dedup_key TEXT UNIQUE, is_combo BOOLEAN);
 CREATE TABLE IF NOT EXISTS asset_components  (combo_asset_id TEXT, component_asset_id TEXT);
 CREATE TABLE IF NOT EXISTS asset_aliases     (alias_key TEXT PRIMARY KEY, asset_id TEXT, alias_raw TEXT,
-                                              source TEXT CHECK (source IN ('name','other_name')));
+                                              source TEXT CHECK (source IN ('name','other_name','curated')));
 CREATE TABLE IF NOT EXISTS contested_aliases (alias_key TEXT, asset_ids TEXT[], n_trials INT,
                                               resolution TEXT);  -- 'vetoed' | 'dominance:<asset_id>'
 CREATE TABLE IF NOT EXISTS trial_assets      (nct_id TEXT, intervention_no INT, asset_id TEXT,
@@ -77,6 +77,8 @@ CREATE TABLE IF NOT EXISTS chembl_moa        (asset_id TEXT, mechanism_of_action
                                               moa_key TEXT);
 CREATE TABLE IF NOT EXISTS targets           (symbol TEXT PRIMARY KEY, pref_name TEXT, source TEXT);
 CREATE TABLE IF NOT EXISTS target_aliases    (alias_key TEXT PRIMARY KEY, symbol TEXT, alias_raw TEXT, source TEXT);
+CREATE TABLE IF NOT EXISTS asset_curated_moa (asset_id TEXT, moa_label TEXT, action TEXT, target_symbols TEXT[],
+                                              modality TEXT, matched_name TEXT, source_note TEXT, moa_key TEXT);
 CREATE TABLE IF NOT EXISTS asset_enrichment  (asset_id TEXT PRIMARY KEY, modality TEXT,
                                               targets_raw TEXT[], targets_canonical TEXT[],
                                               action TEXT, moa_class TEXT, confidence TEXT, abstained BOOLEAN, basis TEXT,
@@ -99,7 +101,14 @@ ENTITY_TABLES = [
     "population_terms",
     "asset_nlm_classes",
 ]
-ENRICH_TABLES = ["asset_chembl", "chembl_moa", "targets", "target_aliases", "asset_enrichment"]
+ENRICH_TABLES = [
+    "asset_chembl",
+    "chembl_moa",
+    "targets",
+    "target_aliases",
+    "asset_curated_moa",
+    "asset_enrichment",
+]
 
 RAW_TABLES = [
     "studies",

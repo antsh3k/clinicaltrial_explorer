@@ -167,12 +167,17 @@ SELECT asset_id, 'chembl' AS provenance, 1 AS tier,
        moa_key                                   -- App. B.7 fold, computed in Python at load time
 FROM chembl_moa
 UNION ALL
-SELECT asset_id, 'nlm_class' AS provenance, 2 AS tier,
+SELECT asset_id, 'curated' AS provenance, 2 AS tier,   -- lexicons/curated_moa.yaml: hand-written, gene-level, cited
+       moa_label, action, target_symbols AS targets, modality,
+       moa_key
+FROM asset_curated_moa
+UNION ALL
+SELECT asset_id, 'nlm_class' AS provenance, 3 AS tier,
        class_term AS moa_label, NULL AS action, NULL AS targets, NULL AS modality,
        moa_key
 FROM asset_nlm_classes
 UNION ALL
-SELECT asset_id, 'llm' AS provenance, 3 AS tier,
+SELECT asset_id, 'llm' AS provenance, 4 AS tier,
        coalesce(moa_class, array_to_string(targets_canonical, ', ')) AS moa_label, action,
        CASE WHEN len(targets_canonical) > 0 THEN targets_canonical ELSE targets_raw END AS targets, modality,
        moa_key
@@ -224,12 +229,41 @@ JOIN v_trials t USING (nct_id)
 JOIN v_trial_conditions_primary tc USING (nct_id)
 WHERE t.study_type = 'INTERVENTIONAL';
 
--- partner pairs, one row per (trial, condition, asset, partner) — the Q7 query surface
+-- partner pairs, one row per (trial, condition, asset, partner) — the Q7 query surface.
+-- A pair counts as a STUDIED combination only when at least one of the two is arm-specific: two agents that are both
+-- present in every arm are the trial's backbone (or an investigator's-choice list such as "SOC immunotherapy:
+-- nivolumab, pembrolizumab, …"), not a combination this trial investigates. `same_mechanism` flags pairs whose
+-- ChEMBL mechanisms coincide (nivolumab + pembrolizumab in one arm = alternatives, not co-administration);
+-- it is exposed, not applied, because a few same-mechanism pairs are real (trastuzumab + pertuzumab).
 CREATE OR REPLACE VIEW v_combo_partners AS
-SELECT c.nct_id, c.condition_key, a.asset_id, p.asset_id AS partner_asset_id, c.source, c.has_background,
-       c.phase_norm, c.phase_rank, c.overall_status, c.program_exists, c.is_industry
-FROM v_combos c, unnest(c.asset_ids) AS a(asset_id), unnest(c.asset_ids) AS p(asset_id)
-WHERE a.asset_id <> p.asset_id;
+WITH arm_pairs AS (
+  SELECT ai.nct_id, ai.arm_no, t1.asset_id, t2.asset_id AS partner_asset_id, 'arm' AS source,
+         coalesce(t1.in_all_arms, FALSE) OR coalesce(t2.in_all_arms, FALSE) AS has_background,
+         coalesce(t1.in_all_arms, FALSE) AND coalesce(t2.in_all_arms, FALSE) AS both_background
+  FROM arm_interventions ai
+  JOIN arm_interventions aj ON aj.nct_id = ai.nct_id AND aj.arm_no = ai.arm_no
+  JOIN arms a ON a.nct_id = ai.nct_id AND a.arm_no = ai.arm_no AND a.type = 'EXPERIMENTAL'
+  JOIN trial_assets t1 ON t1.nct_id = ai.nct_id AND t1.intervention_no = ai.intervention_no AND t1.via = 'name'
+  JOIN trial_assets t2 ON t2.nct_id = aj.nct_id AND t2.intervention_no = aj.intervention_no AND t2.via = 'name'
+  WHERE t1.asset_id <> t2.asset_id
+),
+name_pairs AS (
+  SELECT ta.nct_id, -1 AS arm_no, c1.component_asset_id AS asset_id, c2.component_asset_id AS partner_asset_id,
+         'name' AS source, coalesce(ta.in_all_arms, FALSE) AS has_background, coalesce(ta.in_all_arms, FALSE) AS both_background
+  FROM trial_assets ta
+  JOIN asset_components c1 ON c1.combo_asset_id = ta.asset_id
+  JOIN asset_components c2 ON c2.combo_asset_id = ta.asset_id AND c2.component_asset_id <> c1.component_asset_id
+  WHERE ta.via = 'name' AND ta.role IN ('subject','unknown')
+),
+u AS (SELECT * FROM arm_pairs UNION ALL SELECT * FROM name_pairs)
+SELECT DISTINCT u.nct_id, tc.condition_key, u.asset_id, u.partner_asset_id, u.source, u.has_background,
+       EXISTS (SELECT 1 FROM chembl_moa m1 JOIN chembl_moa m2 ON m2.moa_key = m1.moa_key
+               WHERE m1.asset_id = u.asset_id AND m2.asset_id = u.partner_asset_id) AS same_mechanism,
+       t.phase_norm, t.phase_rank, t.overall_status, t.program_exists, t.is_industry
+FROM u
+JOIN v_trials t USING (nct_id)
+JOIN v_trial_conditions_primary tc USING (nct_id)
+WHERE t.study_type = 'INTERVENTIONAL' AND NOT u.both_background;
 
 -- ---------------------------------------------------------------- v_population_landscape: Q6 rollup
 CREATE OR REPLACE VIEW v_population_landscape AS
