@@ -75,7 +75,11 @@ def cmd_fetch(args: argparse.Namespace) -> int:
 
 
 def cmd_enrich(args: argparse.Namespace) -> int:
+    from dotenv import find_dotenv, load_dotenv
+
     from ct_landscape.db import apply_views, connect, write_meta
+
+    load_dotenv(find_dotenv(usecwd=True))
 
     db_path = Path(args.db) if args.db else DEFAULT_DB
     if not db_path.exists():

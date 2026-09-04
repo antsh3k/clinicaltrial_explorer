@@ -76,9 +76,10 @@
       const d = ev.data || {};
       if (ev.event === "tool_call") {
         const li = document.createElement("li"); li.className = "live"; li.dataset.step = d.step;
-        li.innerHTML = describeCall(d); steps.appendChild(li); live[d.step] = li;
+        li.innerHTML = describeCall(d); steps.appendChild(li); live[d.tool_call_id || d.step] = li;
       } else if (ev.event === "tool_result") {
-        const li = live[d.step]; if (!li) return; li.classList.remove("live");
+        const li = live[d.tool_call_id] || live[d.step]; if (!li) return; li.classList.remove("live");
+        delete live[d.tool_call_id]; delete live[d.step];
         if (d.error) { li.classList.add("err"); li.innerHTML += ` → <code>${esc(d.error)}</code>`; }
         else li.innerHTML += ` → ${d.rows != null ? fmt(d.rows) + " rows" : d.n_candidates != null ? d.n_candidates + " candidates" : "ok"}${d.elapsed_ms != null ? " · " + d.elapsed_ms + " ms" : ""}`;
       } else if (ev.event === "note") {
@@ -187,9 +188,9 @@
       const t = await api(`/api/trials/${nct}`);
       const arms = (t.arms || []).map((a) => `<div class="arm"><span class="type">${esc(a.type || "—")}</span> <b>${esc(a.label || "")}</b>${(a.assets || []).map((x) => ` <span class="role">${esc(x.asset_id)} · ${esc(x.role)}</span>`).join("")}<div class="hint">${esc(a.description || "")}</div></div>`).join("");
       const conds = (t.conditions_primary || []).map((c) => `${esc(c.display_name)} <code>${esc(c.condition_key)}</code>`).join(", ");
-      const pops = (t.population_mentions || []).map((p) => `<li><code>${esc(p.kind)}:${esc(p.term_id)}</code> (${esc(p.surface)}) — ${esc(p.evidence)}</li>`).join("");
+      const pops = (t.population_mentions || []).filter((p) => p && p.term_id).map((p) => `<li><code>${esc(p.kind)}:${esc(p.term_id)}</code> (${esc(p.surface)}) — ${esc(p.evidence)}</li>`).join("");
       $("#drawer-body").innerHTML = `<div class="card"><h2>${esc(t.nct_id)} — ${esc(t.brief_title)}</h2>
-        <div class="kv">${esc(t.study_type)} · ${esc(t.phase_norm || "no phase")} · ${esc(t.overall_status)} · lead: ${esc(t.lead_company_name || "—")} (${esc(t.lead_agency_class || t.is_industry ? "industry" : "")}) · program_exists: ${t.program_exists} · <a href="${esc(t.ctgov_url)}" target="_blank" rel="noopener">clinicaltrials.gov ↗</a></div>
+        <div class="kv">${esc(t.study_type)} · ${esc(t.phase_norm || "no phase")} · ${esc(t.overall_status)} · lead: ${esc(t.lead_company_name || "—")} (${t.is_industry ? "industry" : "non-industry"}) · program_exists: ${t.program_exists} · <a href="${esc(t.ctgov_url)}" target="_blank" rel="noopener">clinicaltrials.gov ↗</a></div>
         <div><b>conditions:</b> ${conds || "—"}</div>
         <div><b>arms</b>${arms || " — none recorded"}</div>
         ${pops ? `<div><b>population mentions (lexicon; inclusion/exclusion not parsed):</b><ul>${pops}</ul></div>` : ""}
