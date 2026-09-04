@@ -31,7 +31,7 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] `normalize/mechanism_key.py` (App. B.7); `moa_key` stored as a column on every MoA tier table (no SQL UDF)
 - [x] `views.sql`: `v_trials`, `v_trial_conditions_primary`, `v_conditions`, `v_programs` (row_number tie-break by latest_activity), `v_asset_max_phase`, `v_assets`, `v_sponsor_activity`, `v_asset_sponsors`, `v_moa` + `v_moa_best`, `v_moa_trials`, `v_combos` + `v_combo_partners`, `v_population_landscape`, `v_trial_card`; build fails on any empty view
 - [x] Census funnel (§8.5) printed by `ctl build` (`funnel.py`), stored in `build_meta.funnel`
-- [ ] Q1/Q2/Q3/Q7 answerable via `ctl sql` with zero LLM spend (smoke-check on demo build)
+- [x] Q1/Q2/Q3/Q7 answerable via `ctl sql` with zero LLM spend (smoke-checked on the demo build 2026-09-04)
 
 ## Phase 3 — enrich/ (§6)
 - [x] 3a `enrich/chembl.py`: REST fetch of 7,561 mechanisms + 5,954 molecules + 1,518 targets → cached JSON (gitignored); exact-fold join (veto on *mechanism* ambiguity; shared-molecule lookups allowed, counted); census printed; ships `data/enrichment/chembl_moa.jsonl` (CC BY-SA 3.0 attribution) and seeds `targets` (1.6k symbols) + `target_aliases`; `ctl enrich chembl`; loader in `enrich/load.py` so `ctl build` is $0
