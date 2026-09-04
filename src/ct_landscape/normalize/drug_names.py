@@ -395,11 +395,12 @@ def route(raw: str, known_tokens: frozenset[str] | None = None) -> Keyed:
             if k not in keys:
                 keys.append(k)
                 surfaces.append(p)
-        if len(keys) == 1:
+        if len(keys) == 1:  # one survivor: its OWN surface is the display, not "X + <gated part>"
             return Keyed(
                 raw=raw,
                 cleaned=cleaned,
                 key=keys[0],
+                component_surfaces=[surfaces[0]],
                 dropped_parts=dropped,
                 route="biologic" if is_biologic_shape(surfaces[0]) else "fixed_point",
             )

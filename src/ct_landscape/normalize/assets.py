@@ -159,7 +159,13 @@ def build_assets(
                 trials_by_key[ck].add(iv.nct_id)
         else:
             uf.add(k.key)
-            surfaces[k.key][_trim_surface(iv.name_raw)] += 1
+            # a combination whose other parts were gated ("SHR-1701 + SBRT") surfaces as the survivor alone
+            surf = (
+                display_surface(k.component_surfaces[0])
+                if k.component_surfaces
+                else _trim_surface(iv.name_raw)
+            )
+            surfaces[k.key][surf or _trim_surface(iv.name_raw)] += 1
             trials_by_key[k.key].add(iv.nct_id)
 
     # ---- 1b. curated synonym groups: unite members now (exempt from the merge-support rule)

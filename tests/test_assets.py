@@ -223,3 +223,15 @@ def test_curated_synonym_group_merges_code_and_inn_on_single_trials():
     # without the group the two single-trial names stay apart (the merge-support rule)
     r2 = build_assets(ivs, {})
     assert r2.intervention_assets[("NCT1", 0)][0][0] != r2.intervention_assets[("NCT2", 0)][0][0]
+
+
+def test_single_survivor_of_a_gated_combination_is_displayed_alone():
+    ivs = [
+        _iv("NCT1", 0, "SHR-1701 + SBRT"),
+        _iv("NCT2", 0, "SHR-1701 +SBRT"),
+        _iv("NCT3", 0, "shr-1701 and standard of care"),
+    ]
+    r = build_assets(ivs, {})
+    aid = r.intervention_assets[("NCT1", 0)][0][0]
+    assert aid == "shr1701"
+    assert r.assets[aid]["canonical_name"] == "SHR-1701"  # never "SHR-1701 + SBRT"
