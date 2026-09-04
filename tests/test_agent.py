@@ -206,3 +206,38 @@ def test_agent_override_with_testmodel_is_offline():
         )
     ):
         pass  # construction + override never touch the network (defer_model_check=True)
+
+
+def test_parallel_tool_calls_do_not_share_a_cursor(db_path):
+    """Pydantic AI runs sync tools in threads; several get_trial calls in ONE model response must each see
+    their own result (a shared DuckDB connection interleaves result sets → phantom 'not found')."""
+    ids = ["NCT02142738", "NCT02811861", "NCT02853331"]
+
+    def fn(messages, info):
+        returns = [p for m in messages for p in getattr(m, "parts", []) if isinstance(p, ToolReturnPart)]
+        if not returns:
+            return ModelResponse(parts=[ToolCallPart("get_trial", {"nct_id": n}) for n in ids] * 2)
+        payloads = [
+            json.loads(r.content) if isinstance(r.content, str) else r.content
+            for r in returns
+            if r.tool_name == "get_trial"
+        ]
+        found = [p["result"].get("found", True) for p in payloads]
+        return ModelResponse(
+            parts=[
+                ToolCallPart(
+                    "submit_answer",
+                    {
+                        "answer_md": f"found {sum(1 for f in found if f)} of {len(found)}",
+                        "citations": [{"nct_id": n, "why": "card"} for n in ids],
+                        "entities": [],
+                        "caveats": [],
+                    },
+                )
+            ]
+        )
+
+    events, deps = asyncio.run(_collect(db_path, scripted_model(fn)))
+    answer = next(e for e in events if e["event"] == "answer")
+    assert answer["answer"]["answer_md"] == "found 6 of 6"
+    assert all(t["found"] for t in answer["trace"] if t["tool"] == "get_trial")

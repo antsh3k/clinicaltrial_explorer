@@ -83,7 +83,13 @@ def resolve_entity(ctx: RunContext[Deps], query: str, kind: T.Kind = "auto") -> 
     ladder (exact → alias → prefix → contains), never fuzzy. Returns candidates ranked by trial count with the
     id to use in SQL; empty candidates ⇒ the term is absent from the index."""
     t0 = time.monotonic()
-    res = T.resolve(ctx.deps.db, query, kind)
+    cur = (
+        ctx.deps.db.cursor()
+    )  # tools may run concurrently in threads: one cursor per call, never a shared one
+    try:
+        res = T.resolve(cur, query, kind)
+    finally:
+        cur.close()
     ctx.deps.seen_entities.update(c.id for c in res.candidates)
     ctx.deps.trace.append(
         {
@@ -93,24 +99,30 @@ def resolve_entity(ctx: RunContext[Deps], query: str, kind: T.Kind = "auto") -> 
             "elapsed_ms": int((time.monotonic() - t0) * 1000),
         }
     )
-    if not res.candidates:
-        raise ModelRetry(
+    payload = res.model_dump()
+    if (
+        not res.candidates
+    ):  # a miss is DATA the model must handle, never an exception that burns the retry budget
+        payload["note"] = (
             f"{query!r} not found as {kind}; nearest: {res.nearest or 'nothing similar'}. "
-            "Try another surface form (INN, code, brand) or answer that it is absent from the index."
+            "Try another surface form (INN, code, brand, MeSH term) or answer honestly that it is absent from the index."
         )
-    return _fence(ctx.deps.nonce, res.model_dump())
+    return _fence(ctx.deps.nonce, payload)
 
 
-@agent.tool(retries=1)
+@agent.tool(retries=3)
 def run_sql(ctx: RunContext[Deps], sql: str) -> dict[str, Any]:
     """Read-only SELECT/WITH over the documented views (one statement). Rows are capped at 200 and list columns
     truncated for you, but EVERY id in the full result is already grounded for citation."""
     t0 = time.monotonic()
+    cur = ctx.deps.db.cursor()
     try:
-        full = T.sandboxed_query(ctx.deps.db, sql)
+        full = T.sandboxed_query(cur, sql)
     except T.SqlRejected as e:
         ctx.deps.trace.append({"tool": "run_sql", "input": {"sql": sql}, "error": str(e)})
         raise ModelRetry(f"SQL rejected: {e}") from e
+    finally:
+        cur.close()
     ctx.deps.retrieved.update(full.nct_ids)  # ALL ids, recorded BEFORE truncation
     ctx.deps.seen_entities.update(full.entity_ids)
     ctx.deps.trace.append(
@@ -130,13 +142,23 @@ def run_sql(ctx: RunContext[Deps], sql: str) -> dict[str, Any]:
 def get_trial(ctx: RunContext[Deps], nct_id: str) -> dict[str, Any]:
     """Inspect one trial (NCT id, e.g. NCT02142738): title, status, phase, arms with per-arm assets and roles,
     sponsors, conditions, eligibility text, dates, registry URL."""
+    cur = ctx.deps.db.cursor()
     try:
-        card = T.get_trial(ctx.deps.db, nct_id)
+        card = T.get_trial(cur, nct_id)
     except T.SqlRejected as e:
         raise ModelRetry(str(e)) from e
+    finally:
+        cur.close()
     if card is None:
         ctx.deps.trace.append({"tool": "get_trial", "input": {"nct_id": nct_id}, "found": False})
-        raise ModelRetry(f"{nct_id} is not in the index")
+        return _fence(
+            ctx.deps.nonce,
+            {
+                "nct_id": nct_id,
+                "found": False,
+                "note": "not in this index (it may exist on ClinicalTrials.gov; absence here is not evidence of absence)",
+            },
+        )
     ctx.deps.retrieved.add(nct_id)
     ctx.deps.seen_entities.update(T.trial_entity_ids(card))
     ctx.deps.trace.append({"tool": "get_trial", "input": {"nct_id": nct_id}, "found": True})
