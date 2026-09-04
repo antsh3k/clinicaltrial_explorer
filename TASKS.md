@@ -103,4 +103,4 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - Raw layer has two extras beyond §4.1: `study_keywords` (conditionsModule.keywords) and `arm_interventions.via` ('label' | 'name') so the arm-join path is auditable per row. Fresh-snapshot finding: every arm link came via `armGroupLabels`; the `interventionNames` fallback was never needed (0 rows).
 - `studies.study_first_submit_date` and `primary_purpose` kept as pass-through columns.
 - Installed `pydantic-ai` is 2.x (spec snippets assume ~0.4); API names verified present, signatures to be checked at Phase 4.
-- Repo root is `clincialtrial_explorer/` (not `ct-landscape/`); package name is `ct_landscape` as specified.
+- Repo root is `clinicaltrial_explorer/` (not `ct-landscape/`); package name is `ct_landscape` as specified.
