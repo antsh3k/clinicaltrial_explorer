@@ -36,8 +36,8 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 ## Phase 3 — enrich/ (§6)
 - [x] 3a `enrich/chembl.py`: REST fetch of 7,561 mechanisms + 5,954 molecules + 1,518 targets → cached JSON (gitignored); exact-fold join (veto on *mechanism* ambiguity; shared-molecule lookups allowed, counted); census printed; ships `data/enrichment/chembl_moa.jsonl` (CC BY-SA 3.0 attribution) and seeds `targets` (1.6k symbols) + `target_aliases`; `ctl enrich chembl`; loader in `enrich/load.py` so `ctl build` is $0
 - [x] 3b `enrich/models.py` (`AssetEnrichment` + `self_consistent`), `prompts.py`, `batch.py` (Anthropic Batches, Haiku 4.5, $35 ceiling, append-only JSONL checkpoint, refusal = abstain, `n_skipped_over_budget`, `--dry-run/--limit/--ceiling`); offline tests for settling/cost/checkpoint/plan
-- [ ] 3b pilot: 300 assets → 30 hand-checked + ChEMBL-agreement sample → measure tokens/abstain/accuracy before bulk (**needs user sign-off on spend**)
-- [ ] 3b bulk on un-joined in-scope assets → ship `data/enrichment/assets.jsonl`; load with target validation → `asset_enrichment`; `targets_unvalidated_rate`
+- [x] 3b pilot run (user-approved): 300 assets, $0.21, abstain 10.4%, 0 self-inconsistent, targets unvalidated 23.6%; ChEMBL-agreement sample (50, $0.04): 79.5% agreement excl. abstains, ~8% hard errors; hand-check sheet in `docs/llm_pilot_review.md` (**the 30-row ✓/✗ pass is the user's**)
+- [ ] 3b bulk on the remaining ~29k in-scope assets (~$22, ceiling $35) → ship `data/enrichment/assets.jsonl` — awaiting the user's go-ahead after the hand-check (`ctl enrich llm`, then `ctl build --skip-ingest` / `--demo`)
 
 ## Phase 4 — agent/ (§7.1–7.4)
 - [x] `agent/schema_card.py` (system prompt: view catalog, house rules, worked SQL examples; snapshot line from build_meta)
@@ -64,11 +64,12 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 
 ## Needs the user (blocked)
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
-- [ ] Phase 3b pilot — **dry-run done**: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
+- [x] Phase 3b pilot — done: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
 - [ ] Gold adjudication: fill `oracle_url` / `capture_date` / `raw_ui_count` / frozen `entities` or `ncts` for G01–G07 and set `adjudicated: true` (set metrics stay DIAG until then)
 - [x] Chrome instance picked by the user; UI tested (two drawer glitches + a parallel-call spinner fixed)
 
 ## Deviations from the spec
+- Cluster-to-cluster alias merges (§5.1 step 6) require ≥2 asserting trials; the pilot hand-check found single-trial `otherNames` that enumerate alternatives (tirofiban/cangrelor) or regimen members (clofazimine/dapsone). Single assertions still attach brands/codes.
 - Sandbox: DuckDB shares one database instance per file per process, so the second sandboxed connection finds `lock_configuration` already set; `connect_sandboxed` tolerates that and VERIFIES `enable_external_access=false` instead of re-applying it.
 - `UsageLimits.cost_limit` is not set: Pydantic AI's price table did not resolve a cost for `claude-sonnet-5` at build time, so the per-question ceiling is enforced by `request_limit`/`tool_calls_limit` (the spec's stated fallback). Revisit when the price table catches up.
 - Pydantic AI 2.x: `run_stream_events` is an async context manager; `FunctionModel` needs a `stream_function` for the streamed path, hence `evals/replay.py`.
