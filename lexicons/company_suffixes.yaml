@@ -63,6 +63,8 @@ legal_forms:
   - public
 
 industry_words:
+  # deliberately NOT here: research, development, medical, health(care), oncology, vaccines, biologics, medicines —
+  # popping them turns 'Cancer Research UK' into 'cancer' and 'Fred Hutchinson Cancer Research Center' into a stub
   - pharmaceuticals
   - pharmaceutical
   - pharma
@@ -81,18 +83,6 @@ industry_words:
   - laboratory
   - labs
   - lab
-  - research
-  - development
-  - research and development
-  - r d
-  - r&d
-  - medical
-  - medicines
-  - healthcare
-  - health
-  - oncology
-  - vaccines
-  - biologics
   - international
   - global
   - worldwide

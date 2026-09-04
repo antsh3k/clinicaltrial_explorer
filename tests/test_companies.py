@@ -44,6 +44,7 @@ def test_same_company(a, b):
         ("Novartis AG", "Novartis AG; University of Glasgow"),  # no substring equality
         ("Pfizer", "Pfizer Foundation"),  # 'foundation' is not a popped token → distinct
         ("Abbott", "AbbVie"),
+        ("Cancer Research UK", "Cancer Research Institute"),
     ],
 )
 def test_distinct_companies(a, b):
@@ -75,3 +76,11 @@ def test_canonical_display_for_curated_groups():
         == "Johnson & Johnson (Janssen)"
     )
     assert canonical_display(company_key("Acme Pharma Inc."), "Acme Pharma Inc.") == "Acme Pharma Inc."
+
+
+def test_generic_words_are_not_popped_into_a_stub():
+    assert company_key("Cancer Research UK") == "cancer research"  # geographic words pop, generic words do not
+    assert company_key("Fred Hutchinson Cancer Research Center") == "fred hutchinson cancer research center"
+    assert company_key("Janssen Research & Development, LLC") == company_key(
+        "Johnson & Johnson"
+    )  # curated group still wins
