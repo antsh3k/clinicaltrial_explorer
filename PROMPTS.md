@@ -33,3 +33,6 @@ The specification `ct-landscape-agent-design.md` was produced agentically: explo
 
 ### Session 1 (cont.) — Phase 6 evals
 **Actions:** eval core (FLOOR/OBJ/DIAG, pooled set metrics with the pinned edge cases), Pydantic gold loader (`extra="forbid"`), a drafted 14-case gold file whose expectations come from the spec's case table (public knowledge) and are explicitly marked unadjudicated — the human adjudication against the CT.gov oracle is the one step the agent must not do; the harness (live + replay modes, per-case records as replay fixtures, report with id lists); mutation operators moved to `evals/mutate.py`. Found and fixed a real sandbox bug through the harness test: a second sandboxed connection in the same process hit DuckDB's locked configuration.
+
+### Session 1 (cont.) — Phase 7 README
+**Actions:** wrote the README from the real funnel in `build_meta` and the smoke-query outputs (no numbers typed from memory); the eval section reports exactly what is verified offline (mutation suite, scripted-agent runs, replay gate) and what is pending the human (gold adjudication, live runs). A live browser check of the UI was skipped because it needed the user to pick a Chrome instance; the front-end was exercised through curl/TestClient instead.

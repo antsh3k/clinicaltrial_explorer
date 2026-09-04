@@ -58,7 +58,14 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [ ] Live runs (Sonnet 5, ~$5) → results + failure modes into README — **needs ANTHROPIC_API_KEY in .env (not present yet)**
 
 ## Phase 7 — README polish (§11.1 row 7)
-- [ ] 5-minute reviewer path, full build, funnel numbers, example Q&As with evidence, tradeoffs (§9), limitations (§10.3), choices the brief left open (§10.1), works-without-key vs needs-key, AI-usage section (from `PROMPTS.md`)
+- [x] README: 5-minute reviewer path, full build, funnel (real numbers), example Q&As from the views, choices-the-brief-left-open table, where it performs well/poorly, tradeoff dials, evaluation (three layers, FLOOR/OBJ/DIAG, mutation + replay status), observed failure modes, AI-usage section, layout
+- [ ] README: live eval results + failure-mode table from `ctl eval --mode live` (needs ANTHROPIC_API_KEY); UI screenshots of the §7.7 example (needs a browser session)
+
+## Needs the user (blocked)
+- [ ] Put `ANTHROPIC_API_KEY` in `.env` → `ctl serve --demo` and try the §7.7 question; `ctl eval --demo --mode live` → paste results into README
+- [ ] Phase 3b pilot: `ctl enrich llm --dry-run` (plan + cost), then `ctl enrich llm --limit 300` (~$0.30) → hand-check 30 rows → bulk (~$27 estimated, $35 ceiling)
+- [ ] Gold adjudication: fill `oracle_url` / `capture_date` / `raw_ui_count` / frozen `entities` or `ncts` for G01–G07 and set `adjudicated: true` (set metrics stay DIAG until then)
+- [ ] Optional: pick a Chrome instance so the agent can screenshot the UI and check the console
 
 ## Deviations from the spec
 - Sandbox: DuckDB shares one database instance per file per process, so the second sandboxed connection finds `lock_configuration` already set; `connect_sandboxed` tolerates that and VERIFIES `enable_external_access=false` instead of re-applying it.
