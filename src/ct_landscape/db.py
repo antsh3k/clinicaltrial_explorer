@@ -129,9 +129,21 @@ def connect_sandboxed(path: str | Path = DEFAULT_DB, memory_limit: str = "2GB") 
     loads so a plain SELECT cannot read arbitrary local files; lock_configuration freezes the settings.
     """
     con = duckdb.connect(str(path), read_only=True)
-    con.execute(f"SET memory_limit='{memory_limit}'")
-    con.execute("SET enable_external_access=false")
-    con.execute("SET lock_configuration=true")
+    try:
+        con.execute(f"SET memory_limit='{memory_limit}'")
+        con.execute("SET enable_external_access=false")
+        con.execute("SET lock_configuration=true")
+    except duckdb.InvalidInputException:
+        # DuckDB shares one database instance per file within a process: a second connection finds the
+        # configuration already locked by the first sandboxed connection. That is fine ONLY if the lock
+        # was applied with external access off — verify rather than assume.
+        pass
+    ext = con.execute("SELECT current_setting('enable_external_access')").fetchone()[0]
+    if str(ext).lower() not in ("false", "0"):
+        con.close()
+        raise RuntimeError(
+            "sandbox invariant violated: enable_external_access is on and the configuration is locked"
+        )
     return con
 
 

@@ -1,0 +1,164 @@
+# Gold set (spec §8.3). 12 core cases across the seven archetypes + 2 borderline variants.
+#
+# HONESTY RULE: expected sets are frozen by a HUMAN against an oracle independent of this pipeline
+# (ClinicalTrials.gov advanced search → every candidate adjudicated by hand). Cases with `adjudicated: false`
+# carry expectations drawn from the design spec's case table (public knowledge, not this system's output);
+# their set-based metrics are reported as DIAG, never gated, until the oracle fields are filled in.
+metadata:
+  source: "Candidates from CT.gov UI advanced search; adjudicated by hand by the repository owner (pending — see `adjudicated`)."
+  as_of: "2026-09-04"
+  thresholds: {nct_precision: 0.80, nct_recall: 0.70, entity_f1: 0.75, min_pooled_gold_items: 30}
+  n_cases: 14
+
+cases:
+  - id: G01
+    archetype: Q1
+    question: "What drugs are currently in development for Erdheim-Chester disease?"
+    check: entity_set
+    expected:
+      entities: [cobimetinib, vemurafenib, dabrafenib, trametinib]
+      condition_key: D031249
+    note: "Rare (tens of trials) → hand-verifiable. Frozen list must come from the oracle; the spec-table seed lists the BRAF/MEK inhibitors."
+    adjudicated: false
+
+  - id: G02
+    archetype: Q2
+    question: "What are the most advanced clinical programs in geographic atrophy?"
+    check: top_k_contains
+    expected:
+      entities: [pegcetacoplan, avacincaptad pegol]
+      k: 10
+      must_mention: ["approv"]
+      condition_key: D057092
+    note: "Top-k must contain both complement inhibitors at Phase 3 AND the answer must carry the 'trial-derived stage ≠ approval' caveat (must_mention 'approv' in a caveat)."
+    adjudicated: false
+
+  - id: G03
+    archetype: Q3
+    question: "Which companies are most active in multiple myeloma? Please count J&J and Celgene programs correctly."
+    check: top_k_contains
+    expected:
+      entities: ["johnson johnson janssen", "bristol myers squibb"]
+      k: 5
+      must_mention: ["lead sponsor"]
+      condition_key: D009101
+    note: "Gold spells J&J and Celgene to force company aliasing (Celgene → BMS, acq. 2019). The answer must state its scope (industry lead sponsors; collaborators excluded unless asked) — the sponsor ≠ collaborator probe."
+    adjudicated: false
+
+  - id: G04
+    archetype: Q4
+    question: "What mechanisms of action and therapeutic targets are being investigated in idiopathic pulmonary fibrosis?"
+    check: contains_all
+    expected:
+      entities: [PDE4B, ITGB6, LPAR1]
+      must_mention: ["of "]
+      condition_key: D054990
+    note: "Contains PDE4B (nerandomilast), αvβ6 integrin (bexotegrast; symbol ITGB6), LPA1 (LPAR1, admilparant); every MoA claim carries ≥1 NCT; the answer states its labeled fraction ('N of M in-scope assets')."
+    adjudicated: false
+
+  - id: G05
+    archetype: Q5
+    question: "Which trials are studying KRAS G12C inhibitors in non-small cell lung cancer?"
+    check: nct_set
+    expected:
+      entities: [sotorasib, adagrasib, divarasib, olomorasib, glecirasib, garsorasib, fulzerasib]
+      ncts: []
+      condition_key: D002289
+    note: "NCT-set P/R vs the hand-verified set. `ncts` is EMPTY until adjudicated (oracle: CT.gov advanced search 'KRAS G12C' ∩ NSCLC, every candidate checked). Pan-KRAS ambiguities go to G05b."
+    adjudicated: false
+
+  - id: G06
+    archetype: Q6
+    question: "Which biomarkers and patient subgroups are commonly targeted in non-small cell lung cancer trials?"
+    check: contains_all
+    expected:
+      entities: [EGFR, ALK, PDL1, KRAS_G12C, MET]
+      must_mention: ["first-line", "metastatic"]
+      condition_key: D002289
+    note: "Contains the five biomarkers AND ≥2 subgroup kinds (line_of_therapy, disease_stage, prior_therapy). DIAG-weighted (lexicon surface); FLOORs still apply."
+    adjudicated: false
+
+  - id: G07
+    archetype: Q7
+    question: "What combination partners are being studied with MK-3475 in renal cell carcinoma?"
+    check: contains_all
+    expected:
+      entities: [lenvatinib, axitinib, belzutifan]
+      condition_key: D002292
+      asset_id: pembrolizumab
+    oracle_url: "https://clinicaltrials.gov/search?cond=Renal%20Cell%20Carcinoma&intr=pembrolizumab"
+    note: "Asked as MK-3475 to force alias resolution. Named agents only: class labels like 'chemotherapy' are gated out before assets exist (§5.1)."
+    adjudicated: false
+
+  - id: G08
+    archetype: negative
+    question: "What trials are studying pembrolizumab for Erdheim-Chester disease?"
+    check: honest_empty
+    expected:
+      must_mention: ["no ", "not "]
+      condition_key: D031249
+      asset_id: pembrolizumab
+    note: "Drug × indication never studied → the answer must assert absence with a caveat, cite nothing, and name no program. dishonest_empty FLOOR."
+    adjudicated: true
+
+  - id: G09
+    archetype: negative
+    question: "Is pembrolizumab approved for renal cell carcinoma?"
+    check: refuse_approval
+    expected:
+      must_mention: ["approv"]
+      must_not_mention: ["is approved", "was approved", "has been approved"]
+      asset_id: pembrolizumab
+      condition_key: D002292
+    note: "Must refuse to infer approval from Phase-4 / completed trials; trial-derived stage caps at Phase 3."
+    adjudicated: true
+
+  - id: G10
+    archetype: messiness
+    question: "Is docetaxel in development for non-small cell lung cancer?"
+    check: role_split
+    expected:
+      must_mention: ["comparator", "subject"]
+      asset_id: docetaxel
+      condition_key: D002289
+    note: "Answer must separate subject-role trials from comparator-role appearances (three-valued roles)."
+    adjudicated: true
+
+  - id: G11
+    archetype: messiness
+    question: "How many trials study pembrolizumab in combination with another named drug in renal cell carcinoma, and how many pembrolizumab trials in renal cell carcinoma are there in total? Do the numbers reconcile?"
+    check: reconcile
+    expected:
+      asset_id: pembrolizumab
+      condition_key: D002292
+    note: "v_combos-derived count ≤ v_programs count; the harness recomputes both by SQL and checks the answer's numbers match."
+    adjudicated: true
+
+  - id: G12
+    archetype: messiness
+    question: "How many drugs are in development for advanced non-small cell lung cancer versus lung cancer in general, and how did you decide which trials count?"
+    check: states_rollup
+    expected:
+      must_mention: ["mesh"]
+      condition_key: D002289
+    note: "Answer must state rollup behaviour explicitly (listed vs mesh_leaf vs ancestor; one keyspace per query; 'advanced' is a stage qualifier, not a separate condition)."
+    adjudicated: true
+
+  # ---- borderline variants (reported, excluded from gates)
+  - id: G05b
+    archetype: Q5
+    question: "Which trials are studying pan-KRAS or KRAS G12D inhibitors in non-small cell lung cancer?"
+    check: nct_set
+    expected: {ncts: [], condition_key: D002289}
+    borderline: true
+    note: "Genuinely ambiguous mechanism boundary (pan-KRAS vs G12C-selective); kept in the file, not gated."
+    adjudicated: false
+
+  - id: G03b
+    archetype: Q3
+    question: "Which sponsors, including collaborators, are most active in multiple myeloma?"
+    check: top_k_contains
+    expected: {entities: ["johnson johnson janssen"], k: 5, condition_key: D009101}
+    borderline: true
+    note: "Collaborator counting is a scope choice the answer must state; borderline because 'most active' is metric-dependent."
+    adjudicated: false

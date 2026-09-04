@@ -131,6 +131,32 @@ def cmd_serve(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval(args: argparse.Namespace) -> int:
+    from dotenv import load_dotenv
+
+    from ct_landscape.evals.harness import run_eval
+
+    load_dotenv()
+    db_path = Path(args.db) if args.db else (DEMO_DB if args.demo else DEFAULT_DB)
+    if not db_path.exists():
+        print(f"no index at {db_path}; run `ctl build` first", file=sys.stderr)
+        return 1
+    if args.mode == "live" and not os.environ.get("ANTHROPIC_API_KEY"):
+        print(
+            "live eval needs ANTHROPIC_API_KEY (put it in .env); use --mode replay for the offline gate",
+            file=sys.stderr,
+        )
+        return 1
+    report = run_eval(
+        str(db_path),
+        mode=args.mode,
+        case_ids=args.case,
+        out_dir=Path(args.out) if args.out else None,
+        replay_dir=Path(args.replay_dir) if args.replay_dir else None,
+    )
+    return 0 if report["passed"] else 2
+
+
 def cmd_sql(args: argparse.Namespace) -> int:
     from ct_landscape.db import connect_sandboxed
 
@@ -200,9 +226,16 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--port", type=int, default=8000)
     s.set_defaults(func=cmd_serve)
 
-    ev = sub.add_parser("eval", help="run the gold-set harness")
+    ev = sub.add_parser(
+        "eval", help="gold-set harness: live (needs ANTHROPIC_API_KEY) or replay of recorded transcripts"
+    )
     ev.add_argument("--db", default=None)
-    ev.set_defaults(func=_not_implemented("Phase 6"))
+    ev.add_argument("--demo", action="store_true", help=f"evaluate against {DEMO_DB}")
+    ev.add_argument("--mode", choices=["live", "replay"], default="live")
+    ev.add_argument("--case", action="append", default=None, help="run only this case id (repeatable)")
+    ev.add_argument("--replay-dir", default=None, help="directory of recorded per-case JSONs (replay mode)")
+    ev.add_argument("--out", default=None, help="output directory (default runs/evals/<mode>-<stamp>)")
+    ev.set_defaults(func=cmd_eval)
 
     q = sub.add_parser("sql", help="read-only SQL against the index (sandboxed connection)")
     q.add_argument("query")

@@ -52,15 +52,16 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] `TestClient` tests with a scripted model (no network): SSE event order, gate badge, permalink round-trip, follow-up turn citing a turn-1 NCT, sandbox rejections; `ctl serve --demo` smoke-tested with curl
 
 ## Phase 6 — evals/ (§8)
-- [ ] `evals/checks.py` (CheckResult/Role/roll_up/set_prf + pinned edge cases), `gold.yaml` loader (`extra="forbid"`, `borderline`)
-- [ ] Gold set: 12 core cases + 2 borderline; **expected sets adjudicated by the user by hand** (oracle URL, capture date, raw UI count)
-- [ ] `evals/harness.py` driving `answer_question()`; FLOOR/OBJ/DIAG report with id lists; `evals/mutate.py`
-- [ ] Live runs (Sonnet 5, ~$5) → results + failure modes into README
+- [x] `evals/checks.py` (CheckResult/Role/roll_up/set_prf/Pooled + pinned edge cases), `evals/gold.py` loader (`extra="forbid"`, `borderline`, `adjudicated`), `evals/gold.yaml`
+- [ ] Gold set: 12 core + 2 borderline cases DRAFTED from the spec's case table (`adjudicated: false` except the 5 negative/messiness probes); **expected sets still to be adjudicated by the user by hand** (oracle URL, capture date, raw UI count, `ncts` for G05) — set-based metrics stay DIAG until then
+- [x] `evals/harness.py` driving `answer_question()` (no HTTP); FLOOR/OBJ/DIAG report with id lists (`report.json` + `report.md`); per-case records double as replay fixtures; `--mode replay` replays recorded transcripts through the real agent (replay_mismatch_count FLOOR); `evals/mutate.py`; `ctl eval [--demo] [--mode live|replay] [--case ID]`
+- [ ] Live runs (Sonnet 5, ~$5) → results + failure modes into README — **needs ANTHROPIC_API_KEY in .env (not present yet)**
 
 ## Phase 7 — README polish (§11.1 row 7)
 - [ ] 5-minute reviewer path, full build, funnel numbers, example Q&As with evidence, tradeoffs (§9), limitations (§10.3), choices the brief left open (§10.1), works-without-key vs needs-key, AI-usage section (from `PROMPTS.md`)
 
 ## Deviations from the spec
+- Sandbox: DuckDB shares one database instance per file per process, so the second sandboxed connection finds `lock_configuration` already set; `connect_sandboxed` tolerates that and VERIFIES `enable_external_access=false` instead of re-applying it.
 - `UsageLimits.cost_limit` is not set: Pydantic AI's price table did not resolve a cost for `claude-sonnet-5` at build time, so the per-question ceiling is enforced by `request_limit`/`tool_calls_limit` (the spec's stated fallback). Revisit when the price table catches up.
 - Pydantic AI 2.x: `run_stream_events` is an async context manager; `FunctionModel` needs a `stream_function` for the streamed path, hence `evals/replay.py`.
 - ChEMBL join veto (§6.2) is applied to **mechanism** ambiguity, not synonym sharing: when one ChEMBL molecule names several of our assets (its brands / typos we never merged: progesterone, Prometrium, Endometrin…) each is labeled — a lookup, never a merge; when one alias names several ChEMBL molecules, it is labeled only if their mechanism signatures are identical, else skipped and logged. Counts for both cases are in the join census.
