@@ -1,0 +1,565 @@
+{
+ "case_id": "G03",
+ "question": "Which companies are most active in multiple myeloma? Please count J&J and Celgene programs correctly.",
+ "answer": null,
+ "gate": null,
+ "trace": [
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "Celgene",
+    "kind": "company"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 24
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "Johnson & Johnson",
+    "kind": "company"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 25
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "Multiple Myeloma",
+    "kind": "condition"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 50
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT company_id, company_name, agency_class, area, n_trials, n_active_trials, n_active_readout_trials, n_assets, n_phase3_plus, n_phase2, n_phase1_or_earlier, latest_activity\nFROM v_sponsor_activity\nWHERE area ILIKE '%myeloma%' OR company_id IN ('johnson johnson janssen','bristol myers squibb')\nORDER BY n_active_trials DESC\nLIMIT 30"
+   },
+   "rows": 30,
+   "elapsed_ms": 34,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 34
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.lead_company_of_most_advanced AS company_id, c.company_name, c.agency_class,\n       count(DISTINCT p.asset_id) AS n_programs,\n       sum(CASE WHEN p.max_phase_active IS NOT NULL THEN 1 ELSE 0 END) AS n_active_programs,\n       sum(p.n_trials) AS n_trials_total,\n       sum(p.n_active_trials) AS n_active_trials_total\nFROM v_programs p\nLEFT JOIN (SELECT DISTINCT company_id, company_name, agency_class FROM v_sponsor_activity) c\n  ON c.company_id = p.lead_company_of_most_advanced\nWHERE p.condition_key = 'D009101'\nGROUP BY 1,2,3\nORDER BY n_programs DESC\nLIMIT 30"
+   },
+   "rows": 30,
+   "elapsed_ms": 38,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 38
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D009101' AND p.lead_company_of_most_advanced = 'johnson johnson janssen'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC"
+   },
+   "rows": 16,
+   "elapsed_ms": 17,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 17
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D009101' AND p.lead_company_of_most_advanced = 'bristol myers squibb'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC\nLIMIT 50"
+   },
+   "rows": 42,
+   "elapsed_ms": 22,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 22
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, canonical_name FROM assets WHERE canonical_name ILIKE '%lenalidomide%' OR canonical_name ILIKE '%pomalidomide%' OR canonical_name ILIKE '%revlimid%' OR canonical_name ILIKE '%pomalyst%'"
+   },
+   "rows": 84,
+   "elapsed_ms": 4,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 4
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.lead_company_of_most_advanced\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D009101' AND p.asset_id IN ('lenalidomide','pomalidomide','revlimid','pomalyst','lenalomide')\nORDER BY p.n_trials DESC"
+   },
+   "rows": 4,
+   "elapsed_ms": 18,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 18
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT s.company_id, s.company_name, count(DISTINCT ta.asset_id) AS n_assets_as_lead_or_collab, count(DISTINCT t.nct_id) AS n_trials\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.sponsor_type='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1,2"
+   },
+   "error": "BinderException: Binder Error: Table \"s\" does not have a column named \"sponsor_type\"\n\nCandidate bindings: : \"role\"\n\nLINE 3: JOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.sponsor_type='lead'\n                                                              ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT s.company_id, s.company_name, count(DISTINCT ta.asset_id) AS n_assets, count(DISTINCT t.nct_id) AS n_trials\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1,2"
+   },
+   "error": "BinderException: Binder Error: Table \"s\" does not have a column named \"company_name\"\n\nCandidate bindings: : \"company_id\"\n\nLINE 1: SELECT s.company_id, s.company_name, count(DISTINCT ta.asset_id) AS n_assets...\n                             ^"
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT s.company_id, count(DISTINCT ta.asset_id) AS n_assets, count(DISTINCT t.nct_id) AS n_trials, sum(CASE WHEN t.is_active_readout THEN 1 ELSE 0 END) AS n_active_readout\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1"
+   },
+   "rows": 2,
+   "elapsed_ms": 5,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 5
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT ta.asset_id, a.canonical_name, count(DISTINCT t.nct_id) AS n_trials\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nJOIN assets a ON a.asset_id = ta.asset_id\nWHERE s.company_id = 'bristol myers squibb' AND ta.asset_id IN ('lenalidomide','pomalidomide','revlimid','pomalyst','lenalomide')\nGROUP BY 1,2"
+   },
+   "rows": 5,
+   "elapsed_ms": 5,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 6
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT s.company_id, count(DISTINCT t.nct_id) AS n_trials_total, sum(CASE WHEN t.is_active_readout THEN 1 ELSE 0 END) AS n_active_readout, sum(CASE WHEN t.program_exists THEN 1 ELSE 0 END) AS n_program_exists_trials, max(t.phase_rank) AS max_phase_rank\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1"
+   },
+   "rows": 2,
+   "elapsed_ms": 6,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 6
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.n_industry_trials\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN (\n  SELECT DISTINCT ta.asset_id\n  FROM trial_assets ta\n  JOIN trial_sponsors_norm s ON s.nct_id=ta.nct_id AND s.role='lead'\n  WHERE s.company_id='bristol myers squibb' AND ta.role IN ('subject','unknown')\n)\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC\nLIMIT 20"
+   },
+   "rows": 20,
+   "elapsed_ms": 17,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 17
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.n_industry_trials\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN (\n  SELECT DISTINCT ta.asset_id\n  FROM trial_assets ta\n  JOIN trial_sponsors_norm s ON s.nct_id=ta.nct_id AND s.role='lead'\n  WHERE s.company_id='johnson johnson janssen' AND ta.role IN ('subject','unknown')\n)\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC\nLIMIT 20"
+   },
+   "rows": 20,
+   "elapsed_ms": 18,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 18
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.nct_ids\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN ('teclistamab','ciltacel','talquetamab','ramantamig')\nORDER BY p.n_active_trials DESC"
+   },
+   "rows": 4,
+   "elapsed_ms": 17,
+   "ncts_seen": 71,
+   "elapsed_total_ms": 17
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.nct_ids\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN ('mezigdomide','gprc5dcartcells','bb2121','idecabtagenevicleucel','isatuximab')\nORDER BY p.n_active_trials DESC"
+   },
+   "rows": 5,
+   "elapsed_ms": 16,
+   "ncts_seen": 79,
+   "elapsed_total_ms": 17
+  }
+ ],
+ "error": "UsageLimitExceeded: The next request would exceed the request_limit of 16. Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+ "usage": null,
+ "events": [
+  {
+   "event": "tool_call",
+   "step": 1,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01Sdh1QgvwqvTgYRj8bRMmE1",
+   "input": {
+    "query": "Multiple Myeloma",
+    "kind": "condition"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 2,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01A4X2DDF66iwwj4rxnnG7G6",
+   "input": {
+    "query": "Johnson & Johnson",
+    "kind": "company"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01R8ygtWae9obvWjZydTA6i2",
+   "input": {
+    "query": "Celgene",
+    "kind": "company"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01R8ygtWae9obvWjZydTA6i2",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 24,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01A4X2DDF66iwwj4rxnnG7G6",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 25,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 3,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_01Sdh1QgvwqvTgYRj8bRMmE1",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 50,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 4,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01WL2XXywTSiM69SwZekSydJ",
+   "input": {
+    "sql": "SELECT company_id, company_name, agency_class, area, n_trials, n_active_trials, n_active_readout_trials, n_assets, n_phase3_plus, n_phase2, n_phase1_or_earlier, latest_activity\nFROM v_sponsor_activity\nWHERE area ILIKE '%myeloma%' OR company_id IN ('johnson johnson janssen','bristol myers squibb')\nORDER BY n_active_trials DESC\nLIMIT 30"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 4,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01WL2XXywTSiM69SwZekSydJ",
+   "rows": 30,
+   "n_candidates": null,
+   "elapsed_ms": 34,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_0147kcjn9AXPs7jecmf7N9y7",
+   "input": {
+    "sql": "SELECT p.lead_company_of_most_advanced AS company_id, c.company_name, c.agency_class,\n       count(DISTINCT p.asset_id) AS n_programs,\n       sum(CASE WHEN p.max_phase_active IS NOT NULL THEN 1 ELSE 0 END) AS n_active_programs,\n       sum(p.n_trials) AS n_trials_total,\n       sum(p.n_active_trials) AS n_active_trials_total\nFROM v_programs p\nLEFT JOIN (SELECT DISTINCT company_id, company_name, agency_class FROM v_sponsor_activity) c\n  ON c.company_id = p.lead_company_of_most_advanced\nWHERE p.condition_key = 'D009101'\nGROUP BY 1,2,3\nORDER BY n_programs DESC\nLIMIT 30"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_0147kcjn9AXPs7jecmf7N9y7",
+   "rows": 30,
+   "n_candidates": null,
+   "elapsed_ms": 38,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01P7haDuhCEccLyQ2NCPzc4r",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D009101' AND p.lead_company_of_most_advanced = 'johnson johnson janssen'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01P7haDuhCEccLyQ2NCPzc4r",
+   "rows": 16,
+   "n_candidates": null,
+   "elapsed_ms": 17,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MgNa972PoQwpSjp1ptbqNV",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D009101' AND p.lead_company_of_most_advanced = 'bristol myers squibb'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC\nLIMIT 50"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 7,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01MgNa972PoQwpSjp1ptbqNV",
+   "rows": 42,
+   "n_candidates": null,
+   "elapsed_ms": 22,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 8,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01RFHQcgEw9qNm1iH7ooxyZy",
+   "input": {
+    "sql": "SELECT asset_id, canonical_name FROM assets WHERE canonical_name ILIKE '%lenalidomide%' OR canonical_name ILIKE '%pomalidomide%' OR canonical_name ILIKE '%revlimid%' OR canonical_name ILIKE '%pomalyst%'"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 8,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01RFHQcgEw9qNm1iH7ooxyZy",
+   "rows": 84,
+   "n_candidates": null,
+   "elapsed_ms": 4,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01XYzrHZwJkT5fiqCe3p1BVK",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.lead_company_of_most_advanced\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D009101' AND p.asset_id IN ('lenalidomide','pomalidomide','revlimid','pomalyst','lenalomide')\nORDER BY p.n_trials DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 9,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01XYzrHZwJkT5fiqCe3p1BVK",
+   "rows": 4,
+   "n_candidates": null,
+   "elapsed_ms": 18,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_018YeuktA1kWhZuPTBeNvrAe",
+   "input": {
+    "sql": "SELECT s.company_id, s.company_name, count(DISTINCT ta.asset_id) AS n_assets_as_lead_or_collab, count(DISTINCT t.nct_id) AS n_trials\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.sponsor_type='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1,2"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 10,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_018YeuktA1kWhZuPTBeNvrAe",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 0,
+   "error": "BinderException: Binder Error: Table \"s\" does not have a column named \"sponsor_type\"\n\nCandidate bindings: : \"role\"\n\nLINE 3: JOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.sponsor_type='lead'\n                                                              ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HdAjAvNsB1G5PF9x7HDWkj",
+   "input": {
+    "sql": "SELECT s.company_id, s.company_name, count(DISTINCT ta.asset_id) AS n_assets, count(DISTINCT t.nct_id) AS n_trials\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1,2"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 11,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01HdAjAvNsB1G5PF9x7HDWkj",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 0,
+   "error": "BinderException: Binder Error: Table \"s\" does not have a column named \"company_name\"\n\nCandidate bindings: : \"company_id\"\n\nLINE 1: SELECT s.company_id, s.company_name, count(DISTINCT ta.asset_id) AS n_assets...\n                             ^",
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01WFKkbTv25R58zcrJyHVaV1",
+   "input": {
+    "sql": "SELECT s.company_id, count(DISTINCT ta.asset_id) AS n_assets, count(DISTINCT t.nct_id) AS n_trials, sum(CASE WHEN t.is_active_readout THEN 1 ELSE 0 END) AS n_active_readout\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01WFKkbTv25R58zcrJyHVaV1",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 5,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NxU6Zhh6scVjgb4PGmjeGZ",
+   "input": {
+    "sql": "SELECT ta.asset_id, a.canonical_name, count(DISTINCT t.nct_id) AS n_trials\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_assets ta ON ta.nct_id = t.nct_id AND ta.role IN ('subject','unknown')\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nJOIN assets a ON a.asset_id = ta.asset_id\nWHERE s.company_id = 'bristol myers squibb' AND ta.asset_id IN ('lenalidomide','pomalidomide','revlimid','pomalyst','lenalomide')\nGROUP BY 1,2"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 13,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NxU6Zhh6scVjgb4PGmjeGZ",
+   "rows": 5,
+   "n_candidates": null,
+   "elapsed_ms": 5,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Q1M6ovThjLpNTedzf55L6d",
+   "input": {
+    "sql": "SELECT s.company_id, count(DISTINCT t.nct_id) AS n_trials_total, sum(CASE WHEN t.is_active_readout THEN 1 ELSE 0 END) AS n_active_readout, sum(CASE WHEN t.program_exists THEN 1 ELSE 0 END) AS n_program_exists_trials, max(t.phase_rank) AS max_phase_rank\nFROM v_trials t\nJOIN trial_sponsors_norm s ON s.nct_id = t.nct_id AND s.role='lead'\nJOIN trial_conditions_norm cn ON cn.nct_id = t.nct_id AND cn.condition_key='D009101'\nWHERE s.company_id IN ('bristol myers squibb','johnson johnson janssen')\nGROUP BY 1"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01Q1M6ovThjLpNTedzf55L6d",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 6,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_018nkcNqVf3t1tPdJQMhud6v",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.n_industry_trials\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN (\n  SELECT DISTINCT ta.asset_id\n  FROM trial_assets ta\n  JOIN trial_sponsors_norm s ON s.nct_id=ta.nct_id AND s.role='lead'\n  WHERE s.company_id='bristol myers squibb' AND ta.role IN ('subject','unknown')\n)\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC\nLIMIT 20"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_018nkcNqVf3t1tPdJQMhud6v",
+   "rows": 20,
+   "n_candidates": null,
+   "elapsed_ms": 17,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 16,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01RubPy6Cuommj5mAKCwm4yQ",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.n_industry_trials\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN (\n  SELECT DISTINCT ta.asset_id\n  FROM trial_assets ta\n  JOIN trial_sponsors_norm s ON s.nct_id=ta.nct_id AND s.role='lead'\n  WHERE s.company_id='johnson johnson janssen' AND ta.role IN ('subject','unknown')\n)\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC\nLIMIT 20"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 16,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01RubPy6Cuommj5mAKCwm4yQ",
+   "rows": 20,
+   "n_candidates": null,
+   "elapsed_ms": 18,
+   "ncts_seen": 0,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_019uQ1fJJ3agsM6KXHUswioG",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.nct_ids\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN ('teclistamab','ciltacel','talquetamab','ramantamig')\nORDER BY p.n_active_trials DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 17,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_019uQ1fJJ3agsM6KXHUswioG",
+   "rows": 4,
+   "n_candidates": null,
+   "elapsed_ms": 17,
+   "ncts_seen": 71,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_011MGH3qjZyfTS5kCSxVpD6L",
+   "input": {
+    "sql": "SELECT p.asset_id, a.canonical_name, p.max_phase_active, p.max_phase_ever, p.n_trials, p.n_active_trials, p.nct_ids\nFROM v_programs p JOIN assets a USING(asset_id)\nWHERE p.condition_key='D009101' AND p.asset_id IN ('mezigdomide','gprc5dcartcells','bb2121','idecabtagenevicleucel','isatuximab')\nORDER BY p.n_active_trials DESC"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 18,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_011MGH3qjZyfTS5kCSxVpD6L",
+   "rows": 5,
+   "n_candidates": null,
+   "elapsed_ms": 16,
+   "ncts_seen": 147,
+   "error": null,
+   "input": null
+  }
+ ],
+ "elapsed_ms": 53365
+}

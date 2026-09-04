@@ -11,32 +11,120 @@
     "kind": "condition"
    },
    "n_candidates": 1,
-   "elapsed_ms": 35
+   "elapsed_ms": 37
   },
   {
    "tool": "run_sql",
    "input": {
-    "sql": "SELECT p.asset_id, a.canonical_name, a.is_combo, p.max_phase_active, p.max_phase_ever,\n       p.n_trials, p.n_active_trials, p.lead_company_of_most_advanced, p.nct_ids\nFROM v_programs p\nJOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D031249'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC, p.n_trials DESC"
+    "sql": "SELECT p.asset_id, a.canonical_name, a.is_combo, p.max_phase_active, p.max_phase_ever, p.n_active_trials, p.n_trials, p.lead_company_of_most_advanced, p.nct_ids\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D031249'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC, p.n_trials DESC"
    },
    "rows": 19,
-   "elapsed_ms": 13,
+   "elapsed_ms": 15,
    "ncts_seen": 12,
-   "elapsed_total_ms": 14
+   "elapsed_total_ms": 15
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05768178"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT06712810"
+   },
+   "found": true
   },
   {
    "tool": "run_sql",
    "input": {
-    "sql": "SELECT b.asset_id, b.provenance, b.tier, b.moa_label, b.action, b.targets, b.modality\nFROM v_moa_best b\nWHERE b.asset_id IN ('cobimetinib','dabrafenib','trametinib','vemurafenib','lenalidomide','pentixafor','hh2710','hlx208','tocilizumab','bevacizumab','cetuximab','temsirolimus')"
+    "sql": "WITH scope AS (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249')\nSELECT coalesce(b.provenance, 'none') AS tier, count(*) AS n_assets\nFROM scope s LEFT JOIN v_moa_best b USING (asset_id) GROUP BY 1"
+   },
+   "rows": 2,
+   "elapsed_ms": 16,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 17
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, moa_label, action, targets FROM v_moa_best\nWHERE asset_id IN (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249')"
    },
    "rows": 20,
-   "elapsed_ms": 2,
+   "elapsed_ms": 15,
    "ncts_seen": 0,
+   "elapsed_total_ms": 15
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, moa_key, moa_label FROM v_moa\nWHERE asset_id IN ('dabrafenib','trametinib','vemurafenib','cobimetinib','tocilizumab','pentixafor','trametinibdimethylsulfoxide','valproicacid','hh2710','hlx208','axl','mer','csf1rinhibitorq702')\nORDER BY asset_id"
+   },
+   "rows": 0,
+   "elapsed_ms": 1,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 1
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT05093335"
+   },
+   "found": true
+  },
+  {
+   "tool": "get_trial",
+   "input": {
+    "nct_id": "NCT02523040"
+   },
+   "found": true
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT nct_id, brief_title, phase_norm, overall_status, lead_company_id\nFROM v_trials WHERE nct_id IN ('NCT04198818','NCT05092815','NCT03794297','NCT07440290')"
+   },
+   "rows": 4,
+   "elapsed_ms": 5,
+   "ncts_seen": 4,
+   "elapsed_total_ms": 5
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT nct_id, brief_title, phase_norm, overall_status, lead_company_id\nFROM v_trials WHERE nct_id IN ('NCT04079179','NCT01552434','NCT01727206','NCT06317246')"
+   },
+   "rows": 4,
+   "elapsed_ms": 5,
+   "ncts_seen": 4,
+   "elapsed_total_ms": 5
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT nct_id, brief_title, phase_norm, overall_status FROM v_trials WHERE nct_id = 'NCT03794297'"
+   },
+   "rows": 1,
+   "elapsed_ms": 2,
+   "ncts_seen": 1,
    "elapsed_total_ms": 2
   },
   {
    "tool": "run_sql",
    "input": {
-    "sql": "SELECT b.asset_id, b.provenance, b.tier, b.moa_label, b.targets\nFROM v_moa_best b\nWHERE b.asset_id IN ('cobimetinib','dabrafenib','trametinib','vemurafenib','pentixafor','hh2710','hlx208','tocilizumab')"
+    "sql": "SELECT asset_id, nct_id, phase_norm, overall_status\nFROM v_moa_trials\nWHERE asset_id IN ('dabrafenib','trametinib') AND condition_key='D031249'"
+   },
+   "rows": 0,
+   "elapsed_ms": 8,
+   "ncts_seen": 0,
+   "elapsed_total_ms": 8
+  },
+  {
+   "tool": "run_sql",
+   "input": {
+    "sql": "SELECT asset_id, moa_key, moa_label, provenance FROM v_moa WHERE asset_id IN ('dabrafenib','trametinib','vemurafenib','cobimetinib')"
    },
    "rows": 0,
    "elapsed_ms": 1,
@@ -46,153 +134,51 @@
   {
    "tool": "run_sql",
    "input": {
-    "sql": "WITH scope AS (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249' AND asset_id NOT LIKE '%+%')\nSELECT coalesce(b.provenance, 'none') AS tier, count(*) AS n_assets\nFROM scope s LEFT JOIN v_moa_best b USING (asset_id)\nGROUP BY 1"
+    "sql": "SELECT * FROM v_moa WHERE asset_id = 'dabrafenib' LIMIT 5"
    },
-   "rows": 2,
-   "elapsed_ms": 13,
+   "rows": 0,
+   "elapsed_ms": 1,
    "ncts_seen": 0,
-   "elapsed_total_ms": 13
+   "elapsed_total_ms": 1
+  },
+  {
+   "tool": "resolve_entity",
+   "input": {
+    "query": "dabrafenib",
+    "kind": "drug"
+   },
+   "n_candidates": 1,
+   "elapsed_ms": 33
   },
   {
    "tool": "run_sql",
    "input": {
-    "sql": "SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249' AND asset_id NOT LIKE '%+%'"
+    "sql": "SELECT asset_id, count(*) FROM chembl_moa WHERE asset_id='dabrafenib' GROUP BY 1"
    },
-   "rows": 18,
-   "elapsed_ms": 14,
+   "rows": 0,
+   "elapsed_ms": 0,
    "ncts_seen": 0,
-   "elapsed_total_ms": 14
+   "elapsed_total_ms": 0
   },
   {
    "tool": "run_sql",
    "input": {
-    "sql": "SELECT b.asset_id, b.provenance, b.moa_label FROM v_moa_best b\nWHERE b.asset_id IN ('trametinib','hlx208','cetuximab','valproicacid','bevacizumab','pentixafor','temsirolimus','tocilizumab','vemurafenib','cobimetinib','trametinibdimethylsulfoxide','lenalidomide','dabrafenib','hh2710')\nORDER BY 1"
+    "sql": "SELECT * FROM asset_nlm_classes WHERE asset_id='dabrafenib' LIMIT 10"
    },
-   "rows": 20,
-   "elapsed_ms": 2,
-   "ncts_seen": 0,
-   "elapsed_total_ms": 2
-  },
-  {
-   "tool": "run_sql",
-   "input": {
-    "sql": "\nSELECT p.asset_id, p.program_exists, p.n_trials, p.n_active_trials, p.latest_activity, p.nct_ids\nFROM v_programs p\nWHERE p.condition_key='D031249'\nORDER BY p.asset_id\n"
-   },
-   "error": "BinderException: Binder Error: Values list \"p\" does not have a column named \"program_exists\"\n\nLINE 1: SELECT p.asset_id, p.program_exists, p.n_trials, p.n_active_trials, p.latest_a...\n                           ^"
-  },
-  {
-   "tool": "run_sql",
-   "input": {
-    "sql": "SELECT p.asset_id, p.n_trials, p.n_active_trials, p.latest_activity, p.nct_ids\nFROM v_programs p\nWHERE p.condition_key='D031249'\nORDER BY p.asset_id"
-   },
-   "rows": 19,
-   "elapsed_ms": 17,
-   "ncts_seen": 12,
-   "elapsed_total_ms": 17
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT06712810"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT01552434"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT05093335"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT02523040"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT07440290"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT04079179"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT03794297"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT05768178"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT05092815"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT04198818"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT06317246"
-   },
-   "found": true
-  },
-  {
-   "tool": "get_trial",
-   "input": {
-    "nct_id": "NCT01727206"
-   },
-   "found": true
-  },
-  {
-   "tool": "run_sql",
-   "input": {
-    "sql": "SELECT asset_id, canonical_name, is_combo FROM assets WHERE asset_id IN ('axl','mer','csf1rinhibitorq702','axl+csf1rinhibitorq702+mer')"
-   },
-   "rows": 4,
+   "rows": 0,
    "elapsed_ms": 0,
    "ncts_seen": 0,
    "elapsed_total_ms": 0
   }
  ],
- "error": "UsageLimitExceeded: The next tool call(s) would exceed the tool_calls_limit of 24 (tool_calls=28). Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
+ "error": "UsageLimitExceeded: The next request would exceed the request_limit of 16. Consider raising the limit, or see the docs on usage limits for budget-aware patterns: https://pydantic.dev/docs/ai/core-concepts/agent/#usage-limits",
  "usage": null,
  "events": [
   {
    "event": "tool_call",
    "step": 1,
    "tool": "resolve_entity",
-   "tool_call_id": "toolu_01DmYmG1Rk4LgG2ERPUafBFS",
+   "tool_call_id": "toolu_01U29Rtsi3M9zY27upxfxWUh",
    "input": {
     "query": "Erdheim-Chester disease",
     "kind": "condition"
@@ -202,10 +188,10 @@
    "event": "tool_result",
    "step": 1,
    "tool": "resolve_entity",
-   "tool_call_id": "toolu_01DmYmG1Rk4LgG2ERPUafBFS",
+   "tool_call_id": "toolu_01U29Rtsi3M9zY27upxfxWUh",
    "rows": null,
    "n_candidates": 1,
-   "elapsed_ms": 35,
+   "elapsed_ms": 37,
    "ncts_seen": 0,
    "error": null,
    "input": null
@@ -214,19 +200,19 @@
    "event": "tool_call",
    "step": 2,
    "tool": "run_sql",
-   "tool_call_id": "toolu_019UGy1grhKGmbMTPAdazbhL",
+   "tool_call_id": "toolu_01NABbcbvouUmcPYZ7VpbEp6",
    "input": {
-    "sql": "\nSELECT p.asset_id, a.canonical_name, a.is_combo, p.max_phase_active, p.max_phase_ever,\n       p.n_trials, p.n_active_trials, p.lead_company_of_most_advanced, p.nct_ids\nFROM v_programs p\nJOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D031249'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC, p.n_trials DESC\n"
+    "sql": "\nSELECT p.asset_id, a.canonical_name, a.is_combo, p.max_phase_active, p.max_phase_ever, p.n_active_trials, p.n_trials, p.lead_company_of_most_advanced, p.nct_ids\nFROM v_programs p JOIN assets a USING (asset_id)\nWHERE p.condition_key = 'D031249'\nORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC, p.n_trials DESC\n"
    }
   },
   {
    "event": "tool_result",
    "step": 2,
    "tool": "run_sql",
-   "tool_call_id": "toolu_019UGy1grhKGmbMTPAdazbhL",
+   "tool_call_id": "toolu_01NABbcbvouUmcPYZ7VpbEp6",
    "rows": 19,
    "n_candidates": null,
-   "elapsed_ms": 13,
+   "elapsed_ms": 15,
    "ncts_seen": 12,
    "error": null,
    "input": null
@@ -234,38 +220,101 @@
   {
    "event": "tool_call",
    "step": 3,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_01MSgMobCzqTZDG1iuJmwM9D",
+   "tool": "get_trial",
+   "tool_call_id": "toolu_015ctBsh7eYKv9Ld2GuBYiMG",
    "input": {
-    "sql": "\nSELECT b.asset_id, b.provenance, b.tier, b.moa_label, b.action, b.targets, b.modality\nFROM v_moa_best b\nWHERE b.asset_id IN ('cobimetinib','dabrafenib','trametinib','vemurafenib','lenalidomide','pentixafor','hh2710','hlx208','tocilizumab','bevacizumab','cetuximab','temsirolimus')\n"
+    "nct_id": "NCT06712810"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 4,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01T1KwjrNvMMMKPP3QEutJ3f",
+   "input": {
+    "nct_id": "NCT05768178"
    }
   },
   {
    "event": "tool_result",
-   "step": 3,
+   "step": 4,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01T1KwjrNvMMMKPP3QEutJ3f",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 4,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_015ctBsh7eYKv9Ld2GuBYiMG",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 5,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01MSgMobCzqTZDG1iuJmwM9D",
+   "tool_call_id": "toolu_01KQKdusQt8a7YSa6xr312Ah",
+   "input": {
+    "sql": "\nWITH scope AS (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249')\nSELECT coalesce(b.provenance, 'none') AS tier, count(*) AS n_assets\nFROM scope s LEFT JOIN v_moa_best b USING (asset_id) GROUP BY 1\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 5,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01KQKdusQt8a7YSa6xr312Ah",
+   "rows": 2,
+   "n_candidates": null,
+   "elapsed_ms": 16,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UNLd9aHkx5KWybTDiMcYdE",
+   "input": {
+    "sql": "\nSELECT asset_id, moa_label, action, targets FROM v_moa_best\nWHERE asset_id IN (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249')\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 6,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01UNLd9aHkx5KWybTDiMcYdE",
    "rows": 20,
    "n_candidates": null,
-   "elapsed_ms": 2,
+   "elapsed_ms": 15,
    "ncts_seen": 12,
    "error": null,
    "input": null
   },
   {
    "event": "tool_call",
-   "step": 4,
+   "step": 7,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01QzJnaPnaENzRoBCiqFLBUd",
+   "tool_call_id": "toolu_01FB5ukqE28nJzpq6HPaNvWP",
    "input": {
-    "sql": "\nSELECT b.asset_id, b.provenance, b.tier, b.moa_label, b.targets\nFROM v_moa_best b\nWHERE b.asset_id IN ('cobimetinib','dabrafenib','trametinib','vemurafenib','pentixafor','hh2710','hlx208','tocilizumab')\n"
+    "sql": "\nSELECT asset_id, moa_key, moa_label FROM v_moa\nWHERE asset_id IN ('dabrafenib','trametinib','vemurafenib','cobimetinib','tocilizumab','pentixafor','trametinibdimethylsulfoxide','valproicacid','hh2710','hlx208','axl','mer','csf1rinhibitorq702')\nORDER BY asset_id\n"
    }
   },
   {
    "event": "tool_result",
-   "step": 4,
+   "step": 7,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01QzJnaPnaENzRoBCiqFLBUd",
+   "tool_call_id": "toolu_01FB5ukqE28nJzpq6HPaNvWP",
    "rows": 0,
    "n_candidates": null,
    "elapsed_ms": 1,
@@ -275,61 +324,103 @@
   },
   {
    "event": "tool_call",
-   "step": 5,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_016jfZ3TcggPhzQmZH9ok3rz",
+   "step": 8,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01UUJRQZiBZ212csecd37vRi",
    "input": {
-    "sql": "\nWITH scope AS (SELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249' AND asset_id NOT LIKE '%+%')\nSELECT coalesce(b.provenance, 'none') AS tier, count(*) AS n_assets\nFROM scope s LEFT JOIN v_moa_best b USING (asset_id)\nGROUP BY 1\n"
+    "nct_id": "NCT05093335"
+   }
+  },
+  {
+   "event": "tool_call",
+   "step": 9,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01A9uuVaRW6J3S5yXGVj4WqR",
+   "input": {
+    "nct_id": "NCT02523040"
    }
   },
   {
    "event": "tool_result",
-   "step": 5,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_016jfZ3TcggPhzQmZH9ok3rz",
-   "rows": 2,
+   "step": 9,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01UUJRQZiBZ212csecd37vRi",
+   "rows": null,
    "n_candidates": null,
-   "elapsed_ms": 13,
+   "elapsed_ms": null,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_result",
+   "step": 9,
+   "tool": "get_trial",
+   "tool_call_id": "toolu_01A9uuVaRW6J3S5yXGVj4WqR",
+   "rows": null,
+   "n_candidates": null,
+   "elapsed_ms": null,
    "ncts_seen": 12,
    "error": null,
    "input": null
   },
   {
    "event": "tool_call",
-   "step": 6,
+   "step": 10,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01FapRu1MpmnKN24SKcB93n1",
+   "tool_call_id": "toolu_014FNCS3QSVZVRsGSyjemMYT",
    "input": {
-    "sql": "\nSELECT DISTINCT asset_id FROM v_programs WHERE condition_key = 'D031249' AND asset_id NOT LIKE '%+%'\n"
+    "sql": "\nSELECT nct_id, brief_title, phase_norm, overall_status, lead_company_id\nFROM v_trials WHERE nct_id IN ('NCT04198818','NCT05092815','NCT03794297','NCT07440290')\n"
    }
   },
   {
    "event": "tool_result",
-   "step": 6,
+   "step": 10,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01FapRu1MpmnKN24SKcB93n1",
-   "rows": 18,
+   "tool_call_id": "toolu_014FNCS3QSVZVRsGSyjemMYT",
+   "rows": 4,
    "n_candidates": null,
-   "elapsed_ms": 14,
+   "elapsed_ms": 5,
    "ncts_seen": 12,
    "error": null,
    "input": null
   },
   {
    "event": "tool_call",
-   "step": 7,
+   "step": 11,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01X5XNSUxGfbBU7JDBiqXVuf",
+   "tool_call_id": "toolu_01W6Q64KiV4R7wizg5hP63mp",
    "input": {
-    "sql": "\nSELECT b.asset_id, b.provenance, b.moa_label FROM v_moa_best b\nWHERE b.asset_id IN ('trametinib','hlx208','cetuximab','valproicacid','bevacizumab','pentixafor','temsirolimus','tocilizumab','vemurafenib','cobimetinib','trametinibdimethylsulfoxide','lenalidomide','dabrafenib','hh2710')\nORDER BY 1\n"
+    "sql": "\nSELECT nct_id, brief_title, phase_norm, overall_status, lead_company_id\nFROM v_trials WHERE nct_id IN ('NCT04079179','NCT01552434','NCT01727206','NCT06317246')\n"
    }
   },
   {
    "event": "tool_result",
-   "step": 7,
+   "step": 11,
    "tool": "run_sql",
-   "tool_call_id": "toolu_01X5XNSUxGfbBU7JDBiqXVuf",
-   "rows": 20,
+   "tool_call_id": "toolu_01W6Q64KiV4R7wizg5hP63mp",
+   "rows": 4,
+   "n_candidates": null,
+   "elapsed_ms": 5,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
+  },
+  {
+   "event": "tool_call",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01XYpvQa7qqxZ4v6egU4zMHy",
+   "input": {
+    "sql": "\nSELECT nct_id, brief_title, phase_norm, overall_status FROM v_trials WHERE nct_id = 'NCT03794297'\n"
+   }
+  },
+  {
+   "event": "tool_result",
+   "step": 12,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01XYpvQa7qqxZ4v6egU4zMHy",
+   "rows": 1,
    "n_candidates": null,
    "elapsed_ms": 2,
    "ncts_seen": 12,
@@ -338,126 +429,21 @@
   },
   {
    "event": "tool_call",
-   "step": 8,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_011AvHfbMzYwD4U2YH9Ysmv9",
-   "input": {
-    "sql": "\nSELECT p.asset_id, p.program_exists, p.n_trials, p.n_active_trials, p.latest_activity, p.nct_ids\nFROM v_programs p\nWHERE p.condition_key='D031249'\nORDER BY p.asset_id\n"
-   }
-  },
-  {
-   "event": "tool_result",
-   "step": 8,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_011AvHfbMzYwD4U2YH9Ysmv9",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": "BinderException: Binder Error: Values list \"p\" does not have a column named \"program_exists\"\n\nLINE 1: SELECT p.asset_id, p.program_exists, p.n_trials, p.n_active_trials, p.latest_a...\n                           ^",
-   "input": null
-  },
-  {
-   "event": "tool_call",
-   "step": 9,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_01JAga6xG8g7BrfRqWXHhW4q",
-   "input": {
-    "sql": "\nSELECT p.asset_id, p.n_trials, p.n_active_trials, p.latest_activity, p.nct_ids\nFROM v_programs p\nWHERE p.condition_key='D031249'\nORDER BY p.asset_id\n"
-   }
-  },
-  {
-   "event": "tool_result",
-   "step": 9,
-   "tool": "run_sql",
-   "tool_call_id": "toolu_01JAga6xG8g7BrfRqWXHhW4q",
-   "rows": 19,
-   "n_candidates": null,
-   "elapsed_ms": 17,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_call",
-   "step": 10,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_013XFn9W3472mQjgjfHxwezR",
-   "input": {
-    "nct_id": "NCT01552434"
-   }
-  },
-  {
-   "event": "tool_call",
-   "step": 11,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_012twQcZFLjxVKfsAYvBzboZ",
-   "input": {
-    "nct_id": "NCT06712810"
-   }
-  },
-  {
-   "event": "tool_result",
-   "step": 11,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_012twQcZFLjxVKfsAYvBzboZ",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 11,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_013XFn9W3472mQjgjfHxwezR",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_call",
-   "step": 12,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01YYJQ8rUR5tri7iqqWWhVCc",
-   "input": {
-    "nct_id": "NCT05093335"
-   }
-  },
-  {
-   "event": "tool_call",
    "step": 13,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_0144T2eSkhvEB7ZehyCCLSsg",
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01SPHGAURoUqXcjfPxkcSxTX",
    "input": {
-    "nct_id": "NCT02523040"
+    "sql": "\nSELECT asset_id, nct_id, phase_norm, overall_status\nFROM v_moa_trials\nWHERE asset_id IN ('dabrafenib','trametinib') AND condition_key='D031249'\n"
    }
   },
   {
    "event": "tool_result",
    "step": 13,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01YYJQ8rUR5tri7iqqWWhVCc",
-   "rows": null,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01SPHGAURoUqXcjfPxkcSxTX",
+   "rows": 0,
    "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 13,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_0144T2eSkhvEB7ZehyCCLSsg",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
+   "elapsed_ms": 8,
    "ncts_seen": 12,
    "error": null,
    "input": null
@@ -465,83 +451,84 @@
   {
    "event": "tool_call",
    "step": 14,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01Q4bA9N9fMpHQ4TTPnzaRtd",
+   "tool": "run_sql",
+   "tool_call_id": "toolu_012hAonHxE6YP7q8rFZEMEBe",
    "input": {
-    "nct_id": "NCT03794297"
+    "sql": "\nSELECT asset_id, moa_key, moa_label, provenance FROM v_moa WHERE asset_id IN ('dabrafenib','trametinib','vemurafenib','cobimetinib')\n"
    }
+  },
+  {
+   "event": "tool_result",
+   "step": 14,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_012hAonHxE6YP7q8rFZEMEBe",
+   "rows": 0,
+   "n_candidates": null,
+   "elapsed_ms": 1,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
   },
   {
    "event": "tool_call",
    "step": 15,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01BP5v2uBAyuSWXySMnrk6mm",
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01A8MGSAPcJKgzEAzstX36dn",
    "input": {
-    "nct_id": "NCT07440290"
+    "sql": "\nSELECT * FROM v_moa WHERE asset_id = 'dabrafenib' LIMIT 5\n"
    }
+  },
+  {
+   "event": "tool_result",
+   "step": 15,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01A8MGSAPcJKgzEAzstX36dn",
+   "rows": 0,
+   "n_candidates": null,
+   "elapsed_ms": 1,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
   },
   {
    "event": "tool_call",
    "step": 16,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01AvUrtyqLFgano5xXrXjLXW",
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_016QX7nzqAjpm12vPFFr9PYm",
    "input": {
-    "nct_id": "NCT04079179"
+    "query": "dabrafenib",
+    "kind": "drug"
    }
+  },
+  {
+   "event": "tool_result",
+   "step": 16,
+   "tool": "resolve_entity",
+   "tool_call_id": "toolu_016QX7nzqAjpm12vPFFr9PYm",
+   "rows": null,
+   "n_candidates": 1,
+   "elapsed_ms": 33,
+   "ncts_seen": 12,
+   "error": null,
+   "input": null
   },
   {
    "event": "tool_call",
    "step": 17,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01TVJi9U4BR5csgp6vkVaoAT",
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NiuB2LvrwD7wsi2dVSPZiW",
    "input": {
-    "nct_id": "NCT05768178"
+    "sql": "\nSELECT asset_id, count(*) FROM chembl_moa WHERE asset_id='dabrafenib' GROUP BY 1\n"
    }
   },
   {
    "event": "tool_result",
    "step": 17,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01BP5v2uBAyuSWXySMnrk6mm",
-   "rows": null,
+   "tool": "run_sql",
+   "tool_call_id": "toolu_01NiuB2LvrwD7wsi2dVSPZiW",
+   "rows": 0,
    "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 17,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01AvUrtyqLFgano5xXrXjLXW",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 17,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01Q4bA9N9fMpHQ4TTPnzaRtd",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 17,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01TVJi9U4BR5csgp6vkVaoAT",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
+   "elapsed_ms": 0,
    "ncts_seen": 12,
    "error": null,
    "input": null
@@ -549,102 +536,18 @@
   {
    "event": "tool_call",
    "step": 18,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01Fz1H6aaK1tQAtsWEdC9n75",
-   "input": {
-    "nct_id": "NCT06317246"
-   }
-  },
-  {
-   "event": "tool_call",
-   "step": 19,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01DTrcakD48h1pFvxKudqwFg",
-   "input": {
-    "nct_id": "NCT04198818"
-   }
-  },
-  {
-   "event": "tool_call",
-   "step": 20,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01PidVMGHDPKUyvpEWeDFxJS",
-   "input": {
-    "nct_id": "NCT05092815"
-   }
-  },
-  {
-   "event": "tool_result",
-   "step": 20,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01PidVMGHDPKUyvpEWeDFxJS",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 20,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01DTrcakD48h1pFvxKudqwFg",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_result",
-   "step": 20,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01Fz1H6aaK1tQAtsWEdC9n75",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_call",
-   "step": 21,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01MSb78H4X41V8GMdCWH3gpD",
-   "input": {
-    "nct_id": "NCT01727206"
-   }
-  },
-  {
-   "event": "tool_result",
-   "step": 21,
-   "tool": "get_trial",
-   "tool_call_id": "toolu_01MSb78H4X41V8GMdCWH3gpD",
-   "rows": null,
-   "n_candidates": null,
-   "elapsed_ms": null,
-   "ncts_seen": 12,
-   "error": null,
-   "input": null
-  },
-  {
-   "event": "tool_call",
-   "step": 22,
    "tool": "run_sql",
-   "tool_call_id": "toolu_015cB16oK59vyKgdh7z6xBY3",
+   "tool_call_id": "toolu_018qGGFa72r4XwMsX7sWoXqr",
    "input": {
-    "sql": "\nSELECT asset_id, canonical_name, is_combo FROM assets WHERE asset_id IN ('axl','mer','csf1rinhibitorq702','axl+csf1rinhibitorq702+mer')\n"
+    "sql": "\nSELECT * FROM asset_nlm_classes WHERE asset_id='dabrafenib' LIMIT 10\n"
    }
   },
   {
    "event": "tool_result",
-   "step": 22,
+   "step": 18,
    "tool": "run_sql",
-   "tool_call_id": "toolu_015cB16oK59vyKgdh7z6xBY3",
-   "rows": 4,
+   "tool_call_id": "toolu_018qGGFa72r4XwMsX7sWoXqr",
+   "rows": 0,
    "n_candidates": null,
    "elapsed_ms": 0,
    "ncts_seen": 12,
@@ -652,5 +555,5 @@
    "input": null
   }
  ],
- "elapsed_ms": 38799
+ "elapsed_ms": 28020
 }

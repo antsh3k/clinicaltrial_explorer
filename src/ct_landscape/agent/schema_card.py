@@ -55,6 +55,7 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
   ranked by n_active_trials, total n_trials as tiebreak — state the scope and the metric in the answer.
 - MoA: use the highest provenance tier present; MoA/target answers MUST state their own completeness computed by SQL:
   "N of M in-scope assets for this indication carry a mechanism label" by tier (chembl / nlm_class / llm / none).
+  If an asset has no v_moa row, its mechanism is UNLABELED in this index — report that; do not probe other tables for it.
 - population_mentions is lexicon-based (recall-limited) and does not know inclusion vs exclusion: verify top hits by
   reading eligibility via get_trial before asserting a population is TARGETED.
 - No enumeration caps in the views; if you truncate a list in the answer, say so and give the full count.
