@@ -216,13 +216,10 @@ def test_parallel_tool_calls_do_not_share_a_cursor(db_path):
     def fn(messages, info):
         returns = [p for m in messages for p in getattr(m, "parts", []) if isinstance(p, ToolReturnPart)]
         if not returns:
-            return ModelResponse(parts=[ToolCallPart("get_trial", {"nct_id": n}) for n in ids] * 2)
-        payloads = [
-            json.loads(r.content) if isinstance(r.content, str) else r.content
-            for r in returns
-            if r.tool_name == "get_trial"
-        ]
-        found = [p["result"].get("found", True) for p in payloads]
+            return ModelResponse(
+                parts=[ToolCallPart("get_trial", {"nct_id": n}) for n in ids + ids]
+            )  # 6 distinct calls
+        found = [r.content["result"].get("found", True) for r in returns if r.tool_name == "get_trial"]
         return ModelResponse(
             parts=[
                 ToolCallPart(
