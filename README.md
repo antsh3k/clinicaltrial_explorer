@@ -104,16 +104,16 @@ Three strictly ordered layers; scope filters (interventional, industry, drug/bio
 ```
 601,694 studies ingested (= 601,694 zip members; 0 parse failures)
   → 459,233 interventional → 225,018 drug/bio interventional → 132,164 industry-lead → 90,304 in scope (industry ∩ interventional ∩ drug/bio)
-interventions: 470,008 drug/bio names → −76,010 gated {placebo/sham prefix 42,191 · exact noise 11,203 · class/procedure regex 9,205 ·
+interventions: 470,008 drug/bio names → −76,013 gated {placebo/sham prefix 42,191 · exact noise 11,203 · class/procedure regex 9,204 ·
                placebo remnant 3,879 · too long 3,741 · metadata cue 2,015 · either/or arms 1,317 · qualifiers-only 531 · …}
-  → 393,998 keyed (83.8%) → 81,329 assets + 18,435 combination assets; 3,432 merged via otherNames (16,889 single-trial
-    merges blocked; 2,750 single-trial names on long otherNames lists not attached); 87 curated synonym merges;
-    939 aliases assigned by dominance; 10,101 contested aliases vetoed (logged, never applied)
-  → 41,261 in-scope assets → mechanism-labeled: chembl 7,285 · curated 36 · nlm_class 1,258 · llm 267 (pilot; 28 abstained)
+  → 393,995 keyed (83.8%) → 81,128 assets + 18,695 combination assets; 3,447 merged via otherNames (16,908 single-trial
+    merges blocked; 2,740 single-trial names on long otherNames lists not attached); 87 curated synonym merges;
+    936 aliases assigned by dominance; 10,065 contested aliases vetoed (logged, never applied)
+  → 41,277 in-scope assets → mechanism-labeled: chembl 7,286 · curated 36 · nlm_class 1,260 · llm 267 (pilot; 28 abstained)
     → 14.7% of in-scope assets carry ≥1 mechanism label = 56.2% of in-scope trial×asset rows (the head of the distribution)
 conditions: 78.9% of trials carry ≥1 MeSH leaf; 108,071 listed-only (→ area "Unclassified", never dropped);
             denoise drops {healthy volunteers 18,075 · device/procedure 14,332 · behaviour/QoL 13,796 · biomarker-only 2,810 · too short 307}
-arms: 92.3% of drug trials have arms; 86.8% of (trial, asset) roles decidable {subject 278,515 · comparator 66,070 · unknown 52,254}
+arms: 92.3% of drug trials have arms; 87.2% of (trial, asset) roles decidable {subject 277,466 · comparator 65,947 · unknown 50,582}
 populations: % of trials with ≥1 typed mention — demographic 57.6 · disease stage 49.5 · severity 38.2 · biomarker 14.0 · line of therapy 8.8 · prior therapy 7.1
 ```
 
@@ -163,11 +163,11 @@ Caveat the agent must state: a Phase 4 trial is not evidence of approval; trial-
 
 ## Where it performs well, where it performs poorly
 
-**Well.** Asset identity for the head of the distribution (brand/code/INN unification through the registry's own `otherNames`; MK-3475 → pembrolizumab across 2,446 trials); comparator exclusion and combination detection from arm structure (86.8% of roles decidable); condition matching by construction with no double counting; company aliasing including dated acquisitions and self-declared parents; everything is countable and sub-second (a full-scan aggregate over `v_programs` runs in ~0.3 s).
+**Well.** Asset identity for the head of the distribution (brand/code/INN unification through the registry's own `otherNames`; MK-3475 → pembrolizumab across 2,428 trials); comparator exclusion and combination detection from arm structure (87.2% of roles decidable); condition matching by construction with no double counting; company aliasing including dated acquisitions and self-declared parents; everything is countable and sub-second (a full-scan aggregate over `v_programs` runs in ~0.3 s).
 
 **Poorly / honestly limited.**
 - **Mechanism coverage is head-heavy**: 14.7% of in-scope assets (56.2% of trial×asset rows) carry a ChEMBL / curated / NLM label; the code-named tail is exactly where the LLM tier's 12.5% hard-error rate (pilot) sits, so the bulk pass was not run. MoA answers state their labeled fraction so this is visible per answer, not only per corpus.
-- **Asset fragmentation on the tail**: typos, regimen acronyms (CHOP, R-CHOP), qualified phrases and abbreviations stay separate clusters by design (10,101 vetoed aliases, 16,889 single-trial merges blocked). Reading the head of the unlabeled distribution after the pilot found real defects that the tests had not — a 593-trial phantom asset "acetate" (the regimen splitter ran before the salt strip), code names losing their digits to the dose regex ("HRS-5635 Injection" → "hrs"), assay and procedure names typed as drugs ("gene expression analysis", "blood sampling") — all fixed with regression tests. What survives now is small and disclosed: a PET tracer "[11C]acetate" (5 trials), "PCA" as a leading device word (18), a handful of two-trial fragments.
+- **Asset fragmentation on the tail**: typos, regimen acronyms (CHOP, R-CHOP), qualified phrases and abbreviations stay separate clusters by design (10,065 vetoed aliases, 16,908 single-trial merges blocked). Reading the head of the unlabeled distribution after the pilot found real defects that the tests had not — a 593-trial phantom asset "acetate" (the regimen splitter ran before the salt strip), code names losing their digits to the dose regex ("HRS-5635 Injection" → "hrs"), assay and procedure names typed as drugs ("gene expression analysis", "blood sampling") — all fixed with regression tests. What survives now is small and disclosed: a PET tracer "[11C]acetate" (5 trials), "PCA" as a leading device word (18), a handful of two-trial fragments.
 - **Listed-only conditions** (108k trials, 21%) roll up to `Unclassified`; rare/new conditions without MeSH get weaker area rollups.
 - **Populations are lexicon-bound** (~250 entries) and do not know inclusion from exclusion; recall is bounded and labeled as such.
 - **Sponsor ≠ owner**: licensing and M&A are invisible to the registry beyond the curated file; `originator_proxy` is a proxy.
@@ -182,8 +182,8 @@ Caveat the agent must state: a Phase 4 trial is not evidence of approval; trial-
 |---|---|---|---|
 | Comparator exclusion from `v_programs` | exclude `comparator`, keep `unknown` | P↑ for "in development"; R risk on OTHER arms mitigated by three-valued retention | `n_unknown_role_trials` column |
 | Noise gates on intervention names | whole-label only | P↑; "pembrolizumab immunotherapy" survives | per-gate census (13 gates) |
-| Contested-alias veto + dominance rule | veto unless ≥5 trials and ≥10× | P↑ over merge-recall; 939 resolved, 10,101 vetoed | `contested_aliases.resolution` |
-| Merge support | cluster-to-cluster merge needs ≥2 asserting trials; long otherNames lists need a code/token link | P↑ (tirofiban ≠ cangrelor); 16,889 merges blocked, 2,750 names not attached | census `n_merges_blocked_single_trial`, `single_trial_on_long_list` |
+| Contested-alias veto + dominance rule | veto unless ≥5 trials and ≥10× | P↑ over merge-recall; 936 resolved, 10,065 vetoed | `contested_aliases.resolution` |
+| Merge support | cluster-to-cluster merge needs ≥2 asserting trials; long otherNames lists need a code/token link | P↑ (tirofiban ≠ cangrelor); 16,908 merges blocked, 2,740 names not attached | census `n_merges_blocked_single_trial`, `single_trial_on_long_list` |
 | Curated synonyms | ~45 INN⟷code⟷brand groups | R↑ on small fixtures, zero corpus risk (curated, exempt from merge support) | `asset_aliases.source = 'curated'`, census `n_curated_synonym_merges` |
 | `otherNames` sparsity | accept unmerged synonyms | R↓ on asset unification (lands in NCT-set recall, not precision) | funnel `merged_via_other_names` |
 | Combination partners | exclude pairs present in every arm; flag same-mechanism pairs | P↑ (nivolumab stops being pembrolizumab's #2 partner); R↓ on add-on trials over a fixed doublet | `v_combo_partners.same_mechanism`, `has_background` |
@@ -238,7 +238,7 @@ The pilot hand-check also caught an **index defect the tests had not**: several 
 - Company normalizer popped "research"/"UK" and turned "Cancer Research UK" into "cancer" → generic words are no longer popped; curated groups still catch "Janssen Research & Development" through a second-chance lookup.
 
 **Failure modes observed at index level** — logged as they were found:
-- Brand aliases "contested" by typos and regimen acronyms → dominance rule; the residual 10,101 vetoes are the honest tail.
+- Brand aliases "contested" by typos and regimen acronyms → dominance rule; the residual 10,065 vetoes are the honest tail.
 - Single-trial `otherNames` that enumerate alternatives or regimen members merged strangers (tirofiban ↔ cangrelor) → merge support ≥2 trials; pasted product lists attached foreign brands (canakinumab ← insulin brands) → long-list rule.
 - The regimen splitter ran before the salt/dose-form strips: "abiraterone acetate" → "abiraterone + acetate", a 593-trial phantom asset that also inflated every "X acetate" program into a combination → strip first, form words never members.
 - The dose regex started inside code names ("HRS-5635 Injection" → "hrs"; "PUL-042 Inhalation Solution" → "inhalation") and left "/day" tails that then split as combos → code-aware regex, chained per-unit tails.
