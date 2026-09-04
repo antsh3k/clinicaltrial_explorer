@@ -177,11 +177,12 @@ def test_no_enumeration_caps_in_programs(con):
 
 def test_contested_aliases_are_logged_not_applied(con):
     for k, res in q(con, "SELECT alias_key, resolution FROM contested_aliases"):
-        n = q(con, "SELECT count(*) FROM asset_aliases WHERE alias_key=?", k)[0][0]
+        rows = q(con, "SELECT asset_id, source FROM asset_aliases WHERE alias_key=?", k)
         if res == "vetoed":
-            assert n == 0
+            # never handed to a claimant: either absent, or the alias is a cluster's OWN name key
+            assert all(src == "name" and aid == k for aid, src in rows), (k, rows)
         else:
-            assert res.startswith("dominance:") and n == 1
+            assert res.startswith("dominance:") and len(rows) == 1
 
 
 def test_company_normalization_and_declared_parents(con):

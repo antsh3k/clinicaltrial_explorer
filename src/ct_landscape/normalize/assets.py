@@ -20,6 +20,11 @@ from ct_landscape.normalize.drug_names import Keyed, display_surface, is_code_na
 ASSET_TYPES = ("DRUG", "BIOLOGICAL", "COMBINATION_PRODUCT", "GENETIC")
 DOMINANCE_MIN_TRIALS = 5  # a claimant must assert the alias in at least this many trials …
 DOMINANCE_RATIO = 10  # … and at least this many times more often than every other claimant
+MERGE_MIN_TRIALS = (
+    2  # uniting TWO existing clusters (alias key is itself an asset name) needs ≥2 asserting trials:
+)
+# one trial's otherNames often ENUMERATE alternatives ("Glycoprotein inhibitor" → [Tirofiban, Cangrelor]) or regimen
+# members ([Dapsone, Rifampicin, Clofazimine]); a single assertion may still attach a brand/code that is not a cluster
 
 
 class UnionFind:
@@ -182,6 +187,11 @@ def build_assets(
             return top[0]
         return None
 
+    def merge_support(alias: str, target_root: str) -> int:
+        return len(
+            {n for owner in claims[alias] if uf.find(owner) == target_root for n in support[(alias, owner)]}
+        )
+
     changed = True
     while changed:
         changed = False
@@ -189,6 +199,9 @@ def build_assets(
             r = roots_of(claims[alias])
             target = next(iter(r)) if len(r) == 1 else dominant_root(alias)
             if target and alias in uf.parent and uf.find(alias) != target:
+                if merge_support(alias, target) < MERGE_MIN_TRIALS:
+                    res.census["n_merges_blocked_single_trial"] += 1
+                    continue
                 uf.union(alias, target)  # the alias is itself another asset's name → merge the two clusters
                 changed = True
 
@@ -202,6 +215,8 @@ def build_assets(
             alias_owner[alias] = next(iter(r))
             continue
         dom = dominant_root(alias)
+        if dom is not None and alias in uf.parent and uf.find(alias) != dom:
+            dom = None  # a cluster that was NOT merged (single-trial assertion) keeps its own alias key
         if dom is not None:
             alias_owner[alias] = dom
             res.contested.append((alias, sorted(r), len(alias_trials[alias]), f"dominance:{dom}"))

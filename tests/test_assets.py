@@ -11,11 +11,16 @@ def _iv(nct, no, name, typ="DRUG"):
 def test_mk3475_is_pembrolizumab():
     ivs = [
         _iv("NCT1", 0, "Pembrolizumab"),
+        _iv("NCT1b", 0, "Pembrolizumab"),  # a cluster-to-cluster merge needs ≥2 asserting trials
         _iv("NCT2", 0, "MK-3475"),
         _iv("NCT3", 0, "KEYTRUDA"),
         _iv("NCT4", 0, "Placebo"),
     ]
-    other = {("NCT1", 0): ["MK-3475", "SCH 900475", "KEYTRUDA®"], ("NCT3", 0): ["pembrolizumab"]}
+    other = {
+        ("NCT1", 0): ["MK-3475", "SCH 900475", "KEYTRUDA®"],
+        ("NCT1b", 0): ["MK-3475", "KEYTRUDA®"],
+        ("NCT3", 0): ["pembrolizumab"],
+    }
     r = build_assets(ivs, other)
     ids = {
         r.intervention_assets[("NCT1", 0)][0][0],
@@ -26,7 +31,7 @@ def test_mk3475_is_pembrolizumab():
     aid = ids.pop()
     assert aid == "pembrolizumab"
     assert r.assets[aid]["canonical_name"] == "Pembrolizumab (KEYTRUDA)"
-    assert r.assets[aid]["n_trials"] == 3
+    assert r.assets[aid]["n_trials"] == 4
     assert r.aliases["mk3475"] == (aid, "MK-3475", "other_name") or r.aliases["mk3475"][0] == aid
     assert r.aliases["sch900475"][0] == aid
     assert ("NCT4", 0) not in r.intervention_assets  # placebo never an asset
@@ -73,8 +78,8 @@ def test_dominance_rule_needs_five_trials_and_ten_x():
 
 def test_multi_claimant_alias_resolves_when_claimants_already_merged():
     # A and B are the same drug: A lists B as an otherName (uncontested merge); both list brand "Z"
-    ivs = [_iv("NCT1", 0, "Alphadrug"), _iv("NCT2", 0, "AD-123")]
-    other = {("NCT1", 0): ["AD-123", "Zbrand"], ("NCT2", 0): ["Zbrand"]}
+    ivs = [_iv("NCT1", 0, "Alphadrug"), _iv("NCT1b", 0, "Alphadrug"), _iv("NCT2", 0, "AD-123")]
+    other = {("NCT1", 0): ["AD-123", "Zbrand"], ("NCT1b", 0): ["AD-123"], ("NCT2", 0): ["Zbrand"]}
     r = build_assets(ivs, other)
     assert r.intervention_assets[("NCT1", 0)][0][0] == r.intervention_assets[("NCT2", 0)][0][0]
     assert r.aliases["zbrand"][0] == "alphadrug"
@@ -98,8 +103,13 @@ def test_combo_keeps_component_edges_and_links_components():
 
 
 def test_canonical_name_prefers_non_code_surface():
-    ivs = [_iv("NCT1", 0, "MK-3475"), _iv("NCT2", 0, "MK-3475"), _iv("NCT3", 0, "pembrolizumab")]
-    other = {("NCT3", 0): ["MK-3475"]}
+    ivs = [
+        _iv("NCT1", 0, "MK-3475"),
+        _iv("NCT2", 0, "MK-3475"),
+        _iv("NCT3", 0, "pembrolizumab"),
+        _iv("NCT4", 0, "pembrolizumab"),
+    ]
+    other = {("NCT3", 0): ["MK-3475"], ("NCT4", 0): ["MK-3475"]}
     r = build_assets(ivs, other)
     aid = r.intervention_assets[("NCT1", 0)][0][0]
     assert r.assets[aid]["canonical_name"] == "pembrolizumab"
@@ -158,3 +168,22 @@ def test_armless_record_is_unknown():
     ia = {("NCT1", 0): [("x", "name")]}
     rows = assign_roles(ia, {}, {}, {})
     assert rows[0][4] == "unknown" and rows[0][5] is None
+
+
+def test_single_trial_enumeration_does_not_merge_two_real_assets():
+    # NCT01103440-style: a junk-ish intervention lists two different antiplatelets as "other names"
+    ivs = [_iv(f"NCT{i}", 0, "Tirofiban") for i in range(3)] + [
+        _iv(f"NCTC{i}", 0, "Cangrelor") for i in range(3)
+    ]
+    ivs.append(_iv("NCTX", 0, "Glycoprotein inhibitor plus ASA"))
+    other = {("NCTX", 0): ["Tirofiban", "Cangrelor"]}
+    r = build_assets(ivs, other)
+    assert r.intervention_assets[("NCT0", 0)][0][0] != r.intervention_assets[("NCTC0", 0)][0][0]
+    assert r.census["n_merges_blocked_single_trial"] >= 1
+
+
+def test_two_trials_asserting_a_synonym_still_merge():
+    ivs = [_iv("NCT1", 0, "Pembrolizumab"), _iv("NCT2", 0, "Pembrolizumab"), _iv("NCT3", 0, "MK-3475")]
+    other = {("NCT1", 0): ["MK-3475"], ("NCT2", 0): ["MK-3475"]}
+    r = build_assets(ivs, other)
+    assert r.intervention_assets[("NCT3", 0)][0][0] == "pembrolizumab"
