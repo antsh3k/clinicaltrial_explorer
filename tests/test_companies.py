@@ -79,7 +79,9 @@ def test_canonical_display_for_curated_groups():
 
 
 def test_generic_words_are_not_popped_into_a_stub():
-    assert company_key("Cancer Research UK") == "cancer research"  # geographic words pop, generic words do not
+    assert (
+        company_key("Cancer Research UK") == "cancer research"
+    )  # geographic words pop, generic words do not
     assert company_key("Fred Hutchinson Cancer Research Center") == "fred hutchinson cancer research center"
     assert company_key("Janssen Research & Development, LLC") == company_key(
         "Johnson & Johnson"

@@ -103,6 +103,29 @@ industry_words:
   - asia
   - pacific
 
+# Second-chance words: popped ONLY to look a name up in the curated alias groups ("Janssen Research & Development"
+# → "janssen" → J&J group). A name that matches no group keeps them, so 'Cancer Research UK' never becomes 'cancer'.
+alias_lookup_words:
+  - research
+  - development
+  - research and development
+  - r d
+  - medical
+  - medicines
+  - healthcare
+  - health
+  - oncology
+  - vaccines
+  - biologics
+  - services
+  - products
+  - consumer
+  - diagnostics
+  - clinical
+  - institute
+  - center
+  - centre
+
 # Regexes for a sponsor string that DECLARES its own parent ("X, a Y company", "X, a subsidiary of Y",
 # "X now a wholly owned subsidiary of Y"). The declared parent is taken as the company — this is the
 # registry asserting the relationship, not a fuzzy match. Group 1 = subsidiary, group 2 = parent.

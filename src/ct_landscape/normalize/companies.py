@@ -24,6 +24,9 @@ def _lex():
     suf = load("company_suffixes")
     ali = load("company_aliases")
     tokens = sorted(set(suf["legal_forms"]) | set(suf["industry_words"]), key=lambda t: -len(t.split()))
+    lookup_tokens = sorted(
+        set(tokens) | set(suf.get("alias_lookup_words", [])), key=lambda t: -len(t.split())
+    )
     alias_map: dict[str, str] = {}
     canon: dict[str, str] = {}
     for g in ali["groups"]:
@@ -33,7 +36,13 @@ def _lex():
             alias_map[_basic_norm(m)] = cid
         alias_map[cid] = cid
     parents = [re.compile(p, re.IGNORECASE) for p in suf["declared_parent_patterns"]]
-    return {"suffix_tokens": tokens, "alias_map": alias_map, "canonical": canon, "parents": parents}
+    return {
+        "suffix_tokens": tokens,
+        "lookup_tokens": lookup_tokens,
+        "alias_map": alias_map,
+        "canonical": canon,
+        "parents": parents,
+    }
 
 
 def _basic_norm(s: str) -> str:
@@ -56,13 +65,15 @@ def declared_parent(raw: str) -> str | None:
     return None
 
 
-def pop_suffixes(norm: str) -> str:
-    """Pop trailing legal-form/industry tokens in a loop; never pop the last remaining token."""
+def pop_suffixes(norm: str, extended: bool = False) -> str:
+    """Pop trailing legal-form/industry tokens in a loop; never pop the last remaining token.
+    extended=True also pops the alias-lookup words — used ONLY to probe the curated alias groups."""
     toks = norm.split()
     changed = True
+    vocab = _lex()["lookup_tokens" if extended else "suffix_tokens"]
     while changed and len(toks) > 1:
         changed = False
-        for suffix in _lex()["suffix_tokens"]:
+        for suffix in vocab:
             st = suffix.split()
             n = len(st)
             if len(toks) > n and toks[-n:] == st:
@@ -79,10 +90,15 @@ def company_key(raw: str) -> str:
         return "unknown"
     parent = declared_parent(raw)
     base = parent if parent else _TRAILING_PAREN.sub("", raw)
-    norm = pop_suffixes(_basic_norm(base))
-    if not norm:
-        norm = _basic_norm(base) or "unknown"
-    return _lex()["alias_map"].get(norm, norm)
+    basic = _basic_norm(base)
+    norm = pop_suffixes(basic) or basic or "unknown"
+    alias_map = _lex()["alias_map"]
+    if norm in alias_map:
+        return alias_map[norm]
+    probe = pop_suffixes(basic, extended=True)  # second chance: curated groups only, never the final key
+    if probe in alias_map:
+        return alias_map[probe]
+    return norm
 
 
 def canonical_display(key: str, most_common_raw: str) -> str:
