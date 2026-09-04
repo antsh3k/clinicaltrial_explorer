@@ -61,6 +61,64 @@ def test_resolve_condition_prefers_mesh_key(con):
     assert any(c.id == "D002289" for c in r2.candidates) and r2.candidates[0].match in ("prefix", "contains")
 
 
+def test_resolve_condition_abbreviation_and_lay_phrasing_reach_mesh(con):
+    """Regression for live-eval G05/G06/G12: 'NSCLC' resolved to the listed-only key `nsclc` and
+    'non-small cell lung cancer' returned ten listed strings and never D002289 (wrong keyspace)."""
+    for q in ("NSCLC", "nsclc", "non-small cell lung cancer", "Non Small Cell Lung Cancer"):
+        r = tools.resolve(con, q, "condition")
+        assert r.candidates and r.candidates[0].id == "D002289", (q, r.candidates[:3])
+        assert r.candidates[0].match == "curated"
+    # the lay phrasing works through the generic fold too (cancer/carcinoma → neoplasm), not only the file
+    r = tools.resolve(con, "renal cell cancer", "condition")
+    assert r.candidates and r.candidates[0].id == "D002292"
+
+
+def test_resolve_condition_strips_stage_qualifiers(con):
+    for q in ("advanced non-small cell lung cancer", "metastatic NSCLC", "Stage IV NSCLC", "recurrent NSCLC"):
+        r = tools.resolve(con, q, "condition")
+        assert r.candidates and r.candidates[0].id == "D002289", (q, r.candidates[:3])
+    assert tools.condition_tokens("advanced non-small cell lung cancer") == [
+        "cell",
+        "lung",
+        "neoplasm",
+        "non",
+        "small",
+    ]
+    assert tools.condition_tokens("Carcinoma, Non-Small-Cell Lung") == [
+        "cell",
+        "lung",
+        "neoplasm",
+        "non",
+        "small",
+    ]
+    assert (
+        tools.condition_tokens("Lung Neoplasms")
+        == tools.condition_tokens("lung cancer")
+        == ["lung", "neoplasm"]
+    )
+
+
+def test_resolve_condition_reports_listed_only_sibling_never_sums(con):
+    """When the MeSH key wins by synonym, a listed-only key for the same surface is a SECOND candidate with a note,
+    so the two keyspaces stay visibly separate (§5.3)."""
+    r = tools.resolve(con, "NSCLC", "condition")
+    ids = [c.id for c in r.candidates]
+    assert ids[0] == "D002289"
+    if "nsclc" in ids:  # present whenever the fixture has a trial listing "NSCLC" without the MeSH leaf
+        assert "never sum" in r.note and "nsclc" in r.note
+        assert r.candidates[ids.index("nsclc")].match == "exact"
+    else:
+        assert r.note == ""
+
+
+def test_condition_synonym_lexicon_is_consistent():
+    syn = tools.condition_synonyms()
+    assert syn["nsclc"][0] == "D002289" and syn["ipf"][0] == "D054990" and syn["rcc"][0] == "D002292"
+    assert all(tools.MESH_ID.match(mesh_id) for mesh_id, _ in syn.values())
+    # every surface folds to a non-empty key and nothing collides (the loader raises on a conflicting mapping)
+    assert all(k for k in syn)
+
+
 def test_resolve_company_via_alias_group(con):
     r = tools.resolve(con, "MSD", "company")
     assert r.candidates and "merck" in r.candidates[0].id

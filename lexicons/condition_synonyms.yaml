@@ -1,0 +1,120 @@
+# Curated condition synonyms for the agent's resolve_entity ladder (spec §7.2 "kind=condition returns the MeSH key
+# when one exists"). Surfaces are folded with normalize.conditions.fold at load, so write them naturally.
+#
+# This file is READ ONLY BY THE RESOLVER. It never touches the persisted condition keyspace (§5.3): a trial that
+# lists "NSCLC" without the MeSH leaf keeps its listed-only key, and the resolver reports that sibling key in its
+# note so the two keyspaces are never summed silently.
+#
+# Two kinds of entry: abbreviations the registry uses as bare condition strings (NSCLC, RCC, IPF), and lay phrasings
+# whose tokens the generic cancer/carcinoma/neoplasm fold cannot bridge (prostate → Prostatic, gastric → Stomach,
+# bladder → Urinary Bladder). Phrasings the fold already handles ("lung cancer" ↔ "Lung Neoplasms", "renal cell
+# carcinoma" ↔ "Carcinoma, Renal Cell") are deliberately NOT listed. Every id was checked against the
+# conditionBrowseModule meshes of the 2026-09-04 snapshot; `term` is the descriptor name at that time, for review.
+synonyms:
+  # ---- oncology
+  - {mesh_id: D002289, term: "Carcinoma, Non-Small-Cell Lung", surfaces: [NSCLC, non-small cell lung cancer, non small cell lung cancer, NSCLC lung cancer, non-small-cell lung cancer]}
+  - {mesh_id: D055752, term: "Small Cell Lung Carcinoma", surfaces: [SCLC, small cell lung cancer, small-cell lung cancer, extensive-stage small cell lung cancer, limited-stage small cell lung cancer]}
+  - {mesh_id: D008175, term: "Lung Neoplasms", surfaces: [lung cancer, lung carcinoma, pulmonary cancer]}
+  - {mesh_id: D002292, term: "Carcinoma, Renal Cell", surfaces: [RCC, renal cell cancer, clear cell renal cell carcinoma, ccRCC, kidney cell carcinoma]}
+  - {mesh_id: D007680, term: "Kidney Neoplasms", surfaces: [kidney cancer, renal cancer]}
+  - {mesh_id: D009101, term: "Multiple Myeloma", surfaces: [MM, myeloma, RRMM, relapsed refractory multiple myeloma, NDMM, newly diagnosed multiple myeloma]}
+  - {mesh_id: D006528, term: "Carcinoma, Hepatocellular", surfaces: [HCC, hepatocellular cancer, liver cell carcinoma, hepatoma]}
+  - {mesh_id: D008113, term: "Liver Neoplasms", surfaces: [liver cancer]}
+  - {mesh_id: D015179, term: "Colorectal Neoplasms", surfaces: [CRC, colorectal cancer, colon cancer, bowel cancer, mCRC]}
+  - {mesh_id: D064726, term: "Triple Negative Breast Neoplasms", surfaces: [TNBC, triple negative breast cancer, triple-negative breast cancer]}
+  - {mesh_id: D001943, term: "Breast Neoplasms", surfaces: [breast cancer, breast carcinoma]}
+  - {mesh_id: D000077195, term: "Squamous Cell Carcinoma of Head and Neck", surfaces: [HNSCC, head and neck squamous cell carcinoma, SCCHN]}
+  - {mesh_id: D006258, term: "Head and Neck Neoplasms", surfaces: [head and neck cancer]}
+  - {mesh_id: D011471, term: "Prostatic Neoplasms", surfaces: [prostate cancer, prostate carcinoma, prostate neoplasm]}
+  - {mesh_id: D064129, term: "Prostatic Neoplasms, Castration-Resistant", surfaces: [CRPC, mCRPC, castration-resistant prostate cancer, castrate-resistant prostate cancer, metastatic castration-resistant prostate cancer]}
+  - {mesh_id: D013274, term: "Stomach Neoplasms", surfaces: [gastric cancer, stomach cancer, gastric carcinoma]}
+  - {mesh_id: D004938, term: "Esophageal Neoplasms", surfaces: [oesophageal cancer, esophagus cancer]}
+  - {mesh_id: D010190, term: "Pancreatic Neoplasms", surfaces: [pancreatic cancer, PDAC, pancreatic ductal adenocarcinoma, pancreas cancer]}
+  - {mesh_id: D001749, term: "Urinary Bladder Neoplasms", surfaces: [bladder cancer, bladder carcinoma]}
+  - {mesh_id: D002295, term: "Carcinoma, Transitional Cell", surfaces: [urothelial carcinoma, urothelial cancer, transitional cell carcinoma]}
+  - {mesh_id: D010051, term: "Ovarian Neoplasms", surfaces: [ovarian cancer, ovarian carcinoma]}
+  - {mesh_id: D002583, term: "Uterine Cervical Neoplasms", surfaces: [cervical cancer, cervix cancer, cervical carcinoma]}
+  - {mesh_id: D016889, term: "Endometrial Neoplasms", surfaces: [endometrial cancer, endometrial carcinoma]}
+  - {mesh_id: D014594, term: "Uterine Neoplasms", surfaces: [uterine cancer]}
+  - {mesh_id: D013964, term: "Thyroid Neoplasms", surfaces: [thyroid cancer]}
+  - {mesh_id: D001932, term: "Brain Neoplasms", surfaces: [brain cancer, brain tumor, brain tumour]}
+  - {mesh_id: D005909, term: "Glioblastoma", surfaces: [GBM, glioblastoma multiforme]}
+  - {mesh_id: D008545, term: "Melanoma", surfaces: [malignant melanoma, cutaneous melanoma, skin melanoma]}
+  - {mesh_id: D012878, term: "Skin Neoplasms", surfaces: [skin cancer]}
+  - {mesh_id: D018281, term: "Cholangiocarcinoma", surfaces: [bile duct cancer, biliary tract cancer, CCA]}
+  - {mesh_id: D000086002, term: "Mesothelioma, Malignant", surfaces: [malignant mesothelioma, malignant pleural mesothelioma, MPM]}
+  - {mesh_id: D015470, term: "Leukemia, Myeloid, Acute", surfaces: [AML, acute myeloid leukemia, acute myeloid leukaemia, acute myelogenous leukemia]}
+  - {mesh_id: D015451, term: "Leukemia, Lymphocytic, Chronic, B-Cell", surfaces: [CLL, chronic lymphocytic leukemia, chronic lymphocytic leukaemia]}
+  - {mesh_id: D054198, term: "Precursor Cell Lymphoblastic Leukemia-Lymphoma", surfaces: [ALL, acute lymphoblastic leukemia, acute lymphoblastic leukaemia, acute lymphocytic leukemia]}
+  - {mesh_id: D015464, term: "Leukemia, Myelogenous, Chronic, BCR-ABL Positive", surfaces: [CML, chronic myeloid leukemia, chronic myelogenous leukemia, chronic myeloid leukaemia]}
+  - {mesh_id: D016403, term: "Lymphoma, Large B-Cell, Diffuse", surfaces: [DLBCL, diffuse large B-cell lymphoma, diffuse large B cell lymphoma]}
+  - {mesh_id: D008228, term: "Lymphoma, Non-Hodgkin", surfaces: [NHL, non-Hodgkin lymphoma, non-Hodgkin's lymphoma, non Hodgkin lymphoma]}
+  - {mesh_id: D006689, term: "Hodgkin Disease", surfaces: [Hodgkin lymphoma, Hodgkin's lymphoma, classical Hodgkin lymphoma]}
+  - {mesh_id: D009190, term: "Myelodysplastic Syndromes", surfaces: [MDS, myelodysplastic syndrome, myelodysplasia]}
+  - {mesh_id: D055728, term: "Primary Myelofibrosis", surfaces: [myelofibrosis]}
+  - {mesh_id: D009369, term: "Neoplasms", surfaces: [cancer, solid tumors, solid tumours, advanced solid tumors, advanced solid tumours]}
+  # ---- respiratory / fibrosis
+  - {mesh_id: D054990, term: "Idiopathic Pulmonary Fibrosis", surfaces: [IPF]}
+  - {mesh_id: D017563, term: "Lung Diseases, Interstitial", surfaces: [ILD, interstitial lung disease, interstitial lung diseases]}
+  - {mesh_id: D029424, term: "Pulmonary Disease, Chronic Obstructive", surfaces: [COPD, chronic obstructive pulmonary disease, chronic obstructive lung disease]}
+  - {mesh_id: D000081029, term: "Pulmonary Arterial Hypertension", surfaces: [PAH]}
+  - {mesh_id: D012128, term: "Respiratory Distress Syndrome", surfaces: [ARDS, acute respiratory distress syndrome]}
+  - {mesh_id: D003550, term: "Cystic Fibrosis", surfaces: [cystic fibrosis lung disease]}
+  - {mesh_id: D020181, term: "Sleep Apnea, Obstructive", surfaces: [OSA, obstructive sleep apnea, obstructive sleep apnoea]}
+  # ---- ophthalmology
+  - {mesh_id: D057092, term: "Geographic Atrophy", surfaces: [GA, geographic atrophy secondary to AMD]}
+  - {mesh_id: D008268, term: "Macular Degeneration", surfaces: [AMD, age-related macular degeneration, age related macular degeneration, wet AMD, nAMD, neovascular age-related macular degeneration]}
+  - {mesh_id: D008269, term: "Macular Edema", surfaces: [DME, diabetic macular edema, diabetic macular oedema]}
+  - {mesh_id: D003930, term: "Diabetic Retinopathy", surfaces: [diabetic eye disease]}
+  # ---- metabolic / cardiovascular / renal
+  - {mesh_id: D003924, term: "Diabetes Mellitus, Type 2", surfaces: [T2DM, T2D, type 2 diabetes, type 2 diabetes mellitus, type II diabetes, type ii diabetes mellitus]}
+  - {mesh_id: D003922, term: "Diabetes Mellitus, Type 1", surfaces: [T1DM, T1D, type 1 diabetes, type 1 diabetes mellitus, type I diabetes]}
+  - {mesh_id: D065626, term: "Non-alcoholic Fatty Liver Disease", surfaces: [NAFLD, NASH, MASH, MASLD, non-alcoholic steatohepatitis, nonalcoholic steatohepatitis, metabolic dysfunction-associated steatohepatitis, metabolic dysfunction-associated steatotic liver disease]}
+  - {mesh_id: D006333, term: "Heart Failure", surfaces: [HF, HFrEF, HFpEF, congestive heart failure, CHF]}
+  - {mesh_id: D001281, term: "Atrial Fibrillation", surfaces: [AF, AFib]}
+  - {mesh_id: D009203, term: "Myocardial Infarction", surfaces: [MI, heart attack, acute myocardial infarction, AMI]}
+  - {mesh_id: D051436, term: "Renal Insufficiency, Chronic", surfaces: [CKD, chronic kidney disease, chronic renal failure, chronic renal insufficiency]}
+  - {mesh_id: D058186, term: "Acute Kidney Injury", surfaces: [AKI]}
+  # ---- immunology / inflammation
+  - {mesh_id: D001172, term: "Arthritis, Rheumatoid", surfaces: [RA, rheumatoid arthritis]}
+  - {mesh_id: D015535, term: "Arthritis, Psoriatic", surfaces: [PsA, psoriatic arthritis]}
+  - {mesh_id: D013167, term: "Spondylitis, Ankylosing", surfaces: [ankylosing spondylitis]}
+  - {mesh_id: D010003, term: "Osteoarthritis", surfaces: [OA]}
+  - {mesh_id: D008180, term: "Lupus Erythematosus, Systemic", surfaces: [SLE, systemic lupus erythematosus]}
+  - {mesh_id: D015212, term: "Inflammatory Bowel Diseases", surfaces: [IBD, inflammatory bowel disease]}
+  - {mesh_id: D003093, term: "Colitis, Ulcerative", surfaces: [ulcerative colitis]}
+  - {mesh_id: D003424, term: "Crohn Disease", surfaces: [Crohn's disease, Crohns disease]}
+  - {mesh_id: D003876, term: "Dermatitis, Atopic", surfaces: [atopic eczema]}
+  - {mesh_id: D006086, term: "Graft vs Host Disease", surfaces: [GVHD, graft versus host disease, graft-versus-host disease]}
+  - {mesh_id: D016553, term: "Purpura, Thrombocytopenic, Idiopathic", surfaces: [ITP, immune thrombocytopenia, immune thrombocytopenic purpura]}
+  - {mesh_id: D006457, term: "Hemoglobinuria, Paroxysmal", surfaces: [PNH, paroxysmal nocturnal hemoglobinuria, paroxysmal nocturnal haemoglobinuria]}
+  - {mesh_id: D009157, term: "Myasthenia Gravis", surfaces: [MG, gMG, generalized myasthenia gravis]}
+  - {mesh_id: D000755, term: "Anemia, Sickle Cell", surfaces: [SCD, sickle cell disease, sickle cell anemia, sickle cell anaemia]}
+  - {mesh_id: D043183, term: "Irritable Bowel Syndrome", surfaces: [IBS]}
+  - {mesh_id: D005764, term: "Gastroesophageal Reflux", surfaces: [GERD, GORD, gastroesophageal reflux disease, gastro-oesophageal reflux disease, acid reflux]}
+  - {mesh_id: D011085, term: "Polycystic Ovary Syndrome", surfaces: [PCOS]}
+  - {mesh_id: D011470, term: "Prostatic Hyperplasia", surfaces: [BPH, benign prostatic hyperplasia]}
+  # ---- neurology / psychiatry
+  - {mesh_id: D009103, term: "Multiple Sclerosis", surfaces: [MS, RRMS, relapsing multiple sclerosis, relapsing-remitting multiple sclerosis, progressive multiple sclerosis]}
+  - {mesh_id: D000544, term: "Alzheimer Disease", surfaces: [Alzheimer's disease, Alzheimers disease, Alzheimer's]}
+  - {mesh_id: D010300, term: "Parkinson Disease", surfaces: [Parkinson's disease, Parkinsons disease, Parkinson's]}
+  - {mesh_id: D000690, term: "Amyotrophic Lateral Sclerosis", surfaces: [ALS, motor neurone disease, motor neuron disease, Lou Gehrig's disease]}
+  - {mesh_id: D009471, term: "Neuromyelitis Optica", surfaces: [NMOSD, NMO, neuromyelitis optica spectrum disorder]}
+  - {mesh_id: D020388, term: "Muscular Dystrophy, Duchenne", surfaces: [DMD, Duchenne muscular dystrophy, Duchenne]}
+  - {mesh_id: D009134, term: "Muscular Atrophy, Spinal", surfaces: [SMA, spinal muscular atrophy]}
+  - {mesh_id: D008881, term: "Migraine Disorders", surfaces: [migraine, migraines, chronic migraine, episodic migraine]}
+  - {mesh_id: D003865, term: "Depressive Disorder, Major", surfaces: [MDD, major depressive disorder, major depression]}
+  - {mesh_id: D009771, term: "Obsessive-Compulsive Disorder", surfaces: [OCD]}
+  - {mesh_id: D013313, term: "Stress Disorders, Post-Traumatic", surfaces: [PTSD, post-traumatic stress disorder, posttraumatic stress disorder]}
+  - {mesh_id: D001289, term: "Attention Deficit Disorder with Hyperactivity", surfaces: [ADHD, attention deficit hyperactivity disorder]}
+  - {mesh_id: D000067877, term: "Autism Spectrum Disorder", surfaces: [ASD, autism]}
+  - {mesh_id: D000070642, term: "Brain Injuries, Traumatic", surfaces: [TBI, traumatic brain injury]}
+  - {mesh_id: D013119, term: "Spinal Cord Injuries", surfaces: [SCI, spinal cord injury]}
+  # ---- infectious
+  - {mesh_id: D015658, term: "HIV Infections", surfaces: [HIV, HIV infection, HIV-1 infection, HIV/AIDS]}
+  - {mesh_id: D000086382, term: "COVID-19", surfaces: [covid, SARS-CoV-2 infection, coronavirus disease 2019]}
+  - {mesh_id: D006509, term: "Hepatitis B", surfaces: [HBV, chronic hepatitis B, hepatitis B infection]}
+  - {mesh_id: D006526, term: "Hepatitis C", surfaces: [HCV, chronic hepatitis C, hepatitis C infection]}
+  - {mesh_id: D014376, term: "Tuberculosis", surfaces: [TB]}
+  # ---- rare
+  - {mesh_id: D031249, term: "Erdheim-Chester Disease", surfaces: [ECD, Erdheim Chester, Erdheim-Chester]}

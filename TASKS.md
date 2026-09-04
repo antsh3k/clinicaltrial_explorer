@@ -71,6 +71,7 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] Mechanisms: curated tier (`lexicons/curated_moa.yaml`, 36 assets) between chembl and nlm_class; funnel line
 - [x] Q7: backbone pairs excluded, `same_mechanism` flag + PARTNER house rule in the schema card
 - [x] README: deliverables map, refreshed funnel/examples/dials/failure modes, second screenshot (two-turn conversation)
+- [x] Resolver: conditions reach the MeSH key from abbreviations / lay phrasings / stage-qualified forms (`lexicons/condition_synonyms.yaml` + folded token rung + listed-only sibling note); regression tests; README failure mode
 
 ## Needs the user (blocked)
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
@@ -80,6 +81,7 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] Chrome instance picked by the user; UI tested (two drawer glitches + a parallel-call spinner fixed)
 
 ## Deviations from the spec
+- `resolve_entity` (§7.2) for `kind=condition` gained two rungs ahead of the listed-string prefix/contains rungs: `curated` (`lexicons/condition_synonyms.yaml`, folded surface → MeSH id, 99 descriptors verified against the snapshot) and a stronger `tokens` rung (order-insensitive, cancer/carcinoma/neoplasm/tumor folded to one token, stage qualifiers such as "advanced"/"metastatic"/"stage IV" dropped from the query). Both are deterministic lookups, never fuzzy. The file is read only by the resolver — the persisted condition keyspace (§5.3) is untouched; when the MeSH key wins by synonym and the same surface also exists as a listed-only key, that key is returned as a second candidate with a note that the two are never summed. `Candidate.match` gained the value `curated`. Motivation: live-eval G05/G06/G12 — "NSCLC" resolved to the listed-only key `nsclc` (wrong keyspace) and "non-small cell lung cancer" never returned D002289.
 - Mechanism waterfall (§6) gained a `curated` tier between `chembl` and `nlm_class`: `lexicons/curated_moa.yaml`, hand-written, cited, gene-level labels for pipeline assets ChEMBL/NLM lack (IPF integrin/LPA1/PDE4B agents, the KRAS G12C class, GA complement agents, MM bispecifics/CAR-Ts). Resolved by alias at load; never overwrites a higher tier.
 - Asset identity (§5.1) gained `lexicons/asset_synonyms.yaml`: curated INN ⟷ code ⟷ brand groups united before the otherNames pass and exempt from the ≥2-trial merge rule, so small fixtures keep BI 1015550 = nerandomilast. Members absent from the registry become aliases with source `curated`; registry evidence (name / other_name) always wins the provenance label.
 - otherNames on an intervention listing ≥4 of them: an otherName no other trial asserts attaches only when code-shaped or token-related to the intervention name (pasted product lists such as canakinumab → [Ultralente, Velosulin, Tolinase, Tolazamise]); counted as `single_trial_on_long_list`.

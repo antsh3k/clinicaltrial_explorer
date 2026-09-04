@@ -1,7 +1,12 @@
 """The agent's three read-only tools as plain functions over a sandboxed DuckDB connection (spec §7.2).
 
-  resolve_entity — deterministic ladder (exact → alias → prefix → contains), NEVER fuzzy; kind=moa folds the
-                   query through the App. B.7 mechanism key server-side; kind=condition prefers the MeSH key.
+  resolve_entity — deterministic ladder (curated → exact → alias → tokens → prefix → contains), NEVER fuzzy; kind=moa
+                   folds the query through the App. B.7 mechanism key server-side; kind=condition prefers the MeSH
+                   key: a curated synonym file (NSCLC, RCC, IPF, "prostate cancer" …) and an order-insensitive token
+                   rung that folds cancer/carcinoma/neoplasm/tumor to one token and strips stage qualifiers
+                   ("advanced", "metastatic", "stage III") both reach the MeSH leaf before any listed-string rung.
+                   When a MeSH key wins and the same surface also exists as a listed-only key, the note names it —
+                   the two keyspaces are never summed (§5.3).
   run_sql        — four-layer sandbox: read-only connection + external access off + memory/time limits +
                    single SELECT/WITH statement after comment stripping. Rows capped at 200 for the model; ALL
                    NCT ids and entity ids in the full result are handed to the harness for the gate.
@@ -11,6 +16,7 @@ agent.py wraps these as @agent.tool functions; api/ exposes them to the UI throu
 
 from __future__ import annotations
 
+import functools
 import re
 import time
 from dataclasses import dataclass, field
@@ -23,6 +29,7 @@ from ct_landscape.db import connect_sandboxed
 from ct_landscape.normalize.companies import _basic_norm, company_key
 from ct_landscape.normalize.conditions import MESH_ID, fold
 from ct_landscape.normalize.drug_names import route
+from ct_landscape.normalize.lexicons import load as load_lexicon
 from ct_landscape.normalize.mechanism_key import mechanism_key
 
 Kind = Literal["drug", "condition", "company", "moa", "population", "auto"]
@@ -31,6 +38,57 @@ ROW_CAP = 200
 LIST_HEAD = 10
 STATEMENT_TIMEOUT_S = 20.0
 NCT_RE = re.compile(r"^NCT\d{8}$")
+
+# ---------------------------------------------------------------- condition matching helpers (resolver only)
+
+# The same fold must run on the query (Python) and on v_conditions.display_name (SQL) — keep the two in step.
+_COND_STOPWORDS = ("the", "of", "and", "with", "due", "to", "a", "an", "in", "for", "or")
+_COND_SYN_RE = r"\b(cancers?|carcinomas?|neoplasms?|tumou?rs?|malignanc(?:y|ies))\b"
+_COND_SYN_PY = re.compile(_COND_SYN_RE)
+# Stage / setting / population qualifiers a landscape question adds that a MeSH descriptor never carries.
+# Query side only. "chronic"/"acute"/"primary" are NOT here: they are part of descriptor names (CLL, AML, PMF).
+_COND_QUALIFIERS = frozenset(
+    """advanced metastatic recurrent relapsed refractory relapsing early late locally unresectable resectable
+       newly diagnosed stage ii iii iv iiia iiib iva ivb previously treated untreated pretreated patients adult adults
+       pediatric paediatric children elderly first second third line naive extensive limited""".split()
+)
+# SQL twin of condition_tokens() for the display-name side (no qualifier strip: descriptors carry none).
+_COND_TOKENS_SQL = (
+    "list_sort(list_filter(regexp_split_to_array(trim(regexp_replace(regexp_replace(lower(display_name), "
+    f"'[^a-z0-9]+', ' ', 'g'), '{_COND_SYN_RE}', 'neoplasm', 'g')), ' '), "
+    f"x -> x <> '' AND x NOT IN {_COND_STOPWORDS}))"
+)
+
+
+def strip_condition_qualifiers(folded: str) -> str:
+    """Drop stage / setting qualifier tokens from an already-folded surface, order preserved."""
+    return " ".join(t for t in folded.split(" ") if t and t not in _COND_QUALIFIERS)
+
+
+def condition_tokens(query: str, *, strip_qualifiers: bool = True) -> list[str]:
+    """Order-insensitive token key for a condition surface: fold → cancer/carcinoma/neoplasm/tumor → 'neoplasm'
+    → drop stage qualifiers → sorted. Empty when nothing but qualifiers remains."""
+    s = _COND_SYN_PY.sub("neoplasm", fold(query))
+    toks = [t for t in s.split(" ") if t and t not in _COND_STOPWORDS]
+    if strip_qualifiers:
+        toks = [t for t in toks if t not in _COND_QUALIFIERS]
+    return sorted(toks)
+
+
+@functools.cache
+def condition_synonyms() -> dict[str, tuple[str, str]]:
+    """folded surface → (mesh_id, descriptor term) from lexicons/condition_synonyms.yaml. Loaded once per process."""
+    out: dict[str, tuple[str, str]] = {}
+    for entry in load_lexicon("condition_synonyms")["synonyms"]:
+        for surface in entry["surfaces"]:
+            key = fold(str(surface))
+            if key in out and out[key][0] != entry["mesh_id"]:
+                raise ValueError(
+                    f"condition_synonyms: {surface!r} maps to both {out[key][0]} and {entry['mesh_id']}"
+                )
+            out[key] = (entry["mesh_id"], entry["term"])
+    return out
+
 
 # ---------------------------------------------------------------- connections
 
@@ -49,7 +107,7 @@ class Candidate(BaseModel):
     canonical_name: str
     n_trials: int
     matched_alias: str
-    match: Literal["exact", "alias", "tokens", "prefix", "contains"]
+    match: Literal["curated", "exact", "alias", "tokens", "prefix", "contains"]
 
 
 class ResolveResult(BaseModel):
@@ -75,10 +133,15 @@ _RESOLVERS: dict[str, dict[str, str]] = {
                        WHERE al.alias_key LIKE '%' || ? || '%' ORDER BY v.n_trials DESC LIMIT 10""",
     },
     "condition": {
+        # curated: the synonym file hands us a MeSH id; probe it by key (the same statement as exact)
+        "curated": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
+                      WHERE condition_key = ? OR lower(display_name) = ? ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
         "exact": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
                     WHERE condition_key = ? OR lower(display_name) = ? ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
-        "tokens": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
-                     WHERE list_sort(regexp_split_to_array(trim(regexp_replace(lower(display_name), '[^a-z0-9]+', ' ', 'g')), ' ')) = ?
+        # tokens: order-insensitive, cancer/carcinoma/neoplasm/tumor folded, stopwords dropped on BOTH sides
+        # (_COND_TOKENS_SQL is the SQL twin of condition_tokens()); the query side also drops stage qualifiers
+        "tokens": f"""SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
+                     WHERE {_COND_TOKENS_SQL} = ?
                      ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
         "prefix": """SELECT condition_key, display_name, n_trials, display_name, source FROM v_conditions
                      WHERE lower(display_name) LIKE ? || '%' ORDER BY (source = 'mesh_leaf') DESC, n_trials DESC LIMIT 10""",
@@ -130,10 +193,12 @@ def _keys_for(kind: str, query: str) -> dict[str, tuple]:
     if kind == "condition":
         f = fold(q)
         key = q.upper() if MESH_ID.match(q) else f
-        toks = sorted(t for t in re.sub(r"[^a-z0-9]+", " ", q.lower()).split(" ") if t)
+        stripped = strip_condition_qualifiers(f)  # "metastatic nsclc" → "nsclc" still hits the synonym file
+        curated = condition_synonyms().get(f) or condition_synonyms().get(stripped)
         return {
+            "curated": (curated[0], curated[0].lower()) if curated else ("",),
             "exact": (key, q.lower()),
-            "tokens": (toks,),
+            "tokens": (condition_tokens(q),),
             "prefix": (q.lower(),),
             "contains": (q.lower(),),
         }
@@ -148,13 +213,39 @@ def _keys_for(kind: str, query: str) -> dict[str, tuple]:
     raise ValueError(kind)
 
 
+def _listed_sibling(con: duckdb.DuckDBPyConnection, query: str, taken: set[str]) -> Candidate | None:
+    """The listed-only key the query (or its qualifier-stripped form) folds to exactly, if any."""
+    f = fold(query)
+    rows: list = []
+    for surface in dict.fromkeys([f, strip_condition_qualifiers(f)]):
+        if surface:
+            rows += con.execute(_RESOLVERS["condition"]["exact"], [surface, surface]).fetchall()
+    for rid, name, n, alias_raw, source in rows:
+        if source == "listed" and rid not in taken:
+            return Candidate(
+                id=rid,
+                kind="condition",
+                canonical_name=name or rid,
+                n_trials=int(n or 0),
+                matched_alias=str(alias_raw or ""),
+                match="exact",
+            )
+    return None
+
+
+_RUNG_RANK = {"curated": 0, "exact": 1, "alias": 1, "tokens": 2, "prefix": 3, "contains": 4}
+_DECISIVE_RUNGS = ("curated", "exact", "alias", "tokens")  # a hit here ends the ladder for that kind
+
+
 def resolve(con: duckdb.DuckDBPyConnection, query: str, kind: Kind = "auto") -> ResolveResult:
     kinds = list(ENTITY_KINDS) if kind == "auto" else [kind]
     found: list[Candidate] = []
     for k in kinds:
         params = _keys_for(k, query)
-        for rung in ("exact", "alias", "tokens", "prefix", "contains"):
+        for rung in ("curated", "exact", "alias", "tokens", "prefix", "contains"):
             sql_rung = "exact" if rung == "alias" else rung
+            if rung == "curated" and k != "condition":
+                continue  # curated synonym file → MeSH id (conditions only; drugs/companies fold theirs at build time)
             if rung == "alias" and k != "drug":
                 continue  # 'alias' is the exact rung reached through a non-canonical surface (drugs only)
             if rung == "tokens" and k != "condition":
@@ -179,11 +270,11 @@ def resolve(con: duckdb.DuckDBPyConnection, query: str, kind: Kind = "auto") -> 
                             match=match,
                         )
                     )
-            if found and rung in ("exact", "alias", "tokens"):
+            if found and rung in _DECISIVE_RUNGS:
                 break
         if found and kind != "auto":
             break
-    found.sort(key=lambda c: (-c.n_trials, c.id))
+    found.sort(key=lambda c: (_RUNG_RANK[c.match], -c.n_trials, c.id))
     nearest: list[str] = []
     if not found:
         for k in kinds:
@@ -195,6 +286,18 @@ def resolve(con: duckdb.DuckDBPyConnection, query: str, kind: Kind = "auto") -> 
     note = ""
     if kind == "condition" and found and found[0].id and not MESH_ID.match(found[0].id):
         note = "listed-only condition (no MeSH key); queries must stay in the listed keyspace"
+    elif kind == "condition" and found and found[0].match in ("curated", "tokens"):
+        # The MeSH leaf won through a synonym/token fold. If the SAME surface also lives on as a listed-only key
+        # (trials that typed "NSCLC" without the MeSH leaf), surface it as a sibling: one keyspace per query (§5.3).
+        sibling = _listed_sibling(con, query, {c.id for c in found})
+        if sibling:
+            found.append(sibling)
+            note = (
+                f"MeSH key {found[0].id} ({found[0].canonical_name}) is the definition of record for {query!r}. "
+                f"A listed-only key {sibling.id!r} ({sibling.n_trials} trials that carry no MeSH leaf) also exists: "
+                "never sum the two keyspaces; query the MeSH key and, if completeness matters, mention the listed-only "
+                "remainder as a caveat."
+            )
     return ResolveResult(
         query=query,
         kind=kind,

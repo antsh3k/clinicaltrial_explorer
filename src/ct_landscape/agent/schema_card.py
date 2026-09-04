@@ -56,8 +56,11 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
 - "Currently"/"in development" = program_exists (ongoing/planned, or COMPLETED within 3 years of the snapshot).
   "Recruiting/enrolling" = is_active_readout. UNKNOWN status is neither active nor inactive (counts toward max_phase_ever only).
 - Conditions: condition_key is EITHER a MeSH id (D…) OR a folded listed string — one keyspace per query, never sum both.
-  resolve_entity returns the MeSH key when one exists. MeSH ANCESTORS are recall surfaces — never use them in precise
-  counting joins. A child condition ("juvenile X") is never rewritten to its parent; state rollup behaviour explicitly.
+  resolve_entity returns the MeSH key when one exists (abbreviations such as NSCLC / RCC / IPF and lay phrasings such as
+  "lung cancer" or "advanced NSCLC" resolve to it; match='curated' or 'tokens'). Its note names any listed-only sibling
+  key ("nsclc": trials that carry no MeSH leaf) — query the MeSH key, mention the sibling as a caveat, never add the two.
+  Never probe v_conditions / trial_conditions_norm with ILIKE to find a key the resolver already returned.
+  MeSH ANCESTORS are recall surfaces — never use them in precise counting joins. A child condition ("juvenile X") is never rewritten to its parent; state rollup behaviour explicitly.
 - Companies: lead sponsor by default; collaborators only if asked; sponsor ≠ owner. Q3 default = industry lead sponsors
   ranked by n_active_trials, total n_trials as tiebreak — state the scope and the metric in the answer.
 - MoA: use the highest provenance tier present; MoA/target answers MUST state their own completeness computed by SQL:
