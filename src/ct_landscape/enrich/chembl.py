@@ -60,7 +60,7 @@ def _get(client: httpx.Client, path: str, params: dict[str, Any], retries: int =
                 raise httpx.HTTPStatusError("retryable", request=r.request, response=r)
             r.raise_for_status()
             return r.json()
-        except (httpx.HTTPError, json.JSONDecodeError):
+        except httpx.HTTPError, json.JSONDecodeError:
             if attempt == retries - 1:
                 raise
             time.sleep(2**attempt)

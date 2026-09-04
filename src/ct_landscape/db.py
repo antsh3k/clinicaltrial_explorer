@@ -210,6 +210,6 @@ def read_meta(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
     for k, v in con.execute("SELECT key, value FROM build_meta").fetchall():
         try:
             out[k] = json.loads(v)
-        except (json.JSONDecodeError, TypeError):
+        except json.JSONDecodeError, TypeError:
             out[k] = v
     return out

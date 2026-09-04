@@ -12,11 +12,11 @@ Brief: `argon-brief.md` · Design specification: `ct-landscape-agent-design.md` 
 
 ## Getting started
 
-Everything runs locally from one checkout: a `uv`-managed Python 3.12 environment, one DuckDB file, one FastAPI process. There are two ways to get an index — the shipped demo slice (one minute, no download) or the full ClinicalTrials.gov corpus (one 2.7 GB download, about ten minutes of build) — and the app is identical on either.
+Everything runs locally from one checkout: a `uv`-managed Python 3.14 environment, one DuckDB file, one FastAPI process. There are two ways to get an index — the shipped demo slice (one minute, no download) or the full ClinicalTrials.gov corpus (one 2.7 GB download, about ten minutes of build) — and the app is identical on either.
 
 ### Prerequisites
 
-- macOS or Linux, `git`, and [`uv`](https://docs.astral.sh/uv/) (it installs Python 3.12 for you if needed):
+- macOS or Linux, `git`, and [`uv`](https://docs.astral.sh/uv/) (it installs Python 3.14 for you if needed):
   ```bash
   curl -LsSf https://astral.sh/uv/install.sh | sh
   ```
@@ -27,7 +27,7 @@ Everything runs locally from one checkout: a `uv`-managed Python 3.12 environmen
 
 ```bash
 git clone <this repository> ct-landscape && cd ct-landscape
-uv sync                       # creates .venv with Python 3.12 and every dependency; nothing is installed globally
+uv sync                       # creates .venv with Python 3.14 and every dependency; nothing is installed globally
 uv run pytest                 # optional, ~2 min: ~350 offline tests (no network, no LLM) — confirms the environment
 ```
 

@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-uv sync                          # create/refresh .venv (Python 3.12 pinned in .python-version)
+uv sync                          # create/refresh .venv (Python 3.14 pinned in .python-version)
 uv run pytest                    # full offline test suite (never hits network or an LLM)
 uv run pytest tests/test_x.py -k name   # one test
 uv run ruff check . && uv run ruff format .

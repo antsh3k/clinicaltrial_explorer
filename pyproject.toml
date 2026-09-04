@@ -3,7 +3,7 @@ name = "ct-landscape"
 version = "0.1.0"
 description = "ClinicalTrials.gov landscape-question agent: one DuckDB index, a small tool-using agent, a verified and traceable chat UI."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 dependencies = [
     "duckdb>=1.1",
     "pydantic>=2.8",
@@ -39,7 +39,7 @@ addopts = "-q"
 
 [tool.ruff]
 line-length = 110
-target-version = "py312"
+target-version = "py314"
 src = ["src", "tests"]
 extend-exclude = ["*.md"]
 
