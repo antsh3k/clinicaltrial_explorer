@@ -238,3 +238,36 @@ def test_answer_surfaces_are_alias_tolerant():
     }
     assert answer_nct_surface(a) == {"NCT02142738", "NCT02853331"}  # malformed id excluded
     assert {"pembrolizumab", "lenvatinib"} <= answer_entity_surface(a)
+
+
+def test_gold_ncts_absent_from_the_index_do_not_count_against_recall(db_path, tmp_path):
+    """Gold NCT sets are frozen against the full dump; on a fixture index only the trials it contains are scorable."""
+    some_nct = (
+        duckdb.connect(db_path, read_only=True).execute("SELECT nct_id FROM studies LIMIT 1").fetchone()[0]
+    )
+    gold = Gold.model_validate(
+        {
+            "metadata": {"source": "synthetic", "as_of": "2026-09-04", "n_cases": 1},
+            "cases": [
+                {
+                    "id": "M04",
+                    "archetype": "Q5",
+                    "question": "an nct-set probe",
+                    "check": "nct_set",
+                    "expected": {"ncts": [some_nct, "NCT99999999"]},
+                    "adjudicated": True,
+                }
+            ],
+        }
+    )
+    report = run_eval(
+        gold=gold,
+        db_path=db_path,
+        model=_model(),
+        mode="live",
+        out_dir=tmp_path / "r",
+        log=open("/dev/null", "w"),
+    )
+    assert report["gold_ncts_absent_from_db"] == {"M04": 1}
+    metrics = {r["metric"]: r for r in report["results"]}
+    assert metrics["nct_set_recall"]["denominator"] == 1  # the phantom NCT is not in the pooled gold

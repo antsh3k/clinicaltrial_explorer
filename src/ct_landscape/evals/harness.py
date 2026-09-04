@@ -307,6 +307,9 @@ def run_eval(
     out_dir = out_dir or (RUNS_EVALS / f"{mode}-{stamp}")
     out_dir.mkdir(parents=True, exist_ok=True)
     con = T.open_sandboxed(db_path)
+    # gold NCTs are frozen against the full dump; score recall only over trials the index under evaluation contains
+    db_ncts = {r[0] for r in con.execute("SELECT nct_id FROM studies").fetchall()}
+    gold_ncts_absent: dict[str, int] = {}
     results: list[CheckResult] = []
     outcomes: dict[str, dict[str, Any]] = {}
     entity_pool, nct_pool = Pooled(), Pooled()
@@ -358,9 +361,10 @@ def run_eval(
                     frozenset(_norm(e) for e in case.expected.entities),
                 )
             else:
-                nct_pool.add(
-                    case.id, frozenset(answer_nct_surface(oc["answer"])), frozenset(case.expected.ncts)
-                )
+                present = frozenset(n for n in case.expected.ncts if n in db_ncts)
+                if len(present) < len(case.expected.ncts):
+                    gold_ncts_absent[case.id] = len(case.expected.ncts) - len(present)
+                nct_pool.add(case.id, frozenset(answer_nct_surface(oc["answer"])), present)
         # persist per-case record (replay fixture)
         rec_out = {k: v for k, v in oc.items() if k != "messages"}
         if oc.get("messages") is not None:
@@ -448,6 +452,7 @@ def run_eval(
         "mode": mode,
         "stamp": stamp,
         "db": db_path,
+        "gold_ncts_absent_from_db": gold_ncts_absent,
         "n_cases": len(outcomes),
         "passed": rollup.passed,
         "obj_score": round(rollup.obj_score, 4),

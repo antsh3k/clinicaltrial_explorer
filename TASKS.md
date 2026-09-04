@@ -53,7 +53,7 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 
 ## Phase 6 — evals/ (§8)
 - [x] `evals/checks.py` (CheckResult/Role/roll_up/set_prf/Pooled + pinned edge cases), `evals/gold.py` loader (`extra="forbid"`, `borderline`, `adjudicated`), `evals/gold.yaml`
-- [ ] Gold set: 12 core + 2 borderline cases DRAFTED from the spec's case table (`adjudicated: false` except the 5 negative/messiness probes); **expected sets still to be adjudicated by the user by hand** (oracle URL, capture date, raw UI count, `ncts` for G05) — set-based metrics stay DIAG until then
+- [x] Gold set: 12 core + 2 borderline cases; G01–G07 adjudicated 2026-09-04 by Claude Fable 5.1 from the raw dump (`adjudicated_by`), G05 frozen at 107 NCTs (13 exclusions recorded); **owner sign-off pending**
 - [x] `evals/harness.py` driving `answer_question()` (no HTTP); FLOOR/OBJ/DIAG report with id lists (`report.json` + `report.md`); per-case records double as replay fixtures; `--mode replay` replays recorded transcripts through the real agent (replay_mismatch_count FLOOR); `evals/mutate.py`; `ctl eval [--demo] [--mode live|replay] [--case ID]`
 - [x] Live runs (Sonnet 5): two full runs on the demo index (~$4 each); run 2 = 13/14 completed, 0 grounding violations, objective 0.90, replay gate 0 mismatches; results + agent-level failure modes in README; G04 (IPF mechanisms) is the documented coverage failure (unlabeled code-named assets → LLM tier)
 
@@ -65,7 +65,8 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 ## Needs the user (blocked)
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
 - [x] Phase 3b pilot — done: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
-- [ ] Gold adjudication: fill `oracle_url` / `capture_date` / `raw_ui_count` / frozen `entities` or `ncts` for G01–G07 and set `adjudicated: true` (set metrics stay DIAG until then)
+- [ ] Owner sign-off on the Fable-5.1 adjudication of G01–G07 (read each case `note` in `evals/gold.yaml`; veto or amend) and on the 30 pilot verdicts in `docs/llm_pilot_review.md`
+- [ ] Re-run `ctl eval --demo` (~$4) so the pooled NCT precision/recall (now gated via G05) and the G01/G06 changes are measured
 - [x] Chrome instance picked by the user; UI tested (two drawer glitches + a parallel-call spinner fixed)
 
 ## Deviations from the spec

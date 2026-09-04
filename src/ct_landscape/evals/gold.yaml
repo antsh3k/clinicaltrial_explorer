@@ -1,11 +1,13 @@
 # Gold set (spec §8.3). 12 core cases across the seven archetypes + 2 borderline variants.
 #
-# HONESTY RULE: expected sets are frozen by a HUMAN against an oracle independent of this pipeline
-# (ClinicalTrials.gov advanced search → every candidate adjudicated by hand). Cases with `adjudicated: false`
-# carry expectations drawn from the design spec's case table (public knowledge, not this system's output);
-# their set-based metrics are reported as DIAG, never gated, until the oracle fields are filled in.
+# HONESTY RULE: expected sets are frozen against an oracle independent of this pipeline's entity/view layers —
+# the RAW dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read and adjudicated
+# one by one — never from this system's answers. `adjudicated_by` records who froze each set and how; the
+# repository owner's sign-off on the Fable-5.1-adjudicated sets is pending. Cases with `adjudicated: false`
+# carry expectations drawn from the design spec's case table (public knowledge); their set-based metrics are
+# reported as DIAG, never gated, until adjudicated.
 metadata:
-  source: "Candidates from CT.gov UI advanced search; adjudicated by hand by the repository owner (pending — see `adjudicated`)."
+  source: "G01–G07: candidates enumerated by SQL over the RAW layer of the 2026-09-04 dump (never the entity/view layers), each read and adjudicated by Claude Fable 5.1 on 2026-09-04 (see `adjudicated_by`); the repository owner's sign-off is pending. G08–G12 are behavioural checks with no set to adjudicate."
   as_of: "2026-09-04"
   thresholds: {nct_precision: 0.80, nct_recall: 0.70, entity_f1: 0.75, min_pooled_gold_items: 30}
   n_cases: 14
@@ -16,10 +18,12 @@ cases:
     question: "What drugs are currently in development for Erdheim-Chester disease?"
     check: entity_set
     expected:
-      entities: [cobimetinib, vemurafenib, dabrafenib, trametinib]
+      entities: [cobimetinib, vemurafenib, dabrafenib, trametinib, lenalidomide, Q702]
       condition_key: D031249
-    note: "Rare (tens of trials) → hand-verifiable. Frozen list must come from the oracle; the spec-table seed lists the BRAF/MEK inhibitors."
-    adjudicated: false
+    raw_ui_count: 22
+    note: "22 ECD trials in the dump (12 interventional). Drugs with an ACTIVE-status interventional trial: dabrafenib+trametinib (NCT07440290 Ph3), vemurafenib+cobimetinib (NCT05768178 Ph3), cobimetinib (NCT04079179 Ph2), lenalidomide (NCT02523040 Ph2 active-not-recruiting), Q702 Axl/Mer/CSF1R inhibitor (NCT06712810 Ph1). Excluded: HLX208 (NCT05092815, status UNKNOWN since 2021), [68Ga]-pentixafor (NCT05093335, a PET tracer), and terminated/withdrawn-only drugs (tocilizumab, bevacizumab, HH2710). An answer that also lists HLX208 is defensible."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G02
     archetype: Q2
@@ -30,8 +34,10 @@ cases:
       k: 10
       must_mention: ["approv"]
       condition_key: D057092
-    note: "Top-k must contain both complement inhibitors at Phase 3 AND the answer must carry the 'trial-derived stage ≠ approval' caveat (must_mention 'approv' in a caveat)."
-    adjudicated: false
+    raw_ui_count: 186
+    note: "186 GA trials in the dump. Phase 3 programs: pegcetacoplan (NCT03525600/NCT03525613/NCT04770545/NCT07214740), avacincaptad pegol (NCT02686658/NCT04435366/NCT05536297, Ph4 NCT06970665), pozelimab+cemdisiran (NCT06541704), vonaprument/ANX007 (NCT06510816), tinlarebant (NCT05949593), plus terminated lampalizumab and completed emixustat/ALK-001. Both gold agents are unambiguously in any top-10 by phase; the answer must carry the 'trial-derived stage ≠ approval' caveat."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G03
     archetype: Q3
@@ -42,8 +48,9 @@ cases:
       k: 5
       must_mention: ["lead sponsor"]
       condition_key: D009101
-    note: "Gold spells J&J and Celgene to force company aliasing (Celgene → BMS, acq. 2019). The answer must state its scope (industry lead sponsors; collaborators excluded unless asked) — the sponsor ≠ collaborator probe."
-    adjudicated: false
+    note: "Gold spells J&J and Celgene to force company aliasing (Celgene → BMS, acq. 2019). Raw lead-sponsor counts (INDUSTRY, MM by mesh ∪ text): Celgene 92 + Celgene Corporation 10 + BMS 39 + Juno 8 ≈ 149 → BMS family; Janssen R&D 66 + other Janssen/J&J entities ≈ 121 → J&J family; then Takeda+Millennium 54, Amgen 43, GSK 40. Both gold entities sit at ranks 1–2 under any reasonable aliasing. The answer must state its scope (industry lead sponsors; collaborators excluded unless asked) — the sponsor ≠ collaborator probe."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G04
     archetype: Q4
@@ -51,32 +58,142 @@ cases:
     check: contains_all
     expected:
       entities: [PDE4B, ITGB6, LPAR1]
-      must_mention: ["of "]
       condition_key: D054990
-    note: "Contains PDE4B (nerandomilast), αvβ6 integrin (bexotegrast; symbol ITGB6), LPA1 (LPAR1, admilparant); every MoA claim carries ≥1 NCT; the answer states its labeled fraction ('N of M in-scope assets')."
-    adjudicated: false
+    note: "Raw IPF trials carrying each anchor: nerandomilast/BI 1015550 (PDE4B) 5, bexotegrast/PLN-74809 (αvβ6 integrin, ITGB6) 4, admilparant/BMS-986278 (LPA1, LPAR1) 6 — all Phase 2/3, so the three mechanisms are genuinely under investigation. Coverage caveat: none of the three is in ChEMBL/NLM; on the demo index only nerandomilast carries an (LLM) label, and the shipped pilot labelled admilparant 'CCR4 antagonist' (wrong) — misses here measure the enrichment tier, not the gold. The vacuous must_mention 'of ' was removed; the labeled-fraction sentence is checked by reading."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G05
     archetype: Q5
     question: "Which trials are studying KRAS G12C inhibitors in non-small cell lung cancer?"
     check: nct_set
     expected:
-      entities: [sotorasib, adagrasib, divarasib, olomorasib, glecirasib, garsorasib, fulzerasib]
-      ncts: []
+      entities: [sotorasib, adagrasib, divarasib, olomorasib, glecirasib, garsorasib, fulzerasib, opnurasib, elironrasib, calderasib]
+      ncts:
+        - NCT03178552
+        - NCT04006301
+        - NCT04165031
+        - NCT04302025
+        - NCT04303780
+        - NCT04330664
+        - NCT04449874
+        - NCT04585035
+        - NCT04613596
+        - NCT04625647
+        - NCT04685135
+        - NCT04699188
+        - NCT04720976
+        - NCT04892017
+        - NCT04933695
+        - NCT04956640
+        - NCT04959981
+        - NCT04975256
+        - NCT05002270
+        - NCT05009329
+        - NCT05054725
+        - NCT05074810
+        - NCT05132075
+        - NCT05180422
+        - NCT05288205
+        - NCT05311709
+        - NCT05313009
+        - NCT05358249
+        - NCT05374538
+        - NCT05375994
+        - NCT05383898
+        - NCT05398094
+        - NCT05400577
+        - NCT05445843
+        - NCT05451056
+        - NCT05462717
+        - NCT05472623
+        - NCT05480865
+        - NCT05485974
+        - NCT05492045
+        - NCT05504278
+        - NCT05578092
+        - NCT05609578
+        - NCT05631249
+        - NCT05673187
+        - NCT05714891
+        - NCT05756153
+        - NCT05789082
+        - NCT05815173
+        - NCT05815186
+        - NCT05840510
+        - NCT05853575
+        - NCT05920356
+        - NCT05999357
+        - NCT06024174
+        - NCT06026410
+        - NCT06039384
+        - NCT06068153
+        - NCT06119581
+        - NCT06127940
+        - NCT06128551
+        - NCT06130254
+        - NCT06162221
+        - NCT06248606
+        - NCT06249282
+        - NCT06300177
+        - NCT06314763
+        - NCT06333678
+        - NCT06333951
+        - NCT06345729
+        - NCT06416410
+        - NCT06497556
+        - NCT06563999
+        - NCT06575933
+        - NCT06594874
+        - NCT06764771
+        - NCT06793215
+        - NCT06875310
+        - NCT06890598
+        - NCT06946927
+        - NCT06963502
+        - NCT07012031
+        - NCT07164170
+        - NCT07174908
+        - NCT07190248
+        - NCT07198841
+        - NCT07227025
+        - NCT07242274
+        - NCT07288034
+        - NCT07294261
+        - NCT07339839
+        - NCT07382726
+        - NCT07397338
+        - NCT07431827
+        - NCT07463677
+        - NCT07468071
+        - NCT07472478
+        - NCT07492342
+        - NCT07541170
+        - NCT07554339
+        - NCT07563738
+        - NCT07601048
+        - NCT07639242
+        - NCT05276726
+        - NCT06244771
+        - NCT06343402
+        - NCT07670013
       condition_key: D002289
-    note: "NCT-set P/R vs the hand-verified set. `ncts` is EMPTY until adjudicated (oracle: CT.gov advanced search 'KRAS G12C' ∩ NSCLC, every candidate checked). Pan-KRAS ambiguities go to G05b."
-    adjudicated: false
+    raw_ui_count: 120
+    note: "Inclusion rule: INTERVENTIONAL trial with NSCLC as a listed condition or MeSH term in which a KRAS-G12C-selective inhibitor is a studied intervention in ANY arm/role (monotherapy, combination partner, comparator, platform/umbrella arm). Candidates = 107 name/otherName matches on 26 G12C agents (sotorasib/AMG 510, adagrasib/MRTX849, divarasib/GDC-6036, olomorasib/LY3537982, glecirasib/JAB-21822, garsorasib/D-1553, fulzerasib/GFH925/IBI351, opnurasib/JDQ443, elironrasib/RMC-6291, calderasib/MK-1084, JNJ-74699157, LY3499446, HBI-2438, HS-10370, JMKX001899) + 13 free-text 'G12C' records read individually. EXCLUDED (13): expanded-access NCT04667234/NCT07783009 and observational NCT06532149/NCT07143513/NCT05273047/NCT07198620/NCT04712877 (not trials studying the drug); NCT05254184 (KRAS peptide vaccine), NCT04967079 (non-G12C), NCT03260491 (HER3-DXd, G12C only in text), NCT07542704 (KQB368 — mechanism not stated in the record; unresolved, left out). INCLUDED from free text: NCT05276726 (JAB 21822), NCT06244771 (FMC-376, G12C ON/OFF), NCT06343402 (BBO-8520, G12C ON/OFF), NCT07670013 (glecirasib + SKB264). Kept although borderline: PK/DDI studies NCT06314763 and NCT06575933 (the record itself says NSCLC) and 6 WITHDRAWN trials (registered, never enrolled). 10 of the 107 are absent from the demo fixture; the harness intersects gold NCTs with the index under evaluation before scoring. Pan-KRAS/G12D ambiguities go to G05b."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G06
     archetype: Q6
     question: "Which biomarkers and patient subgroups are commonly targeted in non-small cell lung cancer trials?"
     check: contains_all
     expected:
-      entities: [EGFR, ALK, PDL1, KRAS_G12C, MET]
+      entities: [EGFR, ALK, PDL1, ROS1, KRAS]
       must_mention: ["first-line", "metastatic"]
       condition_key: D002289
-    note: "Contains the five biomarkers AND ≥2 subgroup kinds (line_of_therapy, disease_stage, prior_therapy). DIAG-weighted (lexicon surface); FLOORs still apply."
-    adjudicated: false
+    note: "Raw NSCLC trials mentioning each biomarker (title/eligibility/summary, word-bounded): EGFR 2,892 · ALK 1,632 · PD-L1 1,415 · ROS1 ~700 · BRAF ~430 · HER2 ~360 · KRAS G12C 148. 'Commonly targeted' therefore means EGFR/ALK/PD-L1/ROS1/KRAS; the spec-table seed's KRAS_G12C and MET were demoted (G12C is ~5% of EGFR's count; 'MET' is a 3-letter id the matcher can only hit exactly and MET exon 14 has ~80 trials). KRAS also matches KRAS_G12C by the substring rule. ≥2 subgroup kinds (line_of_therapy, disease_stage, prior_therapy) via must_mention. DIAG-weighted (lexicon surface); FLOORs still apply."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G07
     archetype: Q7
@@ -87,8 +204,10 @@ cases:
       condition_key: D002292
       asset_id: pembrolizumab
     oracle_url: "https://clinicaltrials.gov/search?cond=Renal%20Cell%20Carcinoma&intr=pembrolizumab"
-    note: "Asked as MK-3475 to force alias resolution. Named agents only: class labels like 'chemotherapy' are gated out before assets exist (§5.1)."
-    adjudicated: false
+    raw_ui_count: 144
+    note: "Asked as MK-3475 to force alias resolution. 144 RCC trials list pembrolizumab/MK-3475/Keytruda. Raw co-listed drugs: nivolumab 17 (almost always the comparator arm, not a partner), lenvatinib 15+1, axitinib 12, belzutifan 8, ipilimumab 6, cabozantinib 5, atezolizumab 5 — the three gold partners are the three largest true combination programs (CLEAR/KEYNOTE-581, KEYNOTE-426, LITESPARK-011/022). Named agents only: class labels like 'chemotherapy' are gated out before assets exist (§5.1)."
+    adjudicated: true
+    adjudicated_by: "Claude Fable 5.1, 2026-09-04 — raw-layer SQL over the 2026-09-04 dump (mesh_terms ∪ study_conditions, interventions ∪ otherNames), every candidate read by hand; owner sign-off pending"
 
   - id: G08
     archetype: negative

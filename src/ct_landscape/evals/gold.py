@@ -49,8 +49,9 @@ class GoldCase(_M):
     capture_date: str | None = None
     raw_ui_count: int | None = None
     adjudicated: bool = (
-        False  # expected sets frozen by a human against the oracle; unadjudicated set cases are DIAG only
+        False  # expected sets frozen against the oracle; unadjudicated set cases are DIAG only
     )
+    adjudicated_by: str | None = None  # who/what froze the set and how (reviewer, date, oracle method)
     borderline: bool = False  # reported, excluded from gates
     note: str = ""
 
