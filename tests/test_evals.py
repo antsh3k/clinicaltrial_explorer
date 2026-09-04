@@ -179,13 +179,13 @@ def _model():
                     ToolCallPart(
                         "run_sql",
                         {
-                            "sql": "SELECT partner_asset_id, count(DISTINCT nct_id) n, list(DISTINCT nct_id) ncts FROM v_combo_partners WHERE asset_id='pembrolizumab' GROUP BY 1 ORDER BY n DESC"
+                            "sql": "SELECT partner_asset_id, count(DISTINCT nct_id) n, list(DISTINCT nct_id) ncts FROM v_combo_partners WHERE asset_id='pembrolizumab' GROUP BY 1 ORDER BY n DESC, partner_asset_id"
                         },
                     )
                 ]
             )
         rows = returns["run_sql"]["result"]["rows"]
-        table_rows = [[r[0], r[1], r[2][0]] for r in rows[:5]]
+        table_rows = [[r[0], r[1], r[2][0]] for r in rows[:10]]  # deterministic order, wide enough for ties
         return ModelResponse(
             parts=[
                 ToolCallPart(
@@ -209,7 +209,9 @@ def test_harness_scores_floors_obj_diag_and_writes_report(db_path, tmp_path):
     gold = Gold.model_validate(MINI_GOLD)
     out = tmp_path / "evalrun"
     report = run_eval(db_path, gold, model=_model(), mode="live", out_dir=out, log=open("/dev/null", "w"))
-    assert report["passed"] is True and report["floor_breaches"] == []
+    assert report["passed"] is True and report["floor_breaches"] == [], [
+        r for r in report["results"] if r["role"] == "FLOOR" and r["value"]
+    ]
     assert report["case_scores"]["M02"] == 1.0  # honest empty
     assert (
         report["case_scores"]["M01"] == 1.0

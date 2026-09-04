@@ -1,0 +1,161 @@
+{
+ "mode": "live",
+ "stamp": "20260904-161228",
+ "db": "data/ctg_demo.duckdb",
+ "n_cases": 1,
+ "passed": true,
+ "obj_score": 0.6667,
+ "floor_breaches": [],
+ "floor_breach_cases": [],
+ "case_scores": {
+  "G04": 0.6667
+ },
+ "results": [
+  {
+   "metric": "ungrounded_citation_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "malformed_nct_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "ungrounded_entity_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04"
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "zero_result_path_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04",
+     "n_sql": 4
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "hard_failure_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "dishonest_empty_count",
+   "value": 0.0,
+   "role": "FLOOR",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "case_score",
+   "value": 0.6667,
+   "role": "OBJ",
+   "section": "case:G04",
+   "detail": [
+    {
+     "case": "G04",
+     "hits": [
+      "ITGB6"
+     ],
+     "prose_hits": [
+      "PDE4B"
+     ],
+     "misses": [
+      "LPAR1"
+     ]
+    }
+   ],
+   "denominator": null
+  },
+  {
+   "metric": "answer_ncts",
+   "value": 8.0,
+   "role": "DIAG",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "answer_entities",
+   "value": 37.0,
+   "role": "DIAG",
+   "section": "case:G04",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "unadjudicated_set_cases",
+   "value": 0.0,
+   "role": "DIAG",
+   "section": "pooled",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "replay_mismatch_count",
+   "value": 0.0,
+   "role": "DIAG",
+   "section": "replay",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "total_input_tokens",
+   "value": 36542.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "total_output_tokens",
+   "value": 4771.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "mean_latency_ms",
+   "value": 44943.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  },
+  {
+   "metric": "pct_answers_touching_2plus_views",
+   "value": 100.0,
+   "role": "DIAG",
+   "section": "usage",
+   "detail": [],
+   "denominator": null
+  }
+ ]
+}
