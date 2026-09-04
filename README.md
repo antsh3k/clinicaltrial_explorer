@@ -146,15 +146,61 @@ The coverage footer in the trace panel is drawn the same way, so an answer's com
 
 ---
 
-### Two more questions from the gold set
+## The brief's seven questions, answered live in the UI
 
-![Q1 in idiopathic pulmonary fibrosis: the answer separates the 102 assets with an active program from the historical ones, then ranks the currently active programs by phase and active-trial count, gate 17/17, with the evidence panel profiling all 284 retrieved IPF trials by phase, status, sponsor and mechanism-label tier](docs/ui-q1-ipf.jpg)
+Each question below is one of the brief's archetypes, asked verbatim in the chat UI with Sonnet 5 on 2026-09-04. Questions 1–5 ran against the **full index** (601,694 studies); questions 6 and 7 ran against the shipped **demo slice** (15,484 studies, every NSCLC and RCC trial included) because the full index was being rebuilt at the time — the page header shows which. For each: what the agent retrieved, what it answered, and how the answer was checked against the definition-of-record views and, where one exists, the adjudicated gold set. Every answer has a permalink; the evidence panel on the right profiles the retrieved trials straight from the index, never from model text.
 
-"What drugs are in development for idiopathic pulmonary fibrosis?" The answer states how many programs exist, how many are currently active, and the phase distribution before ranking, so the reader knows what the table is a slice of. The evidence panel shows that most retrieved trials carry no mechanism label (the head-heavy coverage described in the architecture notes) rather than hiding it.
+### 1 · "What drugs are currently being developed for idiopathic pulmonary fibrosis?"
 
-![Q2 in geographic atrophy: three resolve/SQL steps over v_programs, then a ranked list by highest phase ever reached with the active/total trial split per asset, gate 20/20](docs/ui-q2-ga.jpg)
+![Q1: IPF drugs in development — 7 steps over v_programs, gate 17/17, 25-row table ranked by max active phase, evidence panel over 284 retrieved trials](docs/ui-q1-ipf.jpg)
 
-"What are the most advanced clinical programs in geographic atrophy?" Three tool calls, then a ranking that distinguishes *phase ever reached* from *phase still active* (ranibizumab reached Phase 4 historically but has no active program), with every NCT linked. The caveat the agent must state, that a Phase 4 trial is not evidence of approval, is part of the gold case.
+**Retrieved:** 7 tool calls (one `resolve_entity`, six `run_sql` over `v_programs`), 284 distinct trials, 56 s. **Answered:** 222 non-combination assets have ever had a subject-role IPF trial; 102 have a currently active program (`program_exists`); a 25-row table with phase, active and total trials and example NCTs — pirfenidone and nintedanib at trial-phase 4, then admilparant, nerandomilast, treprostinil, nalbuphine, HEC585 and deupirfenidone at Phase 3. **Gate:** 17/17. **Checked:** the same `v_programs` query from the SQL console returns the same 222 / 102 split; the caveats state the definition of "currently", that Phase 4 is not approval, that combination products were excluded, and that dose-variant splits of one compound exist — all true of the index.
+
+### 2 · "What are the most advanced clinical programs in geographic atrophy?"
+
+![Q2: geographic atrophy — 4 steps, gate 20/20, programs ranked by highest trial phase reached and whether it is still active](docs/ui-q2-ga.jpg)
+
+**Retrieved:** 4 tool calls, 55 trials, 39 s. **Answered:** 79 distinct GA programs across 176 trials, ranked by highest trial phase ever reached, then activity — avacincaptad pegol and brolucizumab (Phase 4 trials, active), ranibizumab (Phase 4 historically, nothing active), then the Phase 3 tier: pegcetacoplan, vonaprument, pozelimab + cemdisiran, ALK-001, tinlarebant. **Gate:** 20/20. **Checked:** gold case G02 requires pegcetacoplan and avacincaptad pegol in the top 10 plus the phase-is-not-approval caveat: both agents are in the top four and the first caveat says a Phase 4 trial is not proof of approval. The raw-layer adjudication lists exactly these five active Phase 3 programs.
+
+### 3 · "Which companies are most active in multiple myeloma?"
+
+![Q3: multiple myeloma sponsors — 4 steps over v_sponsor_condition, gate 21/21, industry lead sponsors ranked by active trials](docs/ui-q3-mm.jpg)
+
+**Retrieved:** 4 tool calls over `v_sponsor_condition`, 407 trials, 44 s. **Answered:** industry lead sponsors ranked by currently active trials with total trials as tiebreak — Johnson & Johnson (Janssen) 45 active / 85 total, Bristol Myers Squibb 24 / 103 (Celgene and Juno folded in), GSK 24 / 39, AbbVie 17 / 32, Pfizer 14 / 30, Roche 12 / 24, Regeneron 11 / 13, Sanofi 9 / 31, AstraZeneca 9 / 15, Takeda 5 / 35. **Gate:** 21/21. **Checked:** gold case G03 requires J&J and BMS in the top 5 with the scope stated: they are ranks 1 and 2, and the first sentence names the metric, the scope (industry lead sponsors) and that collaborators are not counted. The raw sponsor table gives the same top two under any reasonable aliasing.
+
+### 4 · "What mechanisms of action and therapeutic targets are being investigated in idiopathic pulmonary fibrosis?"
+
+![Q4: IPF mechanisms — 7 steps over v_moa / v_moa_trials / v_moa_best, gate 26/26, labeled fraction stated first, target-level table with provenance](docs/ui-q4-ipf-moa.jpg)
+
+**Retrieved:** 7 tool calls, 144 trials, 51 s. **Answered:** the labeled fraction first — 281 IPF assets, 141 (50%) with a mechanism label (108 ChEMBL, 3 curated, 29 NLM class, 1 LLM), 140 unlabeled — then a target-level table: multi-RTK inhibition (nintedanib), endothelin antagonism, PDE5A, LPA1 antagonism (admilparant), prostanoid IP agonism, IFN-γ, Smoothened, IL-13, PDE4B (nerandomilast), CTGF (pamrevlumab), αvβ6/αvβ1 integrin (bexotegrast), TNF. **Gate:** 26/26. **Checked:** gold case G04 requires PDE4B, ITGB6 and LPAR1 — all three present, each with NCTs. This is the question that failed in the first live eval because those three pipeline agents had no label; they are now labeled by the curated tier (`lexicons/curated_moa.yaml`), and the answer says which tier each claim rests on.
+
+### 5 · "Which trials are studying KRAS G12C inhibitors in non-small cell lung cancer?"
+
+![Q5: KRAS G12C trials in NSCLC — 13 steps, gate 23/23, nine inhibitors with NSCLC trial counts, activity, trial-derived phase and sponsors](docs/ui-q5-kras.jpg)
+
+**Retrieved:** 13 tool calls (the mechanism resolved to the `g12c|kras` key, then `v_moa_trials`, `v_moa`, `v_moa_best`), 74 trials, 74 s. **Answered:** nine G12C inhibitors across 74 NSCLC trials — sotorasib 24, adagrasib 18, divarasib 7, glecirasib 7, calderasib 5, olomorasib 5, opnurasib 5, garsorasib 3, fulzerasib 2 — with activity, trial-derived phase and lead sponsors, and the note that sotorasib's Phase 4 trial is not approval. **Gate:** 23/23. **Checked against the adjudicated 107-trial gold set (G05):**
+
+| set | trials | precision | recall |
+|---|---|---|---|
+| retrieved by the agent's queries | 74 | 1.00 | 0.69 |
+| named in the answer | 44 | 1.00 | 0.41 |
+| cited | 12 | 1.00 | 0.11 |
+
+Every trial the agent touched is a true G12C-inhibitor NSCLC trial. The 33 it never saw are the honest recall gap of the mechanism route: trials of agents with no mechanism label (JNJ-74699157, LY3499446, HBI-2438, HS-10370, JMKX001899, FMC-376, BBO-8520) and trials whose primary condition surface is a solid-tumour basket or a listed-only string rather than MeSH D002289 (CodeBreaK 200 itself, NCT04303780). Both gaps are visible in the funnel; neither produces a false positive.
+
+### 6 · "Which biomarkers and patient subgroups are commonly targeted in non-small cell lung cancer trials?"
+
+![Q6: NSCLC biomarkers and subgroups — v_population_landscape plus three trial cards, gate 4/4, biomarker table with trial and active-trial counts, LVEF labelled as a safety marker](docs/ui-q6-nsclc-biomarkers.jpg)
+
+**Retrieved:** 7 tool calls (`v_population_landscape` three times, then three `get_trial` spot-checks), 236 trials, 38 s, demo index. **Answered:** 66 biomarker terms and 60 subgroup terms found; biomarkers by trial count — EGFR 2,131, PD-L1 1,082, ROS1 506, ALK 477, BRAF 314, KRAS 311, EGFR T790M 258, NTRK 140, KRAS G12C 125, EGFR exon 20 104, ctDNA 101, MET exon 14 82 — with LVEF (627) explicitly labelled a cardiac safety marker rather than a tumour biomarker, followed by disease-stage, line-of-therapy and prior-therapy subgroups. **Gate:** 4/4. **Checked:** gold case G06 requires EGFR, ALK, PD-L1, ROS1 and KRAS plus at least two subgroup kinds — all present. The counts are the view's own numbers (the demo slice holds every NSCLC trial, so they equal the full-corpus figures quoted in the zero-LLM examples below), and the caveats state that the lexicon does not separate inclusion from exclusion criteria, that only three trials were spot-checked, and that comorbidity-screening markers can appear.
+
+### 7 · "What combination therapies are being studied with PD-1 inhibitors in renal cell carcinoma?"
+
+![Q7: PD-1 combination partners in RCC — mechanism resolved to 28 PD-1 assets, v_combo_partners with the backbone and same-mechanism rules applied, gate 19/19, ranked partner table with class notes](docs/ui-q7-pd1-rcc.jpg)
+
+**Retrieved:** 7 tool calls (a SQL binder error the agent corrected on the next call), 133 trials, 44 s, demo index. **Answered:** the mechanism resolved to 28 PD-1 antagonists; 184 distinct partners across 226 RCC trials, ranked — ipilimumab 38, axitinib 20, lenvatinib 18, cabozantinib 14, belzutifan 8, quavonlimab 4, atezolizumab 4, tivozanib 4, then relatlimab, cyclophosphamide, aldesleukin — with the scope sentence stating that backbone pairs and same-mechanism pairs (nivolumab + pembrolizumab) are excluded as alternatives, not combinations. **Gate:** 19/19. **Checked:** the same join from the SQL console (`v_combo_partners` ⋈ ChEMBL PD-1 mechanism, `NOT same_mechanism`) gives 182 partners across 225 trials — within one percent, the difference being the second mechanism key the resolver offered. One miss worth recording: this answer put its table in the prose instead of the structured `table` payload, so the evidence panel could not draw it as a bar chart — a house-rule slip the gate does not police.
+
+**Across the seven:** 0 grounding violations in 130 checked citations and entities, every answer states its scope and its metric, four of the seven carry a caveat that a Phase 4 trial is not approval, and the two set-based checks against adjudicated gold (G02, G05) show precision 1.00 with an explained recall gap. Total model spend for the seven: about $3 (≈690k input tokens, mostly cached schema card).
 
 ---
 
