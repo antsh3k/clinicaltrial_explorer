@@ -124,6 +124,19 @@ Every number is a claim the eval can audit; the UI's coverage footer restates th
 
 Left: the derivation timeline (`resolve_entity` MK-3475 → pembrolizumab; `run_sql` over `v_combo_partners`), the machine-verified gate badge, and the structured table with every NCT auto-linked. Right: the citations with phase, status and sponsor pulled live from the index, the entity list, and the expandable trace (each SQL statement, row counts, timings, coverage footer). Answered in 4 model turns, ~30 s, with prompt caching.
 
+### The evidence dashboard: inspecting what the agent saw, not just what it said
+
+![Evidence dashboard for the same answer: phase / status / lead-sponsor / MoA-tier / start-year breakdowns of the 111 retrieved trials with the 6 cited ones overlaid, a Phase 3 cross-filter applied, and the trial list beneath](docs/ui-evidence-dashboard.jpg)
+
+Every answer has three nested evidence sets: **cited** (`citations[]`), **in answer** (every NCT in the prose or table) and **retrieved** (every NCT that appeared in any tool result this conversation, i.e. the grounding gate's set). The right-hand panel profiles the chosen set straight from the index (`POST /api/trials/profile`), never from model text: phase, status, lead sponsor, start year and the MoA-label tier of the assets in each trial, with the cited trials drawn as the darker segment of every bar. Bars cross-filter each other and the trial list, so "what did the agent see but not cite?" and "which of these are Phase 3 and recruiting?" are one click, with no model in the loop.
+
+Two more figures close the loop between the answer and the index:
+
+- **The answer table as a figure.** A ranked table with a numeric column is drawn as a bar chart from `table.rows` (never parsed from prose). Clicking a bar highlights the row and filters the evidence to the row's listed NCTs plus every evidence-set trial naming an asset whose id equals a cell verbatim. When that count differs from the row's own number (18 trials name lenvatinib; 17 pair it with pembrolizumab in one arm), the difference is a real difference in definition, shown rather than hidden.
+- **Entity landscapes.** For each condition / drug / company the answer named, a deterministic card from the views (`GET /api/entities/{kind}/{id}/landscape`): headline counts, programs by most-advanced active phase, most active lead sponsors, MoA-label coverage by tier (the completeness the §7.3 house rule asks the agent to state), trials by start year. Each figure carries a **SQL** button that drops its exact query into the SQL console, so a reviewer can re-run any number on the screen.
+
+The coverage footer in the trace panel is drawn the same way, so an answer's completeness claims sit next to the index's own completeness.
+
 ## Example landscape questions (zero LLM spend — straight from the views)
 
 These are the queries the agent writes; the chat UI adds the prose, the gate, and the evidence panel.
