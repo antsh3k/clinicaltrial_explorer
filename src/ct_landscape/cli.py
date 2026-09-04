@@ -95,10 +95,23 @@ def cmd_enrich(args: argparse.Namespace) -> int:
         from ct_landscape.enrich.batch import run as run_llm
         from ct_landscape.enrich.load import load_shipped_enrichment
 
-        census = run_llm(con, limit=args.limit, ceiling_usd=args.ceiling, dry_run=args.dry_run)
-        write_meta(con, {"llm_batch_census": census})
-        if not args.dry_run:
-            load_shipped_enrichment(con)
+        if args.agreement:
+            from ct_landscape.enrich.batch import CHECKPOINT
+
+            census = run_llm(
+                con,
+                limit=args.limit or 50,
+                ceiling_usd=args.ceiling,
+                dry_run=args.dry_run,
+                checkpoint=CHECKPOINT.with_name("assets_agreement.jsonl"),
+                chembl_covered=True,
+            )
+            write_meta(con, {"llm_agreement_census": census})
+        else:
+            census = run_llm(con, limit=args.limit, ceiling_usd=args.ceiling, dry_run=args.dry_run)
+            write_meta(con, {"llm_batch_census": census})
+            if not args.dry_run:
+                load_shipped_enrichment(con)
     counts = apply_views(con, fail_on_empty=False)
     print(
         "views: " + ", ".join(f"{v}={n:,}" for v, n in sorted(counts.items()) if v.startswith("v_moa")),
@@ -218,6 +231,11 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--ceiling", type=float, default=35.0, help="llm: hard USD ceiling incl. prior spend")
     e.add_argument(
         "--dry-run", action="store_true", help="llm: print the plan + cost estimate, submit nothing"
+    )
+    e.add_argument(
+        "--agreement",
+        action="store_true",
+        help="llm: run on ChEMBL-covered assets into assets_agreement.jsonl (the §8.1 curated benchmark)",
     )
     e.set_defaults(func=cmd_enrich)
 

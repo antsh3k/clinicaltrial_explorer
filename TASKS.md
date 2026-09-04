@@ -60,13 +60,13 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 ## Phase 7 — README polish (§11.1 row 7)
 - [x] README: 5-minute reviewer path, full build, funnel (real numbers), example Q&As from the views, choices-the-brief-left-open table, where it performs well/poorly, tradeoff dials, evaluation (three layers, FLOOR/OBJ/DIAG, mutation + replay status), observed failure modes, AI-usage section, layout
 - [x] README: live eval results + agent-level failure-mode table
-- [ ] README: UI screenshots of the §7.7 example (needs a browser session)
+- [x] README: UI screenshot of the §7.7 example (`docs/ui-mk3475-rcc.jpg`); UI exercised live in Chrome: timeline, gate badge, table, evidence panel, trace, trial drawer, SQL console, permalink reload; two-turn conversation verified via the API
 
 ## Needs the user (blocked)
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
 - [ ] Phase 3b pilot — **dry-run done**: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
 - [ ] Gold adjudication: fill `oracle_url` / `capture_date` / `raw_ui_count` / frozen `entities` or `ncts` for G01–G07 and set `adjudicated: true` (set metrics stay DIAG until then)
-- [ ] Optional: pick a Chrome instance so the agent can screenshot the UI and check the console
+- [x] Chrome instance picked by the user; UI tested (two drawer glitches + a parallel-call spinner fixed)
 
 ## Deviations from the spec
 - Sandbox: DuckDB shares one database instance per file per process, so the second sandboxed connection finds `lock_configuration` already set; `connect_sandboxed` tolerates that and VERIFIES `enable_external_access=false` instead of re-applying it.

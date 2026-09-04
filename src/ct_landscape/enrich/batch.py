@@ -32,8 +32,11 @@ DEFAULT_CEILING_USD = 35.0
 EST_IN_TOKENS, EST_OUT_TOKENS = 750, 150  # §6.6 planning figures; the pilot measures the real ones
 
 
-def in_scope_assets(con: duckdb.DuckDBPyConnection, limit: int | None = None) -> list[dict]:
-    """In-scope assets lacking a ChEMBL mechanism, with their prompt context, ranked by trial count desc."""
+def in_scope_assets(
+    con: duckdb.DuckDBPyConnection, limit: int | None = None, chembl_covered: bool = False
+) -> list[dict]:
+    """In-scope assets lacking a ChEMBL mechanism, with their prompt context, ranked by trial count desc.
+    chembl_covered=True inverts the filter: assets that DO carry a ChEMBL label — the §8.1 agreement benchmark."""
     rows = con.execute(
         """
         WITH scope AS (
@@ -46,9 +49,13 @@ def in_scope_assets(con: duckdb.DuckDBPyConnection, limit: int | None = None) ->
                (SELECT list(alias_raw) FROM asset_aliases al WHERE al.asset_id = s.asset_id AND al.alias_key <> a.dedup_key) AS aliases,
                (SELECT list(class_term ORDER BY n_trials DESC) FROM asset_nlm_classes c WHERE c.asset_id = s.asset_id) AS classes
         FROM scope s JOIN assets a USING (asset_id)
-        WHERE NOT a.is_combo AND s.asset_id NOT IN (SELECT asset_id FROM chembl_moa)
-        ORDER BY s.n_trials DESC, s.asset_id
-        """
+        WHERE NOT a.is_combo AND s.asset_id """
+        + ("IN" if chembl_covered else "NOT IN")
+        + """ (SELECT asset_id FROM chembl_moa)
+        ORDER BY """
+        + (
+            "hash(s.asset_id)" if chembl_covered else "s.n_trials DESC, s.asset_id"
+        )  # agreement: a deterministic spread, not the top
         + (f" LIMIT {int(limit)}" if limit else "")
     ).fetchall()
     ids = [r[0] for r in rows]
@@ -189,9 +196,10 @@ def run(
     dry_run: bool = False,
     poll_s: int = 30,
     log=sys.stderr,
+    chembl_covered: bool = False,
 ) -> dict[str, Any]:
     """Plan → (dry-run: print the plan) → submit one batch → poll → settle → append. Returns the census."""
-    assets = in_scope_assets(con, limit)
+    assets = in_scope_assets(con, limit, chembl_covered=chembl_covered)
     done = load_checkpoint(checkpoint)
     todo = [a for a in assets if a["asset_id"] not in done]
     spent = sum(cost_of(r.get("usage", {})) for r in done.values())
