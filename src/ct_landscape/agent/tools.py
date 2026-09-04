@@ -164,7 +164,7 @@ def resolve(con: duckdb.DuckDBPyConnection, query: str, kind: Kind = "auto") -> 
             rows = con.execute(_RESOLVERS[k][sql_rung], list(params[sql_rung])).fetchall()
             for rid, name, n, alias_raw, extra in rows:
                 match = rung
-                if k == "drug" and rung == "exact" and extra == "other_name":
+                if k == "drug" and rung == "exact" and extra in ("other_name", "curated"):
                     match = "alias"
                 if k == "drug" and rung == "alias":
                     continue

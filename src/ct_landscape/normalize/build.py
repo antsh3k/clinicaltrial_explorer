@@ -22,6 +22,7 @@ from ct_landscape.normalize.arms import assign_roles
 from ct_landscape.normalize.assets import ASSET_TYPES, InterventionRow, build_assets
 from ct_landscape.normalize.companies import _basic_norm, canonical_display, company_key
 from ct_landscape.normalize.conditions import areas_for, denoise_reason, fold, unclassified_area
+from ct_landscape.normalize.lexicons import load as load_lexicon
 from ct_landscape.normalize.mechanism_key import mechanism_key
 from ct_landscape.normalize.populations import entries, find_mentions
 
@@ -60,7 +61,7 @@ def normalize_assets(con: duckdb.DuckDBPyConnection, log) -> dict[str, Any]:
             JOIN interventions i USING (nct_id, intervention_no) WHERE i.type IN ({types}) AND o.other_name_raw IS NOT NULL"""
     ).fetchall():
         other[(nct, no)].append(name)
-    res = build_assets(ivs, other)
+    res = build_assets(ivs, other, synonym_groups=load_lexicon("asset_synonyms")["groups"])
 
     arm_links: dict[tuple[str, int], list[int]] = defaultdict(list)
     for nct, arm_no, no in con.execute(

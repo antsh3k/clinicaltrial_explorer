@@ -187,3 +187,51 @@ def test_two_trials_asserting_a_synonym_still_merge():
     other = {("NCT1", 0): ["MK-3475"], ("NCT2", 0): ["MK-3475"]}
     r = build_assets(ivs, other)
     assert r.intervention_assets[("NCT3", 0)][0][0] == "pembrolizumab"
+
+
+def test_single_trial_other_names_on_a_long_list_attach_only_when_related():
+    """NCT01068860 lists [Ultralente, Velosulin, Tolinase, Tolazamise] under 'Canakinumab 150 mg' — a pasted list of
+    OTHER diabetes drugs. On a ≥4-name list, an otherName no other trial asserts attaches only if it is code-shaped
+    or shares a token with the intervention name."""
+    ivs = [_iv("NCT1", 0, "Canakinumab 150 mg"), _iv("NCT2", 0, "Canakinumab")]
+    other = {
+        ("NCT1", 0): ["Ultralente", "Velosulin", "Tolinase", "Tolazamise", "ACZ885", "Canakinumab injection"],
+        ("NCT2", 0): ["Ilaris"],
+    }
+    r = build_assets(ivs, other)
+    aid = r.intervention_assets[("NCT1", 0)][0][0]
+    assert aid == "canakinumab"
+    assert "ultralente" not in r.aliases and "tolinase" not in r.aliases
+    assert r.aliases["acz885"][0] == aid  # code-shaped: kept
+    assert r.aliases["ilaris"][0] == aid  # short list: kept
+    assert r.other_name_gate_census["single_trial_on_long_list"] == 4
+
+
+def test_curated_synonym_group_merges_code_and_inn_on_single_trials():
+    ivs = [_iv("NCT1", 0, "BI 1015550"), _iv("NCT2", 0, "Nerandomilast")]
+    groups = [{"canonical": "nerandomilast", "members": ["nerandomilast", "BI 1015550", "Jascayd"]}]
+    r = build_assets(ivs, {}, synonym_groups=groups)
+    a1 = r.intervention_assets[("NCT1", 0)][0][0]
+    a2 = r.intervention_assets[("NCT2", 0)][0][0]
+    assert a1 == a2 == "nerandomilast"
+    assert r.aliases["jascayd"] == (
+        "nerandomilast",
+        "Jascayd",
+        "curated",
+    )  # absent from the corpus, still resolvable
+    assert r.census["n_curated_synonym_merges"] == 2
+    # without the group the two single-trial names stay apart (the merge-support rule)
+    r2 = build_assets(ivs, {})
+    assert r2.intervention_assets[("NCT1", 0)][0][0] != r2.intervention_assets[("NCT2", 0)][0][0]
+
+
+def test_single_survivor_of_a_gated_combination_is_displayed_alone():
+    ivs = [
+        _iv("NCT1", 0, "SHR-1701 + SBRT"),
+        _iv("NCT2", 0, "SHR-1701 +SBRT"),
+        _iv("NCT3", 0, "shr-1701 and standard of care"),
+    ]
+    r = build_assets(ivs, {})
+    aid = r.intervention_assets[("NCT1", 0)][0][0]
+    assert aid == "shr1701"
+    assert r.assets[aid]["canonical_name"] == "SHR-1701"  # never "SHR-1701 + SBRT"

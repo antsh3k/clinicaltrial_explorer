@@ -43,7 +43,25 @@ def _lex():
         "dose_form": re.compile(r"\s+(?:" + _alt(salts["dose_forms"]) + r")(?:\s.*)?$"),
         "device": re.compile(r"(?:\s+(?:" + _alt(salts["device_pack"]) + r"))+\s*$"),
         "cations": set(salts["electrolyte_cations"]),
+        # tokens that are never a molecule on their own: a regimen split ("lenalidomide dexamethasone") must not
+        # produce them as members ("abiraterone acetate" is one drug, "nicotine gum" is one drug)
+        "form_words": {
+            _NONALNUM_TOK.sub("", w.lower())
+            for w in salts["salts"]
+            + salts["dose_forms"]
+            + salts["device_pack"]
+            + salts["electrolyte_cations"]
+            + quals["leading"]
+        },
     }
+
+
+_NONALNUM_TOK = re.compile(r"[^a-z0-9]")
+
+
+def non_molecule_tokens() -> frozenset[str]:
+    """Single tokens that can never stand for a molecule (salt, dose form, device, cation, qualifier words)."""
+    return frozenset(_lex()["form_words"])
 
 
 # ---------------------------------------------------------------- cleaning
@@ -63,11 +81,12 @@ _PLACEBO_CLAUSE = re.compile(
     re.IGNORECASE,
 )
 _DOSE = re.compile(
-    r"(?:\b\d+(?:[.,]\d+)?\s*(?:-|to|–|or|/)\s*)?"  # range start "25-50 mg", "25 or 50 mg"
-    r"\b\d+(?:[.,]\d+)?\s*(?:x\s*\d+\s*)?"
+    r"(?<![A-Za-z0-9\-])"  # a number glued to a letter/hyphen is part of a code name ("HRS-5635 Injection" keeps 5635)
+    r"(?:\d+(?:[.,]\d+)?\s*(?:-|to|–|or|/)\s*)?"  # range start "25-50 mg", "25 or 50 mg"
+    r"\d+(?:[.,]\d+)?\s*(?:x\s*\d+\s*)?"
     r"(?:mg|mcg|µg|ug|g|kg|ml|mL|l|iu|units?|u|mmol|µmol|umol|meq|mci|mbq|gbq|gy|ppm|%|ng|pg|mg/kg|mg/m2|mg/m²|cells?/kg|"
     r"cells|copies|vg/kg|vg|pfu|tcid50|ccid50|cfu|spores|dose|doses|tablets?|capsules?|puffs?|drops?|sprays?|vials?|patches?|cycles?|courses?|infusions?|injections?)"
-    r"(?:\s*/\s*(?:kg|m2|m²|ml|mL|l|day|d|dose|h|hr|hour|week|wk|kg/day|kg/dose|min))?\b",
+    r"(?:\s*/\s*(?:kg|m2|m²|ml|mL|l|day|d|dose|h|hr|hrs|hour|hours|week|wk|kg/day|kg/dose|min|\d+\s*(?:h|hr|hrs|hours?)))*\b",  # "mg/m²/day", "mg/24 hrs"
     re.IGNORECASE,
 )
 _PERCENT = re.compile(r"\d+(?:[.,]\d+)?\s*%(?:\s*(?:w/w|w/v|v/v))?", re.IGNORECASE)
@@ -88,7 +107,7 @@ _TRADEMARK = re.compile(r"[®™©]")
 _OPEN_LABEL = re.compile(
     r"\b(?:open[- ]label|double[- ]blind|single[- ]blind|blinded|unblinded)\b", re.IGNORECASE
 )
-_TRAILING_JUNK = re.compile(r"[\s,;:\-–—/+&]+$|^[\s,;:\-–—/+&]+")
+_TRAILING_JUNK = re.compile(r"[\s,;:\-–—/+&、，。]+$|^[\s,;:\-–—/+&、，。]+")
 _DANGLING_CONJ = re.compile(
     r"\s+(?:or|and|with|plus|in combination with|combined with|followed by)\s*$", re.IGNORECASE
 )
@@ -181,7 +200,9 @@ def is_code_name(surface: str) -> bool:
 
 # ---------------------------------------------------------------- router
 
-_COMBO_SPLIT = re.compile(r"\s*/\s*|\s*\+\s*|\s+and\s+|\s+with\s+|\s*&\s*")
+_COMBO_SPLIT = re.compile(
+    r"\s*/\s*|\s*\+\s*|\s+and\s+|\s+with\s+|\s*&\s*|\s*[、；;]\s*"
+)  # CJK enumeration marks too
 _EITHER_OR = re.compile(r"\s+or\s+")
 _GREEK = re.compile(r"\b(?:alfa|alpha|beta|gamma|delta|epsilon|zeta|lambda|theta|kappa)\b")
 _BIO_STEM = re.compile(
@@ -374,11 +395,12 @@ def route(raw: str, known_tokens: frozenset[str] | None = None) -> Keyed:
             if k not in keys:
                 keys.append(k)
                 surfaces.append(p)
-        if len(keys) == 1:
+        if len(keys) == 1:  # one survivor: its OWN surface is the display, not "X + <gated part>"
             return Keyed(
                 raw=raw,
                 cleaned=cleaned,
                 key=keys[0],
+                component_surfaces=[surfaces[0]],
                 dropped_parts=dropped,
                 route="biologic" if is_biologic_shape(surfaces[0]) else "fixed_point",
             )
@@ -394,10 +416,13 @@ def route(raw: str, known_tokens: frozenset[str] | None = None) -> Keyed:
         )
 
     if known_tokens and not is_biologic_shape(cleaned):
-        toks = strip_qualifiers(cleaned).split()
+        toks = strip_dose_forms(strip_salt(strip_device(strip_qualifiers(cleaned)))).split()
         if len(toks) >= 2 and toks[0] not in _lex()["cations"]:
             tkeys = [_NONALNUM.sub("", t) for t in toks]
-            if all(t in known_tokens for t in tkeys) and len(set(tkeys)) >= 2:
+            form = _lex()["form_words"]
+            if (
+                all(t in known_tokens and t not in form for t in tkeys) and len(set(tkeys)) >= 2
+            ):  # "abiraterone acetate" / "nicotine gum" are one drug, never a regimen
                 first_surface = {}
                 for t, k in zip(toks, tkeys, strict=True):
                     first_surface.setdefault(k, t)

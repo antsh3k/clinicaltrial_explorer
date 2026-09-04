@@ -31,7 +31,7 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] `normalize/mechanism_key.py` (App. B.7); `moa_key` stored as a column on every MoA tier table (no SQL UDF)
 - [x] `views.sql`: `v_trials`, `v_trial_conditions_primary`, `v_conditions`, `v_programs` (row_number tie-break by latest_activity), `v_asset_max_phase`, `v_assets`, `v_sponsor_activity`, `v_asset_sponsors`, `v_moa` + `v_moa_best`, `v_moa_trials`, `v_combos` + `v_combo_partners`, `v_population_landscape`, `v_trial_card`; build fails on any empty view
 - [x] Census funnel (§8.5) printed by `ctl build` (`funnel.py`), stored in `build_meta.funnel`
-- [ ] Q1/Q2/Q3/Q7 answerable via `ctl sql` with zero LLM spend (smoke-check on demo build)
+- [x] Q1/Q2/Q3/Q7 answerable via `ctl sql` with zero LLM spend (smoke-checked on the demo build 2026-09-04)
 
 ## Phase 3 — enrich/ (§6)
 - [x] 3a `enrich/chembl.py`: REST fetch of 7,561 mechanisms + 5,954 molecules + 1,518 targets → cached JSON (gitignored); exact-fold join (veto on *mechanism* ambiguity; shared-molecule lookups allowed, counted); census printed; ships `data/enrichment/chembl_moa.jsonl` (CC BY-SA 3.0 attribution) and seeds `targets` (1.6k symbols) + `target_aliases`; `ctl enrich chembl`; loader in `enrich/load.py` so `ctl build` is $0
@@ -64,6 +64,14 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] README: live eval results + agent-level failure-mode table
 - [x] README: UI screenshot of the §7.7 example (`docs/ui-mk3475-rcc.jpg`); UI exercised live in Chrome: timeline, gate badge, table, evidence panel, trace, trial drawer, SQL console, permalink reload; two-turn conversation verified via the API
 
+## Hardening after the review pass (2026-09-04) ✅
+- [x] Router: dose regex code-aware + chained tails; regimen split after salt/form strips; CJK marks; tests
+- [x] Gates: assay/procedure tails, specimens, bare biology words, rescue/adjuvant/care/medical/ADT class labels
+- [x] Aliases: long-list single-trial rule; curated synonym groups (`lexicons/asset_synonyms.yaml`)
+- [x] Mechanisms: curated tier (`lexicons/curated_moa.yaml`, 36 assets) between chembl and nlm_class; funnel line
+- [x] Q7: backbone pairs excluded, `same_mechanism` flag + PARTNER house rule in the schema card
+- [x] README: deliverables map, refreshed funnel/examples/dials/failure modes, second screenshot (two-turn conversation)
+
 ## Needs the user (blocked)
 - [x] `ANTHROPIC_API_KEY` in `.env` (done by the user); live chat verified on the §7.7 question; live evals run
 - [x] Phase 3b pilot — done: 29,299 in-scope assets lack a curated mechanism; pilot of 300 ≈ $0.23, full tail ≈ $22 (ceiling $35). Awaiting your go-ahead: `ctl enrich llm --limit 300` → hand-check 30 rows → `ctl enrich llm` for the rest → `ctl build --demo` / rebuild to load `data/enrichment/assets.jsonl`
@@ -72,6 +80,11 @@ Mark items `[x]` when done. Record any deliberate deviation from the spec under 
 - [x] Chrome instance picked by the user; UI tested (two drawer glitches + a parallel-call spinner fixed)
 
 ## Deviations from the spec
+- Mechanism waterfall (§6) gained a `curated` tier between `chembl` and `nlm_class`: `lexicons/curated_moa.yaml`, hand-written, cited, gene-level labels for pipeline assets ChEMBL/NLM lack (IPF integrin/LPA1/PDE4B agents, the KRAS G12C class, GA complement agents, MM bispecifics/CAR-Ts). Resolved by alias at load; never overwrites a higher tier.
+- Asset identity (§5.1) gained `lexicons/asset_synonyms.yaml`: curated INN ⟷ code ⟷ brand groups united before the otherNames pass and exempt from the ≥2-trial merge rule, so small fixtures keep BI 1015550 = nerandomilast. Members absent from the registry become aliases with source `curated`; registry evidence (name / other_name) always wins the provenance label.
+- otherNames on an intervention listing ≥4 of them: an otherName no other trial asserts attaches only when code-shaped or token-related to the intervention name (pasted product lists such as canakinumab → [Ultralente, Velosulin, Tolinase, Tolazamise]); counted as `single_trial_on_long_list`.
+- Regimen split (§5.1 step 3) runs AFTER the salt / dose-form / device strips and never accepts a form word as a member ("abiraterone acetate", "nicotine gum" are one drug). The dose regex no longer starts inside a code name ("HRS-5635 Injection") and consumes chained per-unit tails ("mg/m²/day").
+- `v_combo_partners` (§4.3 / Q7) drops pairs where BOTH agents sit in every arm (the trial's backbone or an investigator's-choice list, e.g. "SOC immunotherapy: nivolumab, pembrolizumab, …") and exposes `same_mechanism` (identical ChEMBL mechanism, e.g. nivolumab + pembrolizumab in one arm) as a flag the schema card tells the agent to report separately — a flag, not a filter, because trastuzumab + pertuzumab is real.
 - Cluster-to-cluster alias merges (§5.1 step 6) require ≥2 asserting trials; the pilot hand-check found single-trial `otherNames` that enumerate alternatives (tirofiban/cangrelor) or regimen members (clofazimine/dapsone). Single assertions still attach brands/codes.
 - Sandbox: DuckDB shares one database instance per file per process, so the second sandboxed connection finds `lock_configuration` already set; `connect_sandboxed` tolerates that and VERIFIES `enable_external_access=false` instead of re-applying it.
 - `UsageLimits.cost_limit` is not set: Pydantic AI's price table did not resolve a cost for `claude-sonnet-5` at build time, so the per-question ceiling is enforced by `request_limit`/`tool_calls_limit` (the spec's stated fallback). Revisit when the price table catches up.

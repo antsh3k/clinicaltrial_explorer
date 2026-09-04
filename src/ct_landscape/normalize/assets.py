@@ -12,10 +12,18 @@ Identity rules:
 
 from __future__ import annotations
 
+import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 
-from ct_landscape.normalize.drug_names import Keyed, display_surface, is_code_name, route
+from ct_landscape.normalize.drug_names import (
+    Keyed,
+    clean,
+    display_surface,
+    is_code_name,
+    non_molecule_tokens,
+    route,
+)
 
 ASSET_TYPES = ("DRUG", "BIOLOGICAL", "COMBINATION_PRODUCT", "GENETIC")
 DOMINANCE_MIN_TRIALS = 5  # a claimant must assert the alias in at least this many trials …
@@ -25,6 +33,20 @@ MERGE_MIN_TRIALS = (
 )
 # one trial's otherNames often ENUMERATE alternatives ("Glycoprotein inhibitor" → [Tirofiban, Cangrelor]) or regimen
 # members ([Dapsone, Rifampicin, Clofazimine]); a single assertion may still attach a brand/code that is not a cluster
+LONG_LIST_MIN = (
+    4  # an intervention listing ≥4 otherNames is often a pasted product/regimen list ("Canakinumab" →
+)
+# [Ultralente, Velosulin, Tolinase, Tolazamise]); on such lists an otherName asserted by NO other trial attaches only
+# when it is code-shaped or shares a ≥4-char token with the intervention name
+_TOKEN = re.compile(r"[a-z0-9]{4,}")
+
+
+def _related(alias_raw: str, alias_key: str, owner_cleaned: str, owner_key: str) -> bool:
+    if is_code_name(alias_raw):
+        return True
+    if len(alias_key) >= 5 and (alias_key in owner_key or owner_key in alias_key):
+        return True
+    return bool(set(_TOKEN.findall(clean(alias_raw))) & set(_TOKEN.findall(owner_cleaned)))
 
 
 class UnionFind:
@@ -88,8 +110,14 @@ def _trim_surface(raw: str) -> str:
 
 
 def build_assets(
-    interventions: list[InterventionRow], other_names: dict[tuple[str, int], list[str]]
+    interventions: list[InterventionRow],
+    other_names: dict[tuple[str, int], list[str]],
+    synonym_groups: list[dict] | None = None,
 ) -> AssetResult:
+    """`synonym_groups`: curated INN ⟷ code-name ⟷ brand groups (lexicons/asset_synonyms.yaml). Members are routed
+    through the same cleaner and united BEFORE the otherNames pass, exempt from MERGE_MIN_TRIALS (a curated group is
+    the human assertion the merge rule asks for); members absent from the corpus still become aliases (source
+    'curated') so resolve_entity finds them."""
     res = AssetResult()
     uf = UnionFind()
 
@@ -103,7 +131,8 @@ def build_assets(
             k = first_pass[iv.name_raw] = route(iv.name_raw)
         if k.key and not k.is_combo and " " not in k.cleaned.strip():
             single_support[k.key].add(iv.nct_id)
-    known_tokens = frozenset(k for k, t in single_support.items() if len(t) >= 2)
+    form = non_molecule_tokens()
+    known_tokens = frozenset(k for k, t in single_support.items() if len(t) >= 2 and k not in form)
     res.census["n_known_single_tokens"] = len(known_tokens)
 
     # ---- 1. route every intervention name; provisional clusters keyed by dedup_key (combos by components)
@@ -130,8 +159,31 @@ def build_assets(
                 trials_by_key[ck].add(iv.nct_id)
         else:
             uf.add(k.key)
-            surfaces[k.key][_trim_surface(iv.name_raw)] += 1
+            # a combination whose other parts were gated ("SHR-1701 + SBRT") surfaces as the survivor alone
+            surf = (
+                display_surface(k.component_surfaces[0])
+                if k.component_surfaces
+                else _trim_surface(iv.name_raw)
+            )
+            surfaces[k.key][surf or _trim_surface(iv.name_raw)] += 1
             trials_by_key[k.key].add(iv.nct_id)
+
+    # ---- 1b. curated synonym groups: unite members now (exempt from the merge-support rule)
+    curated_display: dict[str, str] = {}
+    for grp in synonym_groups or []:
+        keys: list[str] = []
+        for member in grp.get("members", []):
+            k = route(member)
+            if k.key is None or k.is_combo:
+                res.census["n_curated_synonym_members_gated"] += 1
+                continue
+            keys.append(k.key)
+            uf.add(k.key)
+            curated_display.setdefault(k.key, _trim_surface(member))
+        for a, b in zip(keys, keys[1:], strict=False):
+            if uf.find(a) != uf.find(b):
+                uf.union(a, b)
+                res.census["n_curated_synonym_merges"] += 1
 
     # ---- 2. otherNames → alias claims (alias_key → {provisional keys that claim it})
     claims: dict[str, set[str]] = defaultdict(set)
@@ -140,13 +192,15 @@ def build_assets(
     support: dict[tuple[str, str], set[str]] = defaultdict(
         set
     )  # (alias_key, claimant key) → asserting trials
+    keyed_other: dict[tuple[str, int], list[tuple[str, Keyed]]] = {}
+    key_trials: dict[str, set[str]] = defaultdict(set)
     for (nct, no), names in other_names.items():
         k = routed.get((nct, no))
         if k is None or k.key is None:
             continue
-        owners = k.components if k.is_combo else [k.key]
         if k.is_combo:
             continue  # an otherName on a combination intervention names the combo, not a component — skip
+        kept: list[tuple[str, Keyed]] = []
         for name in names:
             res.census["n_other_names_in"] += 1
             a = route(name)
@@ -155,6 +209,17 @@ def build_assets(
                 continue
             if a.is_combo:
                 res.other_name_gate_census["combo_shaped_other_name"] += 1
+                continue
+            kept.append((name, a))
+            key_trials[a.key].add(nct)
+        keyed_other[(nct, no)] = kept
+    for (nct, no), kept in keyed_other.items():
+        k = routed[(nct, no)]
+        owners = [k.key]
+        long_list = len(kept) >= LONG_LIST_MIN
+        for name, a in kept:
+            if long_list and len(key_trials[a.key]) == 1 and not _related(name, a.key, k.cleaned, k.key):
+                res.other_name_gate_census["single_trial_on_long_list"] += 1
                 continue
             for owner in owners:
                 if a.key == owner:
@@ -264,6 +329,8 @@ def build_assets(
             "n_trials": n_trials,
         }
         for k in keys:
+            if k in curated_display and not trials_by_key.get(k):
+                continue  # a curated member never seen as a registry name: attached below, after otherNames
             top = surfaces[k].most_common(1)
             res.aliases.setdefault(k, (asset_id, top[0][0] if top else k, "name"))
     # contested log: translate union-find roots → asset ids (the audit table must name assets, not roots)
@@ -285,6 +352,10 @@ def build_assets(
             continue
         top = alias_surfaces[alias].most_common(1)
         res.aliases.setdefault(alias, (aid, top[0][0] if top else alias, "other_name"))
+    # curated members the registry never asserted (as a name OR an otherName) — resolvable, provenance visible
+    for k, disp in curated_display.items():
+        if not trials_by_key.get(k):
+            res.aliases.setdefault(k, (root_to_asset[uf.find(k)], disp, "curated"))
 
     # brand-in-parentheses display convention: "generic (BRAND)" when an ® alias is known and differs
     brand_by_asset: dict[str, str] = {}

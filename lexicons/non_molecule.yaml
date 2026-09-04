@@ -234,3 +234,56 @@ class_labels:
   - 5% dextrose
   - lactated ringer's
   - ringer's lactate
+  # ---- procedures, specimens, assays and bare biology words that reach the router typed as DRUG/BIOLOGICAL/GENETIC
+  # (found by reading the head of the unlabeled-asset distribution, 2026-09-04)
+  - rescue
+  - rescue medication
+  - rescue medications
+  - rescue therapy
+  - rescue treatment
+  - adjuvant
+  - adjuvants
+  - blood
+  - blood sampling
+  - blood test
+  - blood tests
+  - blood sample
+  - blood samples
+  - sampling
+  - lymphocytes
+  - t cells
+  - t-cells
+  - t cell
+  - cells
+  - stem cell
+  - stem cells
+  - dendritic cell
+  - dendritic cells
+  - dna
+  - rna
+  - pet
+  - mri
+  - ct
+  - pet/ct
+  - medical
+  - medical treatment
+  - medical therapy
+  - medical management
+  - care
+  - day
+  - days
+  - bolus
+  - fluid bolus
+  - adt
+  - androgen deprivation therapy
+  - nht
+  - arpi
+  - arta
+  - glucocorticoid
+  - dmards
+  - dmard
+  - ssri
+  - ssris
+  - immunization
+  - vaccination
+  - influenza vaccination

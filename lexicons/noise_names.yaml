@@ -139,3 +139,5 @@ regex:
   - 'anti[- ][a-z0-9\-]+( (antibody|antibodies|monoclonal antibody|therapy|agent|inhibitor|blocker))?'   # class shape: needs a separator so "antipyrine" survives
   - '[a-z0-9]+[- ]based( .*)?'
   - '.* (inhibitors?|antagonists?|agonists?|therapy|therapies|agents?|analogs?|analogues?|blockers?|modulators?)'   # bare class suffix w/o molecule; molecules are single-token names before this
+  - '(standard|usual|best|conventional|routine|optimal) (of )?(care|practice|treatment|therapy|medical (treatment|therapy|management))( .*)?'   # "standard of care chemotherapy" dies whole
+  - '.*\b(analysis|analyses|sequencing|genotyping|profiling|hybridization|hybridisation|sampling|collection|assessment|assessments|imaging|scan|scans|assay|assays|survey|surveys|interview|interviews|monitoring)'   # assay / procedure tail

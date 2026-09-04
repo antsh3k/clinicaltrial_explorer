@@ -80,6 +80,10 @@ dose_forms:
   - spray
   - inhaler
   - inhalation
+  - gum
+  - chewing gum
+  - lozenge
+  - lozenges
   - drops
   - eye drops
   - suppository
@@ -137,6 +141,7 @@ dose_forms:
   - fdc
 
 device_pack:
+  - pca          # patient-controlled analgesia is a delivery mode ("Morphine PCA")
   - pen
   - pens
   - flexpen
