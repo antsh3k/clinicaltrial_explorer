@@ -82,6 +82,10 @@ population_mentions(nct_id, term_id, kind, surface, evidence_line), chembl_moa, 
   an eligibility criterion) — and issue those get_trial calls together in ONE turn. You have a hard cap of 30 model turns;
   running out of turns loses the whole answer. Keep submit_answer compact: tables ≤ 25 rows, cite ≤ 25 NCTs, and give
   full counts in prose instead of enumerating every id.
+- PER-ENTITY RULE: NEVER loop one query per company / asset / condition ("for each sponsor, its programs"). Ask for
+  the whole per-entity breakdown in ONE statement: a CTE for the top-N entities, a JOIN, and
+  `QUALIFY row_number() OVER (PARTITION BY <entity> ORDER BY …) <= k` for "top k per entity" (see the worked SQL).
+  A per-row loop over 10 companies is 10 turns for one answer and has exhausted the turn cap before.
 
 ## Workflow contract
 0. EMPTY RESULT RULE: when the entities resolve but the definition-of-record view (v_programs / v_combo_partners /
@@ -108,6 +112,21 @@ ORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC;
 -- most active industry lead sponsors in an indication (Q3 default: industry, ranked by active trials, total as tiebreak)
 SELECT company_name, n_active_trials, n_trials, n_assets, n_phase3_plus FROM v_sponsor_condition
 WHERE condition_key = 'D009101' AND agency_class = 'INDUSTRY' ORDER BY n_active_trials DESC, n_trials DESC LIMIT 10;
+-- Q3 + Q2 in ONE statement: the most active industry sponsors in an indication AND each one's most advanced programs
+-- (top 3 per sponsor via QUALIFY; programs = assets in trials the sponsor LEADS in this condition — never one query per company)
+WITH top AS (SELECT company_id, company_name, n_active_trials, n_trials FROM v_sponsor_condition
+             WHERE condition_key = 'D054990' AND agency_class = 'INDUSTRY' ORDER BY n_active_trials DESC, n_trials DESC LIMIT 10),
+prog AS (SELECT t.lead_company_id AS company_id, ta.asset_id,
+                max(t.phase_rank) FILTER (WHERE t.program_exists) AS max_phase_active, max(t.phase_rank) AS max_phase_ever,
+                count(DISTINCT t.nct_id) FILTER (WHERE t.program_exists) AS n_active_trials, list(DISTINCT t.nct_id) AS nct_ids
+         FROM v_trials t JOIN v_trial_conditions_primary tc USING (nct_id) JOIN trial_assets ta USING (nct_id)
+         WHERE tc.condition_key = 'D054990' AND t.study_type = 'INTERVENTIONAL' AND ta.role IN ('subject', 'unknown')
+         GROUP BY 1, 2)
+SELECT top.company_name, top.n_active_trials AS company_active_trials, p.asset_id, a.canonical_name,
+       p.max_phase_active, p.max_phase_ever, p.n_active_trials, p.nct_ids
+FROM top JOIN prog p USING (company_id) JOIN assets a USING (asset_id) WHERE NOT a.is_combo
+QUALIFY row_number() OVER (PARTITION BY top.company_id ORDER BY p.max_phase_active DESC NULLS LAST, p.n_active_trials DESC) <= 3
+ORDER BY company_active_trials DESC, top.company_name, p.max_phase_active DESC NULLS LAST;
 -- combination partners anchored on an ASSET in an indication
 SELECT cp.partner_asset_id, a.canonical_name, count(DISTINCT cp.nct_id) AS n_trials, max(cp.phase_rank) AS max_phase,
        list(DISTINCT cp.nct_id) AS nct_ids FROM v_combo_partners cp JOIN assets a ON a.asset_id = cp.partner_asset_id
