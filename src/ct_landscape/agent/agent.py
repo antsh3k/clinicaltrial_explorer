@@ -9,6 +9,7 @@ import secrets
 import time
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 import duckdb
@@ -26,9 +27,11 @@ from ct_landscape.agent.gate import Answer, gate
 from ct_landscape.agent.schema_card import schema_card
 
 MODEL = "anthropic:claude-sonnet-5"
-# request_limit is the hard turn/cost cap; tool_calls_limit is generous because the model batches get_trial
-# calls in parallel (one turn, many calls) — the schema card asks it to keep get_trial to a handful.
-LIMITS = UsageLimits(request_limit=30, tool_calls_limit=80)
+# cost_limit is the per-question ceiling (priced by genai-prices); request_limit is the hard turn cap;
+# tool_calls_limit is generous because the model batches get_trial calls in parallel (one turn, many calls) —
+# the schema card asks it to keep get_trial to a handful. $0.75 clears every passing live-eval case (max $0.53)
+# and stops the two looping runs seen before the resolver fixes ($0.92, $1.11).
+LIMITS = UsageLimits(request_limit=30, tool_calls_limit=80, cost_limit=Decimal("0.75"))
 MAX_TURNS = 20
 
 

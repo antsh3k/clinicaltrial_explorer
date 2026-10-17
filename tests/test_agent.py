@@ -238,3 +238,32 @@ def test_parallel_tool_calls_do_not_share_a_cursor(db_path):
     answer = next(e for e in events if e["event"] == "answer")
     assert answer["answer"]["answer_md"] == "found 6 of 6"
     assert all(t["found"] for t in answer["trace"] if t["tool"] == "get_trial")
+
+
+def test_cost_limit_stops_a_looping_run(db_path):
+    """The per-question ceiling is live: a priced model that never stops querying ends in an error event."""
+    from decimal import Decimal
+
+    from pydantic_ai import UsageLimits
+
+    from ct_landscape.agent.agent import LIMITS
+
+    assert LIMITS.cost_limit is not None
+
+    def fn(messages, info):
+        return ModelResponse(parts=[ToolCallPart("run_sql", {"sql": "SELECT 1"})])
+
+    async def run():
+        con = T.open_sandboxed(db_path)
+        limits = UsageLimits(request_limit=30, tool_calls_limit=80, cost_limit=Decimal("0.0001"))
+        model = scripted_model(fn, model_name="claude-sonnet-5")  # priced by genai-prices, unlike "scripted"
+        events = [ev async for ev in answer_question(Deps(db=con), "loop", model=model, usage_limits=limits)]
+        con.close()
+        return events
+
+    events = asyncio.run(run())
+    kinds = [e["event"] for e in events]
+    assert "answer" not in kinds and kinds[-1] == "done"
+    err = next(e for e in events if e["event"] == "error")
+    assert "cost_limit" in err["error"]
+    assert kinds.count("tool_call") < 30  # stopped by cost, not by the turn cap

@@ -39,6 +39,8 @@ addopts = "-q"
 filterwarnings = [
     # starlette.testclient still uses the anyio.abc.BlockingPortal alias; goes away on the next starlette bump
     "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning:starlette.testclient",
+    # offline TestModel / FunctionModel runs are unpriced by design, so LIMITS.cost_limit cannot be enforced there
+    "ignore::pydantic_ai.CostNotFoundWarning",
 ]
 
 [tool.ruff]
